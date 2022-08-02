@@ -1,10 +1,13 @@
 CRYPTO_DEV_OPTIONS=--manifest-path=crypto/Cargo.toml
+OUTPUT_DIR=./output
+OUTPUT_HEADER_DIR=./output/include
 
-buid: build-crypto
+build: build-crypto
 
 release: release-crypto
 
 clean: clean-crypto
+	rm -rf output
 
 check: check-crypto
 
@@ -14,10 +17,10 @@ fmt: fmt-crypto
 
 lint: lint-crypto
 
-build-crypto: 
+build-crypto: generate-header
 	cargo build $(CRYPTO_DEV_OPTIONS)
 
-release-crypto: 
+release-crypto: generate-header
 	cargo build $(CRYPTO_DEV_OPTIONS)
 
 clean-crypto:
@@ -34,3 +37,10 @@ fmt-crypto:
 
 lint-crypto:
 	cargo clippy $(CRYPTO_DEV_OPTIONS)
+
+cbindgen:
+	cargo install cbindgen --root $(OUTPUT_DIR)
+	chmod +x $(OUTPUT_DIR)/bin/cbindgen
+
+generate-header: cbindgen
+	$(OUTPUT_DIR)/bin/cbindgen --lang c crypto/src/lib.rs -o $(OUTPUT_HEADER_DIR)/crypto.h

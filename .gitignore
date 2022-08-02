@@ -2,3 +2,4 @@
 /Cargo.lock
 crypto/Cargo.lock
 crypto/target
+output/
