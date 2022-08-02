@@ -1,6 +1,6 @@
 CRYPTO_DEV_OPTIONS=--manifest-path=crypto/Cargo.toml
 
-buid: build-crypto
+build: build-crypto
 
 release: release-crypto
 
