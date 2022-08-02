@@ -1,6 +1,7 @@
 CRYPTO_DEV_OPTIONS=--manifest-path=crypto/Cargo.toml
 OUTPUT_DIR=./output
 OUTPUT_HEADER_DIR=./output/include
+OUTPUT_LIB_DIR=./output/lib
 
 build: build-crypto
 
@@ -19,9 +20,11 @@ lint: lint-crypto
 
 build-crypto: generate-header
 	cargo build $(CRYPTO_DEV_OPTIONS)
+	cp -r crypto/target/debug $(OUTPUT_LIB_DIR)
 
 release-crypto: generate-header
-	cargo build $(CRYPTO_DEV_OPTIONS)
+	cargo build $(CRYPTO_DEV_OPTIONS) --release
+	cp -r crypto/target/release $(OUTPUT_LIB_DIR)
 
 clean-crypto:
 	cargo clean $(CRYPTO_DEV_OPTIONS)
