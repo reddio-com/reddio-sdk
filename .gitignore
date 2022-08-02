@@ -1,3 +1,4 @@
 /target
 /Cargo.lock
 crypto/Cargo.lock
+crypto/target

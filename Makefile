@@ -1,20 +1,36 @@
-build: 
-	cargo build --all
+CRYPTO_DEV_OPTIONS=--manifest-path=crypto/Cargo.toml
 
-release: 
-	cargo build --all --release
+buid: build-crypto
 
-clean:
-	cargo clean
+release: release-crypto
 
-check:
-	cargo check --all
+clean: clean-crypto
 
-test:
-	cargo test --all
+check: check-crypto
 
-fmt:
-	cargo fmt --all
+test: test-crypto
 
-lint:
-	cargo clippy --all --all-targets
+fmt: fmt-crypto
+
+lint: lint-crypto
+
+build-crypto: 
+	cargo build $(CRYPTO_DEV_OPTIONS)
+
+release-crypto: 
+	cargo build $(CRYPTO_DEV_OPTIONS)
+
+clean-crypto:
+	cargo clean $(CRYPTO_DEV_OPTIONS)
+
+check-crypto:
+	cargo check $(CRYPTO_DEV_OPTIONS)
+
+test-crypto:
+	cargo test $(CRYPTO_DEV_OPTIONS)
+
+fmt-crypto:
+	cargo fmt $(CRYPTO_DEV_OPTIONS)
+
+lint-crypto:
+	cargo clippy $(CRYPTO_DEV_OPTIONS)
