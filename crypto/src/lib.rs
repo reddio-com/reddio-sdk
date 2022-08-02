@@ -1,5 +1,4 @@
 #![no_std]
-#![no_main]
 #![feature(lang_items)]
 
 #[cfg(test)]
