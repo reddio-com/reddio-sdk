@@ -1,37 +1,38 @@
-#[repr(C)]
-pub struct BigInt {
-    pub value: *mut u8,
+use std::os::raw::c_char;
+use std::ptr::null;
 
-    pub len: u32,
-
-    // The number base to parse the value as.
-    pub base: u8,
-}
+// a hex-based big int representation
+pub type BigInt = *const c_char;
 
 #[repr(C)]
 pub struct ECDocument {
     pub msg_hash: BigInt,
     pub private_key: BigInt,
-    pub seed: *const BigInt,
+    pub seed: BigInt,
 }
 
 #[repr(C)]
 pub struct ECSignature {
     pub r: BigInt,
     pub s: BigInt,
-}
-
-#[repr(C)]
-pub struct Error {
-    pub msg: *mut u8,
-    pub len: u32,
+    pub err: *const c_char,
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn sign(
-    _document: *const ECDocument,
-    _signature: *mut ECSignature,
-    _err_msg: *mut Error,
-) -> i32 {
-    return 0;
+pub unsafe extern "C" fn sign(_document: ECDocument) -> ECSignature {
+    return ECSignature::err("sign is not implemented".as_ptr());
+}
+
+impl ECSignature {
+    fn new(r: BigInt, s: BigInt) -> Self {
+        Self { r, s, err: null() }
+    }
+
+    fn err(err: *const u8) -> Self {
+        Self {
+            r: null(),
+            s: null(),
+            err: err as *const c_char,
+        }
+    }
 }
