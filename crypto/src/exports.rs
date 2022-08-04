@@ -20,7 +20,7 @@ pub struct ECSignature {
 
 #[no_mangle]
 pub unsafe extern "C" fn sign(_document: ECDocument) -> ECSignature {
-    return ECSignature::err("sign is not implemented".as_ptr());
+    ECSignature::err("sign is not implemented".as_ptr())
 }
 
 impl ECSignature {

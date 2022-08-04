@@ -3,20 +3,20 @@ OUTPUT_DIR=./output
 OUTPUT_HEADER_DIR=./output/include
 OUTPUT_LIB_DIR=./output/lib
 
-build: build-crypto
+build: build-crypto build-crypto-go
 
-release: release-crypto
+release: release-crypto build-crypto-go
 
 clean: clean-crypto
 	rm -rf output
 
-check: check-crypto
+check: check-crypto build-crypto-go
 
-test: test-crypto
+test: test-crypto test-crypto-go
 
-fmt: fmt-crypto
+fmt: fmt-crypto fmt-crypto-go
 
-lint: lint-crypto
+lint: lint-crypto lint-crypto-go
 
 build-crypto: generate-header
 	cargo build $(CRYPTO_DEV_OPTIONS)
@@ -47,3 +47,15 @@ cbindgen:
 
 generate-header: cbindgen
 	$(OUTPUT_DIR)/bin/cbindgen --lang c crypto/src/lib.rs -o $(OUTPUT_HEADER_DIR)/crypto.h
+
+build-crypto-go: build-crypto
+	cd crypto-go && go build
+
+test-crypto-go: build-crypto
+	cd crypto-go && go test
+
+fmt-crypto-go:
+	cd crypto-go && go fmt
+
+lint-crypto-go:
+	cd crypto-go && go vet
