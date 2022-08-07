@@ -75,7 +75,7 @@ func TestSign(t *testing.T) {
 	for _, c := range cases {
 		hash, ok := new(big.Int).SetString(c.msgHash, 16)
 		assert.True(t, ok)
-		r, s, err := Sign(hash, pk, nil)
+		r, s, err := Sign(pk, hash, nil)
 		assert.Nil(t, err)
 		assert.Equal(t, c.r, r.Text(10))
 		assert.Equal(t, c.s, s.Text(10))

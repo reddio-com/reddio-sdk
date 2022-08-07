@@ -11,7 +11,7 @@ import (
 	"unsafe"
 )
 
-func Sign(msgHash, privateKey, seed *big.Int) (r, s *big.Int, err error) {
+func Sign(privateKey, msgHash, seed *big.Int) (r, s *big.Int, err error) {
 	if msgHash == nil || privateKey == nil {
 		return nil, nil, errors.New("msgHash or privateKey is nil")
 	}
