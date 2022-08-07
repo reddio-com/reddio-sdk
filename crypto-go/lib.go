@@ -16,7 +16,7 @@ func Sign(privateKey, msgHash, seed *big.Int) (r, s *big.Int, err error) {
 		return nil, nil, errors.New("msgHash or privateKey is nil")
 	}
 
-	doc := C.ECDocument{
+	doc := C.SignDocument{
 		msg_hash:    C.CString(msgHash.Text(16)),
 		private_key: C.CString(privateKey.Text(16)),
 	}

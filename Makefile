@@ -19,12 +19,14 @@ fmt: fmt-crypto fmt-crypto-go
 lint: lint-crypto lint-crypto-go
 
 build-crypto: generate-header
+	mkdir -p $(OUTPUT_LIB_DIR)
 	cargo build $(CRYPTO_DEV_OPTIONS)
-	cp -r crypto/target/debug $(OUTPUT_LIB_DIR)
+	cp crypto/target/debug/libcrypto.a $(OUTPUT_LIB_DIR)
 
 release-crypto: generate-header
+	mkdir -p $(OUTPUT_LIB_DIR)
 	cargo build $(CRYPTO_DEV_OPTIONS) --release
-	cp -r crypto/target/release $(OUTPUT_LIB_DIR)
+	cp crypto/target/release/libcrypto.a $(OUTPUT_LIB_DIR)
 
 clean-crypto:
 	cargo clean $(CRYPTO_DEV_OPTIONS)
@@ -42,10 +44,12 @@ lint-crypto:
 	cargo clippy $(CRYPTO_DEV_OPTIONS)
 
 cbindgen:
+	mkdir -p $(OUTPUT_DIR)
 	cargo install cbindgen --root $(OUTPUT_DIR)
 	chmod +x $(OUTPUT_DIR)/bin/cbindgen
 
 generate-header: cbindgen
+	mkdir -p $(OUTPUT_HEADER_DIR)
 	$(OUTPUT_DIR)/bin/cbindgen --lang c crypto/src/exports.rs -o $(OUTPUT_HEADER_DIR)/crypto.h
 
 build-crypto-go: build-crypto

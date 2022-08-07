@@ -10,6 +10,5 @@ name = "crypto"
 crate-type = ["staticlib"]
 
 [dependencies]
-elliptic-curve = "0.12"
 starknet-crypto = "0.1"
 anyhow = "1.0"
