@@ -42,7 +42,7 @@ pub unsafe extern "C" fn sign(document: ECDocument) -> ECSignature {
         let k = rfc6979_generate_k(
             &msg,
             &pk,
-            parse_bigint(document.msg_hash).ok().as_ref(), // seed can be null
+            parse_bigint(document.seed).ok().as_ref(), // seed can be null
         );
         let sig = starknet_crypto::sign(&pk, &msg, &k)?;
         Ok::<_, anyhow::Error>((to_bigint(&sig.r)?, to_bigint(&sig.s)?))
