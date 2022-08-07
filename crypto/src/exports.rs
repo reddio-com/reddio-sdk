@@ -35,6 +35,12 @@ pub struct VerifyResult {
     pub err: *const c_char,
 }
 
+#[repr(C)]
+pub struct PublicKeyResult {
+    pub public_key: BigInt,
+    pub err: *const c_char,
+}
+
 unsafe fn parse_bigint(i: BigInt) -> anyhow::Result<FieldElement> {
     if i.is_null() {
         return Err(anyhow::anyhow!("bigint cannot be null"));
@@ -83,6 +89,19 @@ pub unsafe extern "C" fn verify(signature: Signature) -> VerifyResult {
     }
 }
 
+#[no_mangle]
+pub unsafe extern "C" fn get_public_key(private_key: BigInt) -> PublicKeyResult {
+    let get_public_key_impl = move || {
+        let private = parse_bigint(private_key)?;
+        let public = starknet_crypto::get_public_key(&private);
+        Ok::<_, anyhow::Error>(to_bigint(&public)?)
+    };
+    match get_public_key_impl() {
+        Err(e) => PublicKeyResult::err(e.to_string()),
+        Ok(p) => PublicKeyResult::new(p),
+    }
+}
+
 impl SignResult {
     fn new(r: BigInt, s: BigInt) -> Self {
         Self { r, s, err: null() }
@@ -105,6 +124,22 @@ impl VerifyResult {
     fn err(err: impl Into<Vec<u8>>) -> Self {
         Self {
             valid: false,
+            err: CString::new(err).expect("err to cstr").into_raw(),
+        }
+    }
+}
+
+impl PublicKeyResult {
+    fn new(public_key: BigInt) -> Self {
+        Self {
+            public_key,
+            err: null(),
+        }
+    }
+
+    fn err(err: impl Into<Vec<u8>>) -> Self {
+        Self {
+            public_key: null(),
             err: CString::new(err).expect("err to cstr").into_raw(),
         }
     }

@@ -13,6 +13,15 @@ type SignCase struct {
 	msgHash, s, r string
 }
 
+type VerifyCase struct {
+	publicKey, msgHash, s, r string
+	valid                    bool
+}
+
+type GetPublicKeyCase struct {
+	privateKey, publicKey string
+}
+
 func TestSign(t *testing.T) {
 	cases := []SignCase{
 		{
@@ -79,5 +88,62 @@ func TestSign(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, c.r, r.Text(10))
 		assert.Equal(t, c.s, s.Text(10))
+	}
+}
+
+func TestVerify(t *testing.T) {
+	cases := []VerifyCase{
+		{
+			publicKey: "01ef15c18599971b7beced415a40f0c7deacfd9b0d1819e03d723d8bc943cfca",
+			msgHash:   "0000000000000000000000000000000000000000000000000000000000000002",
+			r:         "0411494b501a98abd8262b0da1351e17899a0c4ef23dd2f96fec5ba847310b20",
+			s:         "0405c3191ab3883ef2b763af35bc5f5d15b3b4e99461d70e84c654a351a7c81b",
+			valid:     true,
+		},
+		{
+			publicKey: "077a4b314db07c45076d11f62b6f9e748a39790441823307743cf00d6597ea43",
+			msgHash:   "0397e76d1667c4454bfb83514e120583af836f8e32a516765497823eabe16a3f",
+			r:         "0173fd03d8b008ee7432977ac27d1e9d1a1f6c98b1a2f05fa84a21c84c44e882",
+			s:         "01f2c44a7798f55192f153b4c48ea5c1241fbb69e6132cc8a0da9c5b62a4286e",
+			valid:     false,
+		},
+	}
+
+	for _, c := range cases {
+		publicKey, ok := new(big.Int).SetString(c.publicKey, 16)
+		assert.True(t, ok)
+		msgHash, ok := new(big.Int).SetString(c.msgHash, 16)
+		assert.True(t, ok)
+		r, ok := new(big.Int).SetString(c.r, 16)
+		assert.True(t, ok)
+		s, ok := new(big.Int).SetString(c.s, 16)
+		assert.True(t, ok)
+
+		valid, err := Verify(publicKey, msgHash, r, s)
+		assert.Nil(t, err)
+		assert.Equal(t, c.valid, valid)
+	}
+}
+
+func TestGetPublicKey(t *testing.T) {
+	cases := []GetPublicKeyCase{
+		{
+			privateKey: "03c1e9550e66958296d11b60f8e8e7a7ad990d07fa65d5f7652c4a6c87d4e3cc",
+			publicKey:  "077a3b314db07c45076d11f62b6f9e748a39790441823307743cf00d6597ea43",
+		},
+		{
+			privateKey: "0000000000000000000000000000000000000000000000000000000000000012",
+			publicKey:  "019661066e96a8b9f06a1d136881ee924dfb6a885239caa5fd3f87a54c6b25c4",
+		},
+	}
+
+	for _, c := range cases {
+		privateKey, ok := new(big.Int).SetString(c.privateKey, 16)
+		assert.True(t, ok)
+		expectedKey, ok := new(big.Int).SetString(c.publicKey, 16)
+		assert.True(t, ok)
+		publicKey, err := GetPublicKey(privateKey)
+		assert.Nil(t, err)
+		assert.True(t, expectedKey.Cmp(publicKey) == 0)
 	}
 }
