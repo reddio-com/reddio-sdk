@@ -11,26 +11,34 @@ import (
 	"unsafe"
 )
 
-func Sign(msgHash, privateKey, Seed *big.Int) (r, s *big.Int, err error) {
-	if msgHash == nil || privateKey == nil || Seed == nil {
-		return nil, nil, errors.New("msgHash, privateKey or Seed is nil")
+func Sign(msgHash, privateKey, seed *big.Int) (r, s *big.Int, err error) {
+	if msgHash == nil || privateKey == nil {
+		return nil, nil, errors.New("msgHash or privateKey is nil")
 	}
 
-	sign := C.sign(C.ECDocument{
+	doc := C.ECDocument{
 		msg_hash:    C.CString(msgHash.Text(16)),
 		private_key: C.CString(privateKey.Text(16)),
-		seed:        C.CString(Seed.Text(16)),
-	})
+	}
+
+	if seed == nil {
+		doc.seed = nil
+	} else {
+		doc.seed = C.CString(seed.Text(16))
+	}
+
+	sign := C.sign(doc)
+
+	if sign.err != nil {
+		defer C.free(unsafe.Pointer(sign.err))
+		return nil, nil, errors.New(C.GoString(sign.err))
+	}
 
 	defer func() {
 		C.free(unsafe.Pointer(sign.r))
 		C.free(unsafe.Pointer(sign.s))
-		C.free(unsafe.Pointer(sign.err))
 	}()
 
-	if sign.err != nil {
-		return nil, nil, errors.New(C.GoString(sign.err))
-	}
 	r, s = new(big.Int), new(big.Int)
 	_, ok := r.SetString(C.GoString(sign.r), 16)
 	if !ok {
