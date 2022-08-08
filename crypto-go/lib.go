@@ -9,6 +9,7 @@ import "C"
 import (
 	"errors"
 	"math/big"
+	"unsafe"
 )
 
 func Sign(privateKey, msgHash, seed *big.Int) (r, s *big.Int, err error) {
@@ -31,6 +32,10 @@ func Sign(privateKey, msgHash, seed *big.Int) (r, s *big.Int, err error) {
 		r: (*C.char)(C.malloc(C.size_t(C.BIG_INT_SIZE))),
 		s: (*C.char)(C.malloc(C.size_t(C.BIG_INT_SIZE))),
 	}
+	defer func() {
+		C.free(unsafe.Pointer(ret.r))
+		C.free(unsafe.Pointer(ret.s))
+	}()
 
 	errno := C.sign(doc, ret)
 
@@ -78,6 +83,7 @@ func GetPublicKey(privateKey *big.Int) (publicKey *big.Int, err error) {
 
 	privateStr := privateKey.Text(16)
 	publicStr := (*C.char)(C.malloc(C.size_t(C.BIG_INT_SIZE)))
+	defer C.free(unsafe.Pointer(publicStr))
 
 	errno := C.get_public_key(C.CString(privateStr), publicStr)
 
