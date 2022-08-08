@@ -21,12 +21,12 @@ lint: lint-crypto lint-crypto-go
 build-crypto: generate-header
 	mkdir -p $(OUTPUT_LIB_DIR)
 	cargo build $(CRYPTO_DEV_OPTIONS)
-	cp crypto/target/debug/libcrypto.a $(OUTPUT_LIB_DIR)
+	cp crypto/target/debug/libcrypto.so $(OUTPUT_LIB_DIR)
 
 release-crypto: generate-header
 	mkdir -p $(OUTPUT_LIB_DIR)
 	cargo build $(CRYPTO_DEV_OPTIONS) --release
-	cp crypto/target/release/libcrypto.a $(OUTPUT_LIB_DIR)
+	cp crypto/target/release/libcrypto.so $(OUTPUT_LIB_DIR)
 
 clean-crypto:
 	cargo clean $(CRYPTO_DEV_OPTIONS)

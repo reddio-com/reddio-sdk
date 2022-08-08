@@ -1,7 +1,7 @@
 package crypto
 
 /*
-#cgo LDFLAGS: -L../output/lib -lcrypto
+#cgo LDFLAGS: -L../output/lib -lcrypto -Wl,-rpath=../output/lib
 #include "../output/include/crypto.h"
 */
 import "C"

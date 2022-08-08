@@ -7,7 +7,7 @@ edition = "2021"
 
 [lib]
 name = "crypto"
-crate-type = ["staticlib"]
+crate-type = ["cdylib"]
 
 [dependencies]
 starknet-crypto = "0.1"
