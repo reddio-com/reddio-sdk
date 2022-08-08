@@ -147,3 +147,13 @@ func TestGetPublicKey(t *testing.T) {
 		assert.True(t, expectedKey.Cmp(publicKey) == 0)
 	}
 }
+
+func TestFFIError(t *testing.T) {
+	pk, ok := new(big.Int).SetString(privateKey, 16)
+	assert.True(t, ok)
+	invalidHex, ok := new(big.Int).SetString("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16)
+	assert.True(t, ok)
+	_, _, err := Sign(pk, invalidHex, nil)
+	assert.NotNil(t, err)
+	assert.Equal(t, "not an invalid hex number", err.Error())
+}

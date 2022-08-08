@@ -11,4 +11,4 @@ crate-type = ["cdylib"]
 
 [dependencies]
 starknet-crypto = "0.1"
-anyhow = "1.0"
+starknet-ff = "0.1"

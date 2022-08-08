@@ -35,7 +35,7 @@ func Sign(privateKey, msgHash, seed *big.Int) (r, s *big.Int, err error) {
 	errno := C.sign(doc, ret)
 
 	if errno != C.Ok {
-		return nil, nil, errors.New("unknow error")
+		return nil, nil, errors.New(C.GoString(C.explain(errno)))
 	}
 
 	r, s = new(big.Int), new(big.Int)
@@ -65,7 +65,7 @@ func Verify(publicKey, msgHash, r, s *big.Int) (bool, error) {
 	valid := C.bool(false)
 	errno := C.verify(signuture, &valid)
 	if errno != C.Ok {
-		return false, errors.New("unknow error")
+		return false, errors.New(C.GoString(C.explain(errno)))
 	}
 
 	return bool(valid), nil
@@ -82,7 +82,7 @@ func GetPublicKey(privateKey *big.Int) (publicKey *big.Int, err error) {
 	errno := C.get_public_key(C.CString(privateStr), publicStr)
 
 	if errno != C.Ok {
-		return nil, errors.New("unknow error")
+		return nil, errors.New(C.GoString(C.explain(errno)))
 	}
 
 	publicKey = new(big.Int)

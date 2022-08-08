@@ -1,4 +1,5 @@
-#![feature(try_trait_v2)]
+#![allow(incomplete_features)]
+#![feature(specialization)]
 
 mod errno;
 mod exports;
