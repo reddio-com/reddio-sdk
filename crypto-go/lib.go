@@ -7,6 +7,7 @@ package crypto
 */
 import "C"
 import (
+	"bytes"
 	"errors"
 	"math/big"
 	"unsafe"
@@ -97,4 +98,24 @@ func GetPublicKey(privateKey *big.Int) (publicKey *big.Int, err error) {
 		return nil, errors.New("publicKey is not a valid big.Int")
 	}
 	return publicKey, nil
+}
+
+func GetPrivateKeyFromEthSignature(ethSignature *big.Int) (privateKey *big.Int, err error) {
+	if ethSignature == nil {
+		return nil, errors.New("ethSignature is nil")
+	}
+
+	privateKeyCStr := make([]byte, 65)
+	C.get_private_key_from_eth_signature(C.CString(ethSignature.Text(16)), (*C.char)(unsafe.Pointer(&privateKeyCStr[0])))
+
+	// though it should always be 64
+	privateKeyLength := bytes.IndexByte(privateKeyCStr[:], 0)
+	privateKeyStr := string(privateKeyCStr[:privateKeyLength])
+
+	privateKey = new(big.Int)
+	_, ok := privateKey.SetString(privateKeyStr, 16)
+	if !ok {
+		return nil, errors.New("private_key is not a valid big.Int")
+	}
+	return privateKey, nil
 }

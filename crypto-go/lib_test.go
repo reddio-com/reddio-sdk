@@ -157,3 +157,27 @@ func TestFFIError(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Equal(t, "not an invalid hex number", err.Error())
 }
+
+func TestGeneratePrivateKey(t *testing.T) {
+	type GeneratePrivateKeyCase struct {
+		ethSignature string
+		privateKey   string
+	}
+
+	cases := []GeneratePrivateKeyCase{
+		{
+			ethSignature: "21fbf0696d5e0aa2ef41a2b4ffb623bcaf070461d61cf7251c74161f82fec3a4370854bc0a34b3ab487c1bc021cd318c734c51ae29374f2beb0e6f2dd49b4bf41c",
+			privateKey:   "766f11e90cd7c7b43085b56da35c781f8c067ac0d578eabdceebc4886435bda",
+		},
+	}
+
+	for _, c := range cases {
+		ethSignature, ok := new(big.Int).SetString(c.ethSignature, 16)
+		assert.True(t, ok)
+		expectedKey, ok := new(big.Int).SetString(c.privateKey, 16)
+		assert.True(t, ok)
+		privateKey, err := GetPrivateKeyFromEthSignature(ethSignature)
+		assert.Nil(t, err)
+		assert.True(t, expectedKey.Cmp(privateKey) == 0)
+	}
+}
