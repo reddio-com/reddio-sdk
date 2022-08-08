@@ -7,6 +7,8 @@ use starknet_crypto::{rfc6979_generate_k, FieldElement};
 // a hex-based big int representation
 pub type BigInt = *const c_char;
 
+pub type MutBigInt = *mut c_char;
+
 #[repr(C)]
 pub struct SignDocument {
     pub private_key: BigInt,
