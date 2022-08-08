@@ -50,7 +50,7 @@ cbindgen:
 
 generate-header: cbindgen
 	mkdir -p $(OUTPUT_HEADER_DIR)
-	$(OUTPUT_DIR)/bin/cbindgen --lang c crypto/src/exports.rs -o $(OUTPUT_HEADER_DIR)/crypto.h
+	$(OUTPUT_DIR)/bin/cbindgen --lang c crypto/src/lib.rs -o $(OUTPUT_HEADER_DIR)/crypto.h
 
 build-crypto-go: build-crypto
 	cd crypto-go && go build
