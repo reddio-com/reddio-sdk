@@ -1,6 +1,6 @@
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
-use std::ptr::copy;
+use std::ptr::{copy, write_bytes};
 
 use starknet_crypto::{rfc6979_generate_k, FieldElement};
 
@@ -10,6 +10,8 @@ use crate::errno::Errno;
 pub type BigInt = *const c_char;
 
 pub type MutBigInt = *mut c_char;
+
+pub const BIG_INT_SIZE: usize = 64;
 
 #[repr(C)]
 pub struct SignDocument {
@@ -41,6 +43,7 @@ unsafe fn parse_bigint(i: BigInt) -> anyhow::Result<FieldElement> {
 }
 
 unsafe fn write_bigint(field: &FieldElement, i: MutBigInt) -> anyhow::Result<()> {
+    write_bytes(i, 0, BIG_INT_SIZE);
     let s = CString::new(format!("{field:x}"))?;
     let len = s.as_bytes().len();
     copy(s.into_raw(), i, len);
