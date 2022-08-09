@@ -106,7 +106,10 @@ func GetPrivateKeyFromEthSignature(ethSignature *big.Int) (privateKey *big.Int, 
 	}
 
 	privateKeyCStr := make([]byte, 65)
-	C.get_private_key_from_eth_signature(C.CString(ethSignature.Text(16)), (*C.char)(unsafe.Pointer(&privateKeyCStr[0])))
+	errno := C.get_private_key_from_eth_signature(C.CString(ethSignature.Text(16)), (*C.char)(unsafe.Pointer(&privateKeyCStr[0])))
+	if errno != C.Ok {
+		return nil, errors.New(C.GoString(C.explain(errno)))
+	}
 
 	// though it should always be 64
 	privateKeyLength := bytes.IndexByte(privateKeyCStr[:], 0)
