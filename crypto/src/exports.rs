@@ -11,7 +11,7 @@ pub type BigInt = *const c_char;
 
 pub type MutBigInt = *mut c_char;
 
-pub const BIG_INT_SIZE: usize = 64;
+pub const BIG_INT_SIZE: usize = 65;
 
 #[repr(C)]
 pub struct SignDocument {
