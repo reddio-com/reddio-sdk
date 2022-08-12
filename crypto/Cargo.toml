@@ -12,3 +12,7 @@ crate-type = ["cdylib"]
 [dependencies]
 starknet-crypto = "0.1"
 starknet-ff = "0.1"
+anyhow = "1.0"
+hex = "0.4"
+sha2 = "0.10"
+elliptic-curve = "0.12"
