@@ -3,3 +3,6 @@
 crypto/Cargo.lock
 crypto/target
 output/
+
+crypto-csharp/**/[Bb]in/
+crypto-csharp/**/[Oo]bj/
