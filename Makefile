@@ -3,6 +3,8 @@ OUTPUT_DIR=./output
 OUTPUT_HEADER_DIR=./output/include
 OUTPUT_LIB_DIR=./output/lib
 
+export CGO_ENABLED=1
+
 build: build-crypto build-crypto-go
 
 release: release-crypto build-crypto-go
