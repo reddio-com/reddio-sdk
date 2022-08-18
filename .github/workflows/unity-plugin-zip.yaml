@@ -1,0 +1,28 @@
+name: Build Unity Plugin Zip
+on: 
+  workflow_dispatch: {}
+  label:
+    types:
+      - created
+jobs:
+  linux_shared_library:
+    name: Linux Shared Library
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Rust x86_64-unknown-linux-gnu
+        uses: actions-rs/toolchain@v1
+        with:
+          target: x86_64-unknown-linux-gnu
+      - name: Setup Rust aarch64-linux-android
+        uses: actions-rs/toolchain@v1
+        with:
+          target: aarch64-linux-android
+      - name: Compile
+        run: |
+          cargo build --release --target x86_64-unknown-linux-gnu --target aarch64-linux-android
+  # windows_shared_library:
+  # macos_shared_library:
+  # ios_static_library:
+  # unity_plugin_zip:
