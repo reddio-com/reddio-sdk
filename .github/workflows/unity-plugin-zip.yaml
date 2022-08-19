@@ -11,18 +11,95 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Setup Rust x86_64-unknown-linux-gnu
+      - name: Setup Rust toolchain x86_64-unknown-linux-gnu
         uses: actions-rs/toolchain@v1
         with:
           target: x86_64-unknown-linux-gnu
-      - name: Setup Rust aarch64-linux-android
+      - name: Compile
+        run: |
+          cd crypto && cargo build --release --target x86_64-unknown-linux-gnu
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: libcrypto-x86_64-unknown-linux-gnu
+          path: |
+            crypto/target/x86_64-unknown-linux-gnu/release/libcrypto.a
+            crypto/target/x86_64-unknown-linux-gnu/release/libcrypto.so
+  android_share_library:
+    name: Android Shared Library
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup cargo-ndk
+        run: |
+          cargo install cargo-ndk
+      - name: Setup Rust toolchain aarch64-linux-android
         uses: actions-rs/toolchain@v1
         with:
           target: aarch64-linux-android
-      - name: Compile
+      - name: Setup Rust toolchain armv7-linux-androideabi
+        uses: actions-rs/toolchain@v1
+        with:
+          target: armv7-linux-androideabi
+      - name: Setup Rust toolchain x86_64-linux-android
+        uses: actions-rs/toolchain@v1
+        with:
+          target: x86_64-linux-android
+      - name: Setup NDK
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r25
+      - name: Build Android Shared Library
         run: |
-          cargo build --release --target x86_64-unknown-linux-gnu --target aarch64-linux-android
+          cd crypto && cargo ndk -t armeabi-v7a -t arm64-v8a -t x86_64 build --release
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: libcrypto-aarch64-linux-android
+          path: |
+            crypto/target/aarch64-linux-android/release/libcrypto.a
+            crypto/target/aarch64-linux-android/release/libcrypto.so
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: libcrypto-armv7-linux-androideabi
+          path: |
+            crypto/target/armv7-linux-androideabi/release/libcrypto.a
+            crypto/target/armv7-linux-androideabi/release/libcrypto.so
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: libcrypto-x86_64-linux-android
+          path: |
+            crypto/target/x86_64-linux-android/release/libcrypto.a
+            crypto/target/x86_64-linux-android/release/libcrypto.so
   # windows_shared_library:
   # macos_shared_library:
-  # ios_static_library:
+  ios_static_library:
+    name: iOS Static Library
+    runs-on: macos-12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup cargo-lipo
+        run: |
+          cargo install cargo-lipo
+      - name: Setup Rust toolchain aarch64-apple-ios
+        uses: actions-rs/toolchain@v1
+        with:
+          target: aarch64-apple-ios
+      - name: Setup Rust toolchain x86_64-apple-ios
+        uses: actions-rs/toolchain@v1
+        with:
+          target: x86_64-apple-ios
+      - name: Build iOS Static Library
+        run: |
+          cd crypto && cargo lipo --release
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: libcrypto-universal-apple-ios
+          path: |
+            crypto/target/universal/release/libcrypto.a
   # unity_plugin_zip:

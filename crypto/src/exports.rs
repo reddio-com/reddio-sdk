@@ -113,7 +113,7 @@ pub unsafe extern "C" fn get_private_key_from_eth_signature(
     eth_signature: *const c_char,
     private_key_str: *mut c_char,
 ) -> Errno {
-    let eth_signature = match CStr::from_ptr(eth_signature as *const i8).to_str() {
+    let eth_signature = match CStr::from_ptr(eth_signature as *const c_char).to_str() {
         Ok(s) => s,
         Err(_) => return Errno::InvalidStr,
     };
