@@ -7,7 +7,7 @@ on:
 jobs:
   linux_shared_library:
     name: Linux Shared Library
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -27,7 +27,7 @@ jobs:
             crypto/target/x86_64-unknown-linux-gnu/release/libcrypto.so
   android_share_library:
     name: Android Shared Library
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -74,8 +74,57 @@ jobs:
           path: |
             crypto/target/x86_64-linux-android/release/libcrypto.a
             crypto/target/x86_64-linux-android/release/libcrypto.so
-  # windows_shared_library:
-  # macos_shared_library:
+  windows_shared_library:
+    name: Windows Shared Library
+    runs-on: windows-2022
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Rust toolchain x86_64-pc-windows-msvc
+        uses: actions-rs/toolchain@v1
+        with:
+          target: x86_64-pc-windows-msvc
+      - name: Compile
+        run: |
+          cd crypto && cargo build --release --target x86_64-pc-windows-msvc
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: libcrypto-x86_64-pc-windows-msvc
+          path: |
+            crypto/target/x86_64-pc-windows-msvc/release/libcrypto.lib
+            crypto/target/x86_64-pc-windows-msvc/release/libcrypto.dll
+  macos_shared_library:
+    name: macOS Shared Library
+    runs-on: macos-12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Rust toolchain aarch64-apple-darwin
+        uses: actions-rs/toolchain@v1
+        with:
+          target: aarch64-apple-darwin
+      - name: Setup Rust toolchain x86_64-apple-darwin
+        uses: actions-rs/toolchain@v1
+        with:
+          target: x86_64-apple-darwin
+      - name: Build macOS shared Library
+        run: |
+          cd crypto && cargo build --target x86_64-apple-darwin --target aarch64-apple-darwin --release
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: libcrypto-aarch64-apple-darwin
+          path: |
+            crypto/target/aarch64-apple-darwin/release/libcrypto.a
+            crypto/target/aarch64-apple-darwin/release/libcrypto.dylib
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: libcrypto-x86_64-apple-darwin
+          path: |
+            crypto/target/x86_64-apple-darwin/release/libcrypto.a
+            crypto/target/x86_64-apple-darwin/release/libcrypto.dylib
   ios_static_library:
     name: iOS Static Library
     runs-on: macos-12
