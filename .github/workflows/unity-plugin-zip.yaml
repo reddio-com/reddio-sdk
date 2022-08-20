@@ -92,8 +92,8 @@ jobs:
         with:
           name: libcrypto-x86_64-pc-windows-msvc
           path: |
-            crypto/target/x86_64-pc-windows-msvc/release/libcrypto.lib
-            crypto/target/x86_64-pc-windows-msvc/release/libcrypto.dll
+            crypto/target/x86_64-pc-windows-msvc/release/crypto.lib
+            crypto/target/x86_64-pc-windows-msvc/release/crypto.dll
   macos_shared_library:
     name: macOS Shared Library
     runs-on: macos-12
