@@ -151,4 +151,28 @@ jobs:
           name: libcrypto-universal-apple-ios
           path: |
             crypto/target/universal/release/libcrypto.a
-  # unity_plugin_zip:
+  unity_plugin_zip:
+    name: Package Unity Plugin Zip
+    runs-on: ubuntu-20.04
+    needs:
+      - linux_shared_library
+      - android_share_library
+      - windows_shared_library
+      - macos_shared_library
+      - ios_static_library
+    steps:
+      - name: Prepare Playground
+        run: mkdir -p artifacts
+      - name: Download Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: artifacts
+      - name: Build the Zip
+        uses: thedoctor0/zip-release@main
+        with:
+          type: zip
+          filename: reddio-sdk-unity-plugin.zip
+          directory: artifacts
