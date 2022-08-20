@@ -170,9 +170,35 @@ jobs:
       - name: Display structure of downloaded files
         run: ls -R
         working-directory: artifacts
+      - name: Restructure Libraries
+        run: |
+          mkdir -p unity/Plugins/Android/arm64
+          mkdir -p unity/Plugins/Android/armeabi-v7a
+          mkdir -p unity/Plugins/Android/x86_64
+          mkdir -p unity/Plugins/iOS
+          mkdir -p unity/Plugins/Editor/x86_64
+          mkdir -p unity/Plugins/Editor/aarch64
+
+          # iOS
+          cp artifacts/libcrypto-universal-apple-ios/libcrypto.a unity/Plugins/iOS/libcrypto-universal-apple-ios.a
+
+          # Android
+          cp artifacts/libcrypto-aarch64-linux-android/libcrypto.so unity/Plugins/Android/arm64/libcrypto-aarch64-linux-android.so
+          cp artifacts/libcrypto-armv7-linux-androideabi/libcrypto.so unity/Plugins/Android/armeabi-v7a/libcrypto-armv7-linux-androideabi.so
+          cp artifacts/libcrypto-x86_64-linux-android/libcrypto.so unity/Plugins/Android/x86_64/libcrypto-x86_64-linux-android.so
+
+          # Editor / Standalone
+          cp artifacts/libcrypto-x86_64-apple-darwin/libcrypto.dylib unity/Plugins/Editor/x86_64/libcrypto-x86_64-apple-darwin.dylib
+          cp artifacts/libcrypto-aarch64-apple-darwin/libcrypto.dylib unity/Plugins/Editor/aarch64/libcrypto-aarch64-apple-darwin.dylib
+          cp artifacts/libcrypto-x86_64-pc-windows-msvc/crypto.dll unity/Plugins/Editor/x86_64/libcrypto-x86_64-pc-windows-msvc.dll
+          cp artifacts/libcrypto-x86_64-unknown-linux-gnu/libcrypto.so unity/Plugins/Editor/x86_64/libcrypto-x86_64-unknown-linux-gnu.so
       - name: Build the Zip
         uses: thedoctor0/zip-release@main
         with:
           type: zip
           filename: reddio-sdk-unity-plugin.zip
-          directory: artifacts
+          directory: unity
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: unity/reddio-sdk-unity-plugin.zip
