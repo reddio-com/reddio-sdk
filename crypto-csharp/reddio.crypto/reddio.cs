@@ -58,7 +58,7 @@ namespace Reddio.Crypto {
         [DllImport("libcrypto", EntryPoint="explain")]
         private static extern string ExplainError(int errno);
 
-        private static BigInteger ParsePositive(string hex) 
+        public static BigInteger ParsePositive(string hex) 
         {
             return BigInteger.Parse("0" + hex, NumberStyles.HexNumber);
         }
