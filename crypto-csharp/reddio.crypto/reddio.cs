@@ -71,7 +71,7 @@ namespace Reddio.Crypto {
 
         public static BigInteger GetPrivateKeyFromEthSignature(string ethSignatureStr)
         {
-            var privateKeyStr = new StringBuilder('0', BIG_INT_BUFFER_SIZE);
+            var privateKeyStr = new StringBuilder(BIG_INT_BUFFER_SIZE);
 
             var errno = GetPrivateKeyFromEthSignatureImpl(ethSignatureStr, privateKeyStr);
             if (errno != 0) {
@@ -135,7 +135,7 @@ namespace Reddio.Crypto {
         public static BigInteger GetPublicKey(BigInteger privateKey)
         {
             var privateKeyStr = privateKey.ToString("x");
-            var publicKeyStr = new StringBuilder('0', BIG_INT_BUFFER_SIZE);
+            var publicKeyStr = new StringBuilder(BIG_INT_BUFFER_SIZE);
             var errno = GetPublicKey(privateKeyStr, publicKeyStr);
             if (errno != 0) {
                 throw new CryptoException(ExplainError(errno));
