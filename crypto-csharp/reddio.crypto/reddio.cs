@@ -63,9 +63,14 @@ namespace Reddio.Crypto {
             return BigInteger.Parse("0" + hex, NumberStyles.HexNumber);
         }
 
-        public static BigInteger GetPrivateKeyFromEthSignature(BigInteger ethSignature)
+       public static BigInteger GetPrivateKeyFromEthSignature(BigInteger ethSignature)
         {
             var ethSignatureStr = ethSignature.ToString("x");
+            return GetPrivateKeyFromEthSignature(ethSignatureStr);
+        }
+
+        public static BigInteger GetPrivateKeyFromEthSignature(string ethSignatureStr)
+        {
             var privateKeyStr = new StringBuilder('0', BIG_INT_BUFFER_SIZE);
 
             var errno = GetPrivateKeyFromEthSignatureImpl(ethSignatureStr, privateKeyStr);
@@ -75,6 +80,7 @@ namespace Reddio.Crypto {
 
             return ParsePositive(privateKeyStr.ToString());
         }
+            
 
         public static (BigInteger, BigInteger) Sign(BigInteger privateKey, BigInteger msgHash, BigInteger? seed)
         {
