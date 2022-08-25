@@ -37,7 +37,7 @@ pub struct Signature {
     pub s: BigInt,
 }
 
-unsafe fn parse_bigint(i: BigInt) -> Result<FieldElement> {
+pub unsafe fn parse_bigint(i: BigInt) -> Result<FieldElement> {
     if i.is_null() {
         return Err(Errno::InvalidNullPtr);
     }
@@ -45,7 +45,7 @@ unsafe fn parse_bigint(i: BigInt) -> Result<FieldElement> {
     Ok(FieldElement::from_hex_be(s)?)
 }
 
-unsafe fn write_bigint(field: &FieldElement, i: MutBigInt) {
+pub unsafe fn write_bigint(field: &FieldElement, i: MutBigInt) {
     write_bytes(i, 0, BIG_INT_SIZE);
     let s = CString::new(format!("{field:x}")).expect("hex string cannot contain nul bytes");
     let len = s.as_bytes().len();

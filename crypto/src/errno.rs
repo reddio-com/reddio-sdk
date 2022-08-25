@@ -1,7 +1,7 @@
 use std::str::Utf8Error;
 
 use starknet_crypto::{SignError, VerifyError};
-use starknet_ff::FromHexError;
+use starknet_ff::{FromHexError, FromDecStrError};
 
 #[repr(C)]
 pub enum Errno {
@@ -10,6 +10,7 @@ pub enum Errno {
     InvalidNullPtr,
     InvalidStr,
     InvalidHex,
+    InvalidDecStr,
     InvalidMsg,
     InvalidR,
     InvalidS,
@@ -26,7 +27,8 @@ impl Errno {
         match self {
             Self::Ok => "ok\0",
             Self::InvalidNullPtr => "pointer cannot be null\0",
-            Self::InvalidStr => "not an invalid string\0",
+            Self::InvalidStr => "not an invalid hex string\0",
+            Self::InvalidDecStr => "not an invalid decimal string\0",
             Self::InvalidHex => "not an invalid hex number\0",
             Self::InvalidMsg => "not an invalid message hash\0",
             Self::InvalidR => "not an invalid 'r'\0",
@@ -46,6 +48,12 @@ impl From<Utf8Error> for Errno {
 impl From<FromHexError> for Errno {
     fn from(_: FromHexError) -> Self {
         Self::InvalidHex
+    }
+}
+
+impl From<FromDecStrError> for Errno{
+    fn from(_: FromDecStrError) -> Self {
+        Self::InvalidDecStr
     }
 }
 
