@@ -1,8 +1,8 @@
 use std::ffi::CStr;
 
-use crypto_bigint::{Wrapping, U256};
 use log::{debug, error, info, log_enabled, Level};
 use starknet_crypto::FieldElement;
+use elliptic_curve::bigint::{Wrapping, Encoding, SubMod, U256};
 
 use crate::errno::{Errno, Result};
 use crate::exports::{parse_bigint, write_bigint, BigInt, MutBigInt};
@@ -137,6 +137,17 @@ pub unsafe extern "C" fn get_limit_order_msg_hash(msg: LimitOrderMsg, hash: MutB
     }
 }
 
+trait FromFieldElement {
+    fn from_fe(fe: &FieldElement) -> Self;
+}
+
+impl FromFieldElement for U256 {
+    fn from_fe(fe: &FieldElement) -> Self {
+        let bytes = fe.to_bytes_be();
+        U256::from_be_bytes(bytes)
+    }
+}
+
 /// ref: https://github.com/starkware-libs/starkware-crypto-utils/blob/d3a1e655105afd66ebc07f88a179a3042407cc7b/src/js/signature.js#L105
 fn hash_msg(
     instruction_type: FieldElement,
@@ -160,23 +171,23 @@ fn hash_msg(
     log::debug!("token0: {token0:x}");
     log::debug!("token1_or_pub_key: {token1_or_pub_key:x}");
     log::debug!("condition: {condition:?}");
-    let mut packaged_message: U256 = (&instruction_type).into();
+    let mut packaged_message: U256 = U256::from_fe(&instruction_type);
     log::debug!("packaged_message: {packaged_message:x}");
-    packaged_message = (Wrapping(packaged_message << 31) + Wrapping(U256::from(&vault0))).0;
+    packaged_message = (Wrapping(packaged_message << 31) + Wrapping(U256::from_fe(&vault0))).0;
     log::debug!("packaged_message: {packaged_message:x}");
-    packaged_message = (Wrapping(packaged_message << 31) + Wrapping(U256::from(&vault1))).0;
+    packaged_message = (Wrapping(packaged_message << 31) + Wrapping(U256::from_fe(&vault1))).0;
     log::debug!("packaged_message: {packaged_message:x}");
-    packaged_message = (Wrapping(packaged_message << 63) + Wrapping(U256::from(&amount0))).0;
+    packaged_message = (Wrapping(packaged_message << 63) + Wrapping(U256::from_fe(&amount0))).0;
     log::debug!("packaged_message: {packaged_message:x}");
     // not works as expected :(
     packaged_message = packaged_message << 63;
     log::debug!("packaged_message: {packaged_message:x}");
-    packaged_message = (Wrapping(packaged_message) + Wrapping(U256::from(&amount1))).0;
+    packaged_message = (Wrapping(packaged_message) + Wrapping(U256::from_fe(&amount1))).0;
     log::debug!("packaged_message: {packaged_message:x}");
-    packaged_message = (Wrapping(packaged_message << 31) + Wrapping(U256::from(&nonce))).0;
+    packaged_message = (Wrapping(packaged_message << 31) + Wrapping(U256::from_fe(&nonce))).0;
     log::debug!("packaged_message: {packaged_message:x}");
     packaged_message =
-        (Wrapping(packaged_message << 22) + Wrapping(U256::from(&expiration_time_stamp))).0;
+        (Wrapping(packaged_message << 22) + Wrapping(U256::from_fe(&expiration_time_stamp))).0;
     log::debug!("packaged_message: {packaged_message:x}");
     let packaged_message = FieldElement::from_hex_be(format!("{packaged_message:x}").as_str())?;
     log::debug!("packaged_message: {packaged_message:x}");
