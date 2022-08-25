@@ -1,6 +1,7 @@
 use std::ffi::CStr;
 
 use crypto_bigint::{Wrapping, U256};
+use log::{debug, error, info, log_enabled, Level};
 use starknet_crypto::FieldElement;
 
 use crate::errno::{Errno, Result};
@@ -30,7 +31,7 @@ pub struct TransferMsg {
     pub receiver_public_key: BigInt,
     /// decimal string
     pub expiration_time_stamp: BigInt,
-    /// notice that condition could be nullable
+    /// hex string, notice that condition could be nullable
     pub condition: BigInt,
 }
 
@@ -149,15 +150,36 @@ fn hash_msg(
     token1_or_pub_key: FieldElement,
     condition: Option<FieldElement>,
 ) -> Result<FieldElement> {
+    log::debug!("instruction_type: {instruction_type}");
+    log::debug!("vault0: {vault0}");
+    log::debug!("vault1: {vault1}");
+    log::debug!("amount0: {amount0}");
+    log::debug!("amount1: {amount1}");
+    log::debug!("nonce: {nonce}");
+    log::debug!("expiration_time_stamp: {expiration_time_stamp}");
+    log::debug!("token0: {token0:x}");
+    log::debug!("token1_or_pub_key: {token1_or_pub_key:x}");
+    log::debug!("condition: {condition:?}");
     let mut packaged_message: U256 = (&instruction_type).into();
+    log::debug!("packaged_message: {packaged_message:x}");
     packaged_message = (Wrapping(packaged_message << 31) + Wrapping(U256::from(&vault0))).0;
+    log::debug!("packaged_message: {packaged_message:x}");
     packaged_message = (Wrapping(packaged_message << 31) + Wrapping(U256::from(&vault1))).0;
+    log::debug!("packaged_message: {packaged_message:x}");
     packaged_message = (Wrapping(packaged_message << 63) + Wrapping(U256::from(&amount0))).0;
-    packaged_message = (Wrapping(packaged_message << 63) + Wrapping(U256::from(&amount1))).0;
+    log::debug!("packaged_message: {packaged_message:x}");
+    // not works as expected :(
+    packaged_message = packaged_message << 63;
+    log::debug!("packaged_message: {packaged_message:x}");
+    packaged_message = (Wrapping(packaged_message) + Wrapping(U256::from(&amount1))).0;
+    log::debug!("packaged_message: {packaged_message:x}");
     packaged_message = (Wrapping(packaged_message << 31) + Wrapping(U256::from(&nonce))).0;
+    log::debug!("packaged_message: {packaged_message:x}");
     packaged_message =
         (Wrapping(packaged_message << 22) + Wrapping(U256::from(&expiration_time_stamp))).0;
+    log::debug!("packaged_message: {packaged_message:x}");
     let packaged_message = FieldElement::from_hex_be(format!("{packaged_message:x}").as_str())?;
+    log::debug!("packaged_message: {packaged_message:x}");
 
     match condition {
         Some(value) => Result::Ok(starknet_crypto::pedersen_hash(
@@ -171,5 +193,53 @@ fn hash_msg(
             &(starknet_crypto::pedersen_hash(&token0, &token1_or_pub_key)),
             &packaged_message,
         )),
+    }
+}
+#[cfg(test)]
+mod tests {
+    use std::ffi::{c_char, CStr, CString};
+    use std::ptr::null;
+
+    use super::{get_transfer_msg_hash, hash_msg, TransferMsg};
+    use crate::exports::BIG_INT_SIZE;
+
+    fn init() {
+        let _ = env_logger::builder()
+            .filter_level(log::LevelFilter::Trace)
+            .try_init();
+    }
+    #[test]
+    fn test_get_transfer_msg_hash() -> anyhow::Result<()> {
+        init();
+        let buffer: *mut c_char = ([0 as c_char; BIG_INT_SIZE]).as_mut_ptr();
+        unsafe {
+            let errno = get_transfer_msg_hash(
+                TransferMsg {
+                    amount: CString::new("2154549703648910716").unwrap().as_ptr(),
+                    nonce: CString::new("1").unwrap().as_ptr(),
+                    sender_vault_id: CString::new("34").unwrap().as_ptr(),
+                    token: CString::new(
+                        "0x3003a65651d3b9fb2eff934a4416db301afd112a8492aaf8d7297fc87dcd9f4",
+                    )
+                    .unwrap()
+                    .as_ptr(),
+                    receiver_vault_id: CString::new("21").unwrap().as_ptr(),
+                    receiver_public_key: CString::new(
+                        "0x5fa3383597691ea9d827a79e1a4f0f7949435ced18ca9619de8ab97e661020",
+                    )
+                    .unwrap()
+                    .as_ptr(),
+                    expiration_time_stamp: CString::new("438953").unwrap().as_ptr(),
+                    condition: null(),
+                },
+                buffer,
+            );
+            let result = CStr::from_ptr(buffer).to_str()?;
+            assert_eq!(
+                result,
+                "6366b00c218fb4c8a8b142ca482145e8513c78e00faa0de76298ba14fc37ae7"
+            )
+        }
+        Ok(())
     }
 }
