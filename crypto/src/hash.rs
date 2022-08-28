@@ -1,8 +1,7 @@
 use std::ffi::CStr;
 
-use log::{debug, error, info, log_enabled, Level};
+use elliptic_curve::bigint::{Encoding, Wrapping, U256};
 use starknet_crypto::FieldElement;
-use elliptic_curve::bigint::{Wrapping, Encoding, SubMod, U256};
 
 use crate::errno::{Errno, Result};
 use crate::exports::{parse_bigint, write_bigint, BigInt, MutBigInt};
@@ -161,36 +160,15 @@ fn hash_msg(
     token1_or_pub_key: FieldElement,
     condition: Option<FieldElement>,
 ) -> Result<FieldElement> {
-    log::debug!("instruction_type: {instruction_type}");
-    log::debug!("vault0: {vault0}");
-    log::debug!("vault1: {vault1}");
-    log::debug!("amount0: {amount0}");
-    log::debug!("amount1: {amount1}");
-    log::debug!("nonce: {nonce}");
-    log::debug!("expiration_time_stamp: {expiration_time_stamp}");
-    log::debug!("token0: {token0:x}");
-    log::debug!("token1_or_pub_key: {token1_or_pub_key:x}");
-    log::debug!("condition: {condition:?}");
     let mut packaged_message: U256 = U256::from_fe(&instruction_type);
-    log::debug!("packaged_message: {packaged_message:x}");
     packaged_message = (Wrapping(packaged_message << 31) + Wrapping(U256::from_fe(&vault0))).0;
-    log::debug!("packaged_message: {packaged_message:x}");
     packaged_message = (Wrapping(packaged_message << 31) + Wrapping(U256::from_fe(&vault1))).0;
-    log::debug!("packaged_message: {packaged_message:x}");
     packaged_message = (Wrapping(packaged_message << 63) + Wrapping(U256::from_fe(&amount0))).0;
-    log::debug!("packaged_message: {packaged_message:x}");
-    // not works as expected :(
-    packaged_message = packaged_message << 63;
-    log::debug!("packaged_message: {packaged_message:x}");
-    packaged_message = (Wrapping(packaged_message) + Wrapping(U256::from_fe(&amount1))).0;
-    log::debug!("packaged_message: {packaged_message:x}");
+    packaged_message = (Wrapping(packaged_message << 63) + Wrapping(U256::from_fe(&amount1))).0;
     packaged_message = (Wrapping(packaged_message << 31) + Wrapping(U256::from_fe(&nonce))).0;
-    log::debug!("packaged_message: {packaged_message:x}");
     packaged_message =
         (Wrapping(packaged_message << 22) + Wrapping(U256::from_fe(&expiration_time_stamp))).0;
-    log::debug!("packaged_message: {packaged_message:x}");
     let packaged_message = FieldElement::from_hex_be(format!("{packaged_message:x}").as_str())?;
-    log::debug!("packaged_message: {packaged_message:x}");
 
     match condition {
         Some(value) => Result::Ok(starknet_crypto::pedersen_hash(
@@ -214,14 +192,8 @@ mod tests {
     use super::{get_transfer_msg_hash, hash_msg, TransferMsg};
     use crate::exports::BIG_INT_SIZE;
 
-    fn init() {
-        let _ = env_logger::builder()
-            .filter_level(log::LevelFilter::Trace)
-            .try_init();
-    }
     #[test]
     fn test_get_transfer_msg_hash() -> anyhow::Result<()> {
-        init();
         let buffer: *mut c_char = ([0 as c_char; BIG_INT_SIZE]).as_mut_ptr();
         unsafe {
             let errno = get_transfer_msg_hash(
