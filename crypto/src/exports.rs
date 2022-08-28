@@ -24,6 +24,7 @@ pub struct SignDocument {
 }
 
 #[repr(C)]
+#[derive(Copy, Clone)]
 pub struct SignResult {
     pub r: MutBigInt,
     pub s: MutBigInt,
@@ -197,4 +198,71 @@ fn hash_key_with_index(seed: &str, index: usize) -> Result<U256> {
         .expect("hash result is not 32 bytes");
 
     Ok(U256::from_be_bytes(hash_result))
+}
+#[cfg(test)]
+mod tests {
+    use std::{ffi::{c_char, CStr, CString}, ptr::null};
+
+    use super::{sign, SignDocument, SignResult};
+    use crate::exports::BIG_INT_SIZE;
+
+    #[test]
+    fn test_sign_1() -> anyhow::Result<()> {
+        let actual = SignResult {
+            r: ([0 as c_char; BIG_INT_SIZE]).as_mut_ptr(),
+            s: ([0 as c_char; BIG_INT_SIZE]).as_mut_ptr(),
+        };
+        unsafe {
+            let errno = sign(
+                SignDocument {
+                    msg_hash: CString::new("0x397e76d1667c4454bfb83514e120583af836f8e32a516765497823eabe16a3f").unwrap().as_ptr(),
+                    private_key: CString::new("0x3c1e9550e66958296d11b60f8e8e7a7ad990d07fa65d5f7652c4a6c87d4e3cc").unwrap().as_ptr(),
+                    seed: null(),
+                },
+                actual,
+            );
+
+            let actual_r = CStr::from_ptr(actual.r).to_str()?;
+            let actual_s = CStr::from_ptr(actual.s).to_str()?;
+            assert_eq!(
+                actual_r,
+                "173fd03d8b008ee7432977ac27d1e9d1a1f6c98b1a2f05fa84a21c84c44e882"
+            );
+            assert_eq!(
+                actual_s,
+                "4b6d75385aed025aa222f28a0adc6d58db78ff17e51c3f59e259b131cd5a1cc"
+            );
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn test_sign_2() -> anyhow::Result<()> {
+        let actual = SignResult {
+            r: ([0 as c_char; BIG_INT_SIZE]).as_mut_ptr(),
+            s: ([0 as c_char; BIG_INT_SIZE]).as_mut_ptr(),
+        };
+        unsafe {
+            let errno = sign(
+                SignDocument {
+                    msg_hash: CString::new("0x6adb14408452ede28b89f40ca1847eca4de6a2dd6eb2c7d6dc5584f9399586").unwrap().as_ptr(),
+                    private_key: CString::new("0x4c1e9550e66958296d11b60f8e8e7a7ad990d07fa65d5f7652c4a6c87d4e3cc").unwrap().as_ptr(),
+                    seed: null(),
+                },
+                actual,
+            );
+
+            let actual_r = CStr::from_ptr(actual.r).to_str()?;
+            let actual_s = CStr::from_ptr(actual.s).to_str()?;
+            assert_eq!(
+                actual_r,
+                "2ee2b8927122f93dd5fc07a11980f0fab4c8358e5d1306bfee5e095355d2ad0"
+            );
+            assert_eq!(
+                actual_s,
+                "64d393473af2ebab736c579ad511bf439263e4740f9ad299498bda2e75b0e9"
+            );
+        }
+        Ok(())
+    }
 }

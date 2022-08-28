@@ -190,9 +190,8 @@ mod tests {
     use std::ptr::null;
 
     use super::{
-        get_limit_order_msg_hash, get_transfer_msg_hash, hash_msg, LimitOrderMsg, TransferMsg,
+        get_limit_order_msg_hash, get_transfer_msg_hash, LimitOrderMsg, TransferMsg,
     };
-    use crate::errno;
     use crate::exports::BIG_INT_SIZE;
 
     /// ref: https://github.com/starkware-libs/starkex-resources/blob/844ac3dcb1f735451457f7eecc6e37cd96d1cb2d/crypto/starkware/crypto/signature/signature_test_data.json#L38
