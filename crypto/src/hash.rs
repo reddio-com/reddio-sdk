@@ -189,9 +189,13 @@ mod tests {
     use std::ffi::{c_char, CStr, CString};
     use std::ptr::null;
 
-    use super::{get_transfer_msg_hash, hash_msg, TransferMsg};
+    use super::{
+        get_limit_order_msg_hash, get_transfer_msg_hash, hash_msg, LimitOrderMsg, TransferMsg,
+    };
+    use crate::errno;
     use crate::exports::BIG_INT_SIZE;
 
+    /// ref: https://github.com/starkware-libs/starkex-resources/blob/844ac3dcb1f735451457f7eecc6e37cd96d1cb2d/crypto/starkware/crypto/signature/signature_test_data.json#L38
     #[test]
     fn test_get_transfer_msg_hash() -> anyhow::Result<()> {
         let buffer: *mut c_char = ([0 as c_char; BIG_INT_SIZE]).as_mut_ptr();
@@ -221,6 +225,78 @@ mod tests {
             assert_eq!(
                 result,
                 "6366b00c218fb4c8a8b142ca482145e8513c78e00faa0de76298ba14fc37ae7"
+            )
+        }
+        Ok(())
+    }
+
+    /// ref: https://github.com/starkware-libs/starkex-resources/blob/master/crypto/starkware/crypto/signature/signature_test_data.json#L3
+    #[test]
+    fn test_get_limit_order_msg_hash_party_a_order() -> anyhow::Result<()> {
+        let buffer: *mut c_char = ([0 as c_char; BIG_INT_SIZE]).as_mut_ptr();
+
+        unsafe {
+            let errno = get_limit_order_msg_hash(
+                LimitOrderMsg {
+                    vault_sell: CString::new("21").unwrap().as_ptr(),
+                    vault_buy: CString::new("27").unwrap().as_ptr(),
+                    amount_sell: CString::new("2154686749748910716").unwrap().as_ptr(),
+                    amount_buy: CString::new("1470242115489520459").unwrap().as_ptr(),
+                    token_sell: CString::new(
+                        "0x5fa3383597691ea9d827a79e1a4f0f7989c35ced18ca9619de8ab97e661020",
+                    )
+                    .unwrap()
+                    .as_ptr(),
+                    token_buy: CString::new(
+                        "0x774961c824a3b0fb3d2965f01471c9c7734bf8dbde659e0c08dca2ef18d56a",
+                    )
+                    .unwrap()
+                    .as_ptr(),
+                    nonce: CString::new("0").unwrap().as_ptr(),
+                    expiration_time_stamp: CString::new("438953").unwrap().as_ptr(),
+                },
+                buffer,
+            );
+            let result = CStr::from_ptr(buffer).to_str()?;
+            assert_eq!(
+                result,
+                "397e76d1667c4454bfb83514e120583af836f8e32a516765497823eabe16a3f"
+            )
+        }
+        Ok(())
+    }
+
+    /// ref: https://github.com/starkware-libs/starkex-resources/blob/844ac3dcb1f735451457f7eecc6e37cd96d1cb2d/crypto/starkware/crypto/signature/signature_test_data.json#L18
+    #[test]
+    fn test_get_limit_order_msg_hash_party_b_order() -> anyhow::Result<()> {
+        let buffer: *mut c_char = ([0 as c_char; BIG_INT_SIZE]).as_mut_ptr();
+
+        unsafe {
+            let errno = get_limit_order_msg_hash(
+                LimitOrderMsg {
+                    vault_sell: CString::new("221").unwrap().as_ptr(),
+                    vault_buy: CString::new("227").unwrap().as_ptr(),
+                    amount_buy: CString::new("21546867497489").unwrap().as_ptr(),
+                    amount_sell: CString::new("14702421154895").unwrap().as_ptr(),
+                    token_buy: CString::new(
+                        "0x5fa3383597691ea9d827a79e1a4f0f7989c35ced18ca9619de8ab97e661020",
+                    )
+                    .unwrap()
+                    .as_ptr(),
+                    token_sell: CString::new(
+                        "0x774961c824a3b0fb3d2965f01471c9c7734bf8dbde659e0c08dca2ef18d56a",
+                    )
+                    .unwrap()
+                    .as_ptr(),
+                    nonce: CString::new("1").unwrap().as_ptr(),
+                    expiration_time_stamp: CString::new("468963").unwrap().as_ptr(),
+                },
+                buffer,
+            );
+            let result = CStr::from_ptr(buffer).to_str()?;
+            assert_eq!(
+                result,
+                "6adb14408452ede28b89f40ca1847eca4de6a2dd6eb2c7d6dc5584f9399586"
             )
         }
         Ok(())
