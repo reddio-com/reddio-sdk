@@ -148,6 +148,7 @@ impl FromFieldElement for U256 {
 }
 
 /// ref: https://github.com/starkware-libs/starkware-crypto-utils/blob/d3a1e655105afd66ebc07f88a179a3042407cc7b/src/js/signature.js#L105
+#[allow(clippy::too_many_arguments)]
 fn hash_msg(
     instruction_type: FieldElement,
     vault0: FieldElement,
@@ -189,9 +190,7 @@ mod tests {
     use std::ffi::{c_char, CStr, CString};
     use std::ptr::null;
 
-    use super::{
-        get_limit_order_msg_hash, get_transfer_msg_hash, LimitOrderMsg, TransferMsg,
-    };
+    use super::{get_limit_order_msg_hash, get_transfer_msg_hash, LimitOrderMsg, TransferMsg};
     use crate::exports::BIG_INT_SIZE;
 
     /// ref: https://github.com/starkware-libs/starkex-resources/blob/844ac3dcb1f735451457f7eecc6e37cd96d1cb2d/crypto/starkware/crypto/signature/signature_test_data.json#L38
@@ -201,25 +200,27 @@ mod tests {
         unsafe {
             let errno = get_transfer_msg_hash(
                 TransferMsg {
-                    amount: CString::new("2154549703648910716").unwrap().as_ptr(),
-                    nonce: CString::new("1").unwrap().as_ptr(),
-                    sender_vault_id: CString::new("34").unwrap().as_ptr(),
+                    amount: CString::new("2154549703648910716").unwrap().into_raw(),
+                    nonce: CString::new("1").unwrap().into_raw(),
+                    sender_vault_id: CString::new("34").unwrap().into_raw(),
                     token: CString::new(
                         "0x3003a65651d3b9fb2eff934a4416db301afd112a8492aaf8d7297fc87dcd9f4",
                     )
                     .unwrap()
-                    .as_ptr(),
-                    receiver_vault_id: CString::new("21").unwrap().as_ptr(),
+                    .into_raw(),
+                    receiver_vault_id: CString::new("21").unwrap().into_raw(),
                     receiver_public_key: CString::new(
                         "0x5fa3383597691ea9d827a79e1a4f0f7949435ced18ca9619de8ab97e661020",
                     )
                     .unwrap()
-                    .as_ptr(),
-                    expiration_time_stamp: CString::new("438953").unwrap().as_ptr(),
+                    .into_raw(),
+                    expiration_time_stamp: CString::new("438953").unwrap().into_raw(),
                     condition: null(),
                 },
                 buffer,
             );
+            assert_eq!(errno as u8, 0);
+
             let result = CStr::from_ptr(buffer).to_str()?;
             assert_eq!(
                 result,
@@ -237,25 +238,27 @@ mod tests {
         unsafe {
             let errno = get_limit_order_msg_hash(
                 LimitOrderMsg {
-                    vault_sell: CString::new("21").unwrap().as_ptr(),
-                    vault_buy: CString::new("27").unwrap().as_ptr(),
-                    amount_sell: CString::new("2154686749748910716").unwrap().as_ptr(),
-                    amount_buy: CString::new("1470242115489520459").unwrap().as_ptr(),
+                    vault_sell: CString::new("21").unwrap().into_raw(),
+                    vault_buy: CString::new("27").unwrap().into_raw(),
+                    amount_sell: CString::new("2154686749748910716").unwrap().into_raw(),
+                    amount_buy: CString::new("1470242115489520459").unwrap().into_raw(),
                     token_sell: CString::new(
                         "0x5fa3383597691ea9d827a79e1a4f0f7989c35ced18ca9619de8ab97e661020",
                     )
                     .unwrap()
-                    .as_ptr(),
+                    .into_raw(),
                     token_buy: CString::new(
                         "0x774961c824a3b0fb3d2965f01471c9c7734bf8dbde659e0c08dca2ef18d56a",
                     )
                     .unwrap()
-                    .as_ptr(),
-                    nonce: CString::new("0").unwrap().as_ptr(),
-                    expiration_time_stamp: CString::new("438953").unwrap().as_ptr(),
+                    .into_raw(),
+                    nonce: CString::new("0").unwrap().into_raw(),
+                    expiration_time_stamp: CString::new("438953").unwrap().into_raw(),
                 },
                 buffer,
             );
+            assert_eq!(errno as u8, 0);
+
             let result = CStr::from_ptr(buffer).to_str()?;
             assert_eq!(
                 result,
@@ -273,25 +276,27 @@ mod tests {
         unsafe {
             let errno = get_limit_order_msg_hash(
                 LimitOrderMsg {
-                    vault_sell: CString::new("221").unwrap().as_ptr(),
-                    vault_buy: CString::new("227").unwrap().as_ptr(),
-                    amount_buy: CString::new("21546867497489").unwrap().as_ptr(),
-                    amount_sell: CString::new("14702421154895").unwrap().as_ptr(),
+                    vault_sell: CString::new("221").unwrap().into_raw(),
+                    vault_buy: CString::new("227").unwrap().into_raw(),
+                    amount_buy: CString::new("21546867497489").unwrap().into_raw(),
+                    amount_sell: CString::new("14702421154895").unwrap().into_raw(),
                     token_buy: CString::new(
                         "0x5fa3383597691ea9d827a79e1a4f0f7989c35ced18ca9619de8ab97e661020",
                     )
                     .unwrap()
-                    .as_ptr(),
+                    .into_raw(),
                     token_sell: CString::new(
                         "0x774961c824a3b0fb3d2965f01471c9c7734bf8dbde659e0c08dca2ef18d56a",
                     )
                     .unwrap()
-                    .as_ptr(),
-                    nonce: CString::new("1").unwrap().as_ptr(),
-                    expiration_time_stamp: CString::new("468963").unwrap().as_ptr(),
+                    .into_raw(),
+                    nonce: CString::new("1").unwrap().into_raw(),
+                    expiration_time_stamp: CString::new("468963").unwrap().into_raw(),
                 },
                 buffer,
             );
+            assert_eq!(errno as u8, 0);
+
             let result = CStr::from_ptr(buffer).to_str()?;
             assert_eq!(
                 result,

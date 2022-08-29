@@ -1,7 +1,7 @@
 use std::str::Utf8Error;
 
 use starknet_crypto::{SignError, VerifyError};
-use starknet_ff::{FromHexError, FromDecStrError};
+use starknet_ff::{FromDecStrError, FromHexError};
 
 #[repr(C)]
 pub enum Errno {
@@ -51,7 +51,7 @@ impl From<FromHexError> for Errno {
     }
 }
 
-impl From<FromDecStrError> for Errno{
+impl From<FromDecStrError> for Errno {
     fn from(_: FromDecStrError) -> Self {
         Self::InvalidDecStr
     }
