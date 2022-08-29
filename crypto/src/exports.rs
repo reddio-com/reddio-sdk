@@ -2,8 +2,7 @@ use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 use std::ptr::{copy, write_bytes};
 
-use elliptic_curve::bigint::{Encoding, SubMod, U256};
-use elliptic_curve::Field;
+use elliptic_curve::bigint::{Encoding, U256};
 use sha2::{Digest, Sha256};
 use starknet_crypto::{rfc6979_generate_k, FieldElement};
 
@@ -162,7 +161,7 @@ fn grind_key(seed: &str) -> Result<FieldElement> {
     let mut i = 0;
     let mut key = hash_key_with_index(seed, i)?;
     i += 1;
-    while (key >= max_allowed_val) {
+    while key >= max_allowed_val {
         key = hash_key_with_index(seed, i)?;
         i += 1;
     }
@@ -201,7 +200,8 @@ fn hash_key_with_index(seed: &str, index: usize) -> Result<U256> {
 }
 #[cfg(test)]
 mod tests {
-    use std::{ffi::{c_char, CStr, CString}, ptr::null};
+    use std::ffi::{c_char, CStr, CString};
+    use std::ptr::null;
 
     use super::{sign, SignDocument, SignResult};
     use crate::exports::BIG_INT_SIZE;
@@ -215,12 +215,21 @@ mod tests {
         unsafe {
             let errno = sign(
                 SignDocument {
-                    msg_hash: CString::new("0x397e76d1667c4454bfb83514e120583af836f8e32a516765497823eabe16a3f").unwrap().as_ptr(),
-                    private_key: CString::new("0x3c1e9550e66958296d11b60f8e8e7a7ad990d07fa65d5f7652c4a6c87d4e3cc").unwrap().as_ptr(),
+                    msg_hash: CString::new(
+                        "0x397e76d1667c4454bfb83514e120583af836f8e32a516765497823eabe16a3f",
+                    )
+                    .unwrap()
+                    .into_raw(),
+                    private_key: CString::new(
+                        "0x3c1e9550e66958296d11b60f8e8e7a7ad990d07fa65d5f7652c4a6c87d4e3cc",
+                    )
+                    .unwrap()
+                    .into_raw(),
                     seed: null(),
                 },
                 actual,
             );
+            assert_eq!(errno as u8, 0);
 
             let actual_r = CStr::from_ptr(actual.r).to_str()?;
             let actual_s = CStr::from_ptr(actual.s).to_str()?;
@@ -245,12 +254,21 @@ mod tests {
         unsafe {
             let errno = sign(
                 SignDocument {
-                    msg_hash: CString::new("0x6adb14408452ede28b89f40ca1847eca4de6a2dd6eb2c7d6dc5584f9399586").unwrap().as_ptr(),
-                    private_key: CString::new("0x4c1e9550e66958296d11b60f8e8e7a7ad990d07fa65d5f7652c4a6c87d4e3cc").unwrap().as_ptr(),
+                    msg_hash: CString::new(
+                        "0x6adb14408452ede28b89f40ca1847eca4de6a2dd6eb2c7d6dc5584f9399586",
+                    )
+                    .unwrap()
+                    .into_raw(),
+                    private_key: CString::new(
+                        "0x4c1e9550e66958296d11b60f8e8e7a7ad990d07fa65d5f7652c4a6c87d4e3cc",
+                    )
+                    .unwrap()
+                    .into_raw(),
                     seed: null(),
                 },
                 actual,
             );
+            assert_eq!(errno as u8, 0);
 
             let actual_r = CStr::from_ptr(actual.r).to_str()?;
             let actual_s = CStr::from_ptr(actual.s).to_str()?;
