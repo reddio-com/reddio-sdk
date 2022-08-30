@@ -125,33 +125,36 @@ func GetPrivateKeyFromEthSignature(ethSignature *big.Int) (privateKey *big.Int, 
 }
 
 func GetTransferMsgHash(
-	amount int,
-	nonce int,
-	senderVaultID *big.Int,
+	amount int64,
+	nonce int64,
+	senderVaultID int64,
 	token *big.Int,
-	receiverVaultID int,
+	receiverVaultID int64,
 	receiverPublicKey *big.Int,
-	expirationTimeStamp int,
+	expirationTimeStamp int64,
 	condition *big.Int,
 ) (result *big.Int, err error) {
 	msg := C.TransferMsg{
-		amount:                C.CString(strconv.Itoa(amount)),
-		nonce:                 C.CString(strconv.Itoa(nonce)),
-		sender_vault_id:       C.CString(senderVaultID.Text(16)),
+		amount:                C.CString(strconv.FormatInt(amount, 10)),
+		nonce:                 C.CString(strconv.FormatInt(nonce, 10)),
+		sender_vault_id:       C.CString(strconv.FormatInt(senderVaultID, 10)),
 		token:                 C.CString(token.Text(16)),
-		receiver_vault_id:     C.CString(strconv.Itoa(receiverVaultID)),
+		receiver_vault_id:     C.CString(strconv.FormatInt(receiverVaultID, 10)),
 		receiver_public_key:   C.CString(receiverPublicKey.Text(16)),
-		expiration_time_stamp: C.CString(strconv.Itoa(expirationTimeStamp)),
-		condition:             C.CString(condition.Text(16)),
+		expiration_time_stamp: C.CString(strconv.FormatInt(expirationTimeStamp, 10)),
+		condition:             nil,
+	}
+
+	if condition != nil {
+		msg.condition = C.CString(condition.Text(16))
 	}
 	hash := (*C.char)(C.malloc(C.size_t(C.BIG_INT_SIZE)))
-	defer func() {
-		C.free(unsafe.Pointer(hash))
-	}()
+	defer C.free(unsafe.Pointer(hash))
 	errno := C.get_transfer_msg_hash(msg, hash)
 	if errno != C.Ok {
 		return nil, errors.New(C.GoString(C.explain(errno)))
 	}
+
 	result = new(big.Int)
 	_, ok := result.SetString(C.GoString(hash), 16)
 	if !ok {
@@ -161,24 +164,24 @@ func GetTransferMsgHash(
 }
 
 func GetLimitOrderMsgHash(
-	vaultSell int,
-	vaultBut int,
-	amountSell int,
-	amountBuy int,
+	vaultSell int64,
+	vaultBuy int64,
+	amountSell int64,
+	amountBuy int64,
 	tokenSell *big.Int,
 	tokenBuy *big.Int,
-	nonce int,
-	expirationTimeStamp int,
+	nonce int64,
+	expirationTimeStamp int64,
 ) (result *big.Int, err error) {
 	msg := C.LimitOrderMsg{
-		vault_sell:            C.CString(strconv.Itoa(vaultSell)),
-		vault_buy:             C.CString(strconv.Itoa(vaultBut)),
-		amount_sell:           C.CString(strconv.Itoa(amountSell)),
-		amount_buy:            C.CString(strconv.Itoa(amountBuy)),
+		vault_sell:            C.CString(strconv.FormatInt(vaultSell, 10)),
+		vault_buy:             C.CString(strconv.FormatInt(vaultBuy, 10)),
+		amount_sell:           C.CString(strconv.FormatInt(amountSell, 10)),
+		amount_buy:            C.CString(strconv.FormatInt(amountBuy, 10)),
 		token_sell:            C.CString(tokenSell.Text(16)),
 		token_buy:             C.CString(tokenBuy.Text(16)),
-		nonce:                 C.CString(strconv.Itoa(nonce)),
-		expiration_time_stamp: C.CString(strconv.Itoa(expirationTimeStamp)),
+		nonce:                 C.CString(strconv.FormatInt(nonce, 10)),
+		expiration_time_stamp: C.CString(strconv.FormatInt(expirationTimeStamp, 10)),
 	}
 	hash := (*C.char)(C.malloc(C.size_t(C.BIG_INT_SIZE)))
 	defer func() {

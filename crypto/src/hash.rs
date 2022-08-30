@@ -229,6 +229,41 @@ mod tests {
         }
         Ok(())
     }
+    #[test]
+    fn test_get_transfer_msg_hash_without_0x_prefix() -> anyhow::Result<()> {
+        let buffer: *mut c_char = ([0 as c_char; BIG_INT_SIZE]).as_mut_ptr();
+        unsafe {
+            let errno = get_transfer_msg_hash(
+                TransferMsg {
+                    amount: CString::new("2154549703648910716").unwrap().into_raw(),
+                    nonce: CString::new("1").unwrap().into_raw(),
+                    sender_vault_id: CString::new("34").unwrap().into_raw(),
+                    token: CString::new(
+                        "3003a65651d3b9fb2eff934a4416db301afd112a8492aaf8d7297fc87dcd9f4",
+                    )
+                    .unwrap()
+                    .into_raw(),
+                    receiver_vault_id: CString::new("21").unwrap().into_raw(),
+                    receiver_public_key: CString::new(
+                        "5fa3383597691ea9d827a79e1a4f0f7949435ced18ca9619de8ab97e661020",
+                    )
+                    .unwrap()
+                    .into_raw(),
+                    expiration_time_stamp: CString::new("438953").unwrap().into_raw(),
+                    condition: null(),
+                },
+                buffer,
+            );
+            assert_eq!(errno as u8, 0);
+
+            let result = CStr::from_ptr(buffer).to_str()?;
+            assert_eq!(
+                result,
+                "6366b00c218fb4c8a8b142ca482145e8513c78e00faa0de76298ba14fc37ae7"
+            )
+        }
+        Ok(())
+    }
 
     /// ref: https://github.com/starkware-libs/starkex-resources/blob/master/crypto/starkware/crypto/signature/signature_test_data.json#L3
     #[test]
