@@ -10,6 +10,7 @@ import (
 	"bytes"
 	"errors"
 	"math/big"
+	"strconv"
 	"unsafe"
 )
 
@@ -121,4 +122,76 @@ func GetPrivateKeyFromEthSignature(ethSignature *big.Int) (privateKey *big.Int, 
 		return nil, errors.New("private_key is not a valid big.Int")
 	}
 	return privateKey, nil
+}
+
+func GetTransferMsgHash(
+	amount int,
+	nonce int,
+	senderVaultID *big.Int,
+	token *big.Int,
+	receiverVaultID int,
+	receiverPublicKey *big.Int,
+	expirationTimeStamp int,
+	condition *big.Int,
+) (result *big.Int, err error) {
+	msg := C.TransferMsg{
+		amount:                C.CString(strconv.Itoa(amount)),
+		nonce:                 C.CString(strconv.Itoa(nonce)),
+		sender_vault_id:       C.CString(senderVaultID.Text(16)),
+		token:                 C.CString(token.Text(16)),
+		receiver_vault_id:     C.CString(strconv.Itoa(receiverVaultID)),
+		receiver_public_key:   C.CString(receiverPublicKey.Text(16)),
+		expiration_time_stamp: C.CString(strconv.Itoa(expirationTimeStamp)),
+		condition:             C.CString(condition.Text(16)),
+	}
+	hash := (*C.char)(C.malloc(C.size_t(C.BIG_INT_SIZE)))
+	defer func() {
+		C.free(unsafe.Pointer(hash))
+	}()
+	errno := C.get_transfer_msg_hash(msg, hash)
+	if errno != C.Ok {
+		return nil, errors.New(C.GoString(C.explain(errno)))
+	}
+	result = new(big.Int)
+	_, ok := result.SetString(C.GoString(hash), 16)
+	if !ok {
+		return nil, errors.New("hash is not a valid big.Int")
+	}
+	return result, err
+}
+
+func GetLimitOrderMsgHash(
+	vaultSell int,
+	vaultBut int,
+	amountSell int,
+	amountBuy int,
+	tokenSell *big.Int,
+	tokenBuy *big.Int,
+	nonce int,
+	expirationTimeStamp int,
+) (result *big.Int, err error) {
+	msg := C.LimitOrderMsg{
+		vault_sell:            C.CString(strconv.Itoa(vaultSell)),
+		vault_buy:             C.CString(strconv.Itoa(vaultBut)),
+		amount_sell:           C.CString(strconv.Itoa(amountSell)),
+		amount_buy:            C.CString(strconv.Itoa(amountBuy)),
+		token_sell:            C.CString(tokenSell.Text(16)),
+		token_buy:             C.CString(tokenBuy.Text(16)),
+		nonce:                 C.CString(strconv.Itoa(nonce)),
+		expiration_time_stamp: C.CString(strconv.Itoa(expirationTimeStamp)),
+	}
+	hash := (*C.char)(C.malloc(C.size_t(C.BIG_INT_SIZE)))
+	defer func() {
+		C.free(unsafe.Pointer(hash))
+	}()
+	errno := C.get_limit_order_msg_hash(msg, hash)
+	if errno != C.Ok {
+		return nil, errors.New(C.GoString(C.explain(errno)))
+	}
+	result = new(big.Int)
+	_, ok := result.SetString(C.GoString(hash), 16)
+	if !ok {
+		return nil, errors.New("hash is not a valid big.Int")
+	}
+	return result, err
 }
