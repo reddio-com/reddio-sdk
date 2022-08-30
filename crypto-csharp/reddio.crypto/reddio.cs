@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Globalization;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -57,6 +57,41 @@ namespace Reddio.Crypto {
         
         [DllImport("libcrypto", EntryPoint="explain")]
         private static extern string ExplainError(int errno);
+
+        private struct TransferMsg
+        {
+            [MarshalAs(UnmanagedType.LPStr)] public string Amount;
+            [MarshalAs(UnmanagedType.LPStr)] public string Nonce;
+            [MarshalAs(UnmanagedType.LPStr)] public string SenderVaultId;
+            [MarshalAs(UnmanagedType.LPStr)] public string Token;
+            [MarshalAs(UnmanagedType.LPStr)] public string ReceiverVaultId;
+            [MarshalAs(UnmanagedType.LPStr)] public string ReceiverPublicKey;
+            [MarshalAs(UnmanagedType.LPStr)] public string ExpirationTimeStamp;
+            [MarshalAs(UnmanagedType.LPStr)] public string Condition;
+        }
+    
+        [DllImport("libcrypto", EntryPoint = "get_transfer_msg_hash")]
+        private static extern int GetTransferMsgHash(
+            TransferMsg msg,
+            [MarshalAs(UnmanagedType.LPStr)] StringBuilder hash
+        );
+
+        private struct LimitOrderMsg
+        {
+            [MarshalAs(UnmanagedType.LPStr)] public string VaultSell;
+            [MarshalAs(UnmanagedType.LPStr)] public string VaultBuy;
+            [MarshalAs(UnmanagedType.LPStr)] public string AmountSell;
+            [MarshalAs(UnmanagedType.LPStr)] public string AmountBuy;
+            [MarshalAs(UnmanagedType.LPStr)] public string TokenSell;
+            [MarshalAs(UnmanagedType.LPStr)] public string TokenBuy;
+            [MarshalAs(UnmanagedType.LPStr)] public string Nonce;
+            [MarshalAs(UnmanagedType.LPStr)] public string ExpirationTimeStamp;
+        }
+        [DllImport("libcrypto", EntryPoint = "get_limit_order_msg_hash")]
+        private static extern int GetLimitOrderMsgHash(
+            LimitOrderMsg msg, 
+            [MarshalAs(UnmanagedType.LPStr)] StringBuilder hash
+        );
 
         public static BigInteger ParsePositive(string hex) 
         {
@@ -141,6 +176,70 @@ namespace Reddio.Crypto {
                 throw new CryptoException(ExplainError(errno));
             }
             return ParsePositive(publicKeyStr.ToString());
+        }
+
+        public static BigInteger GetTransferMsgHash(
+            int amount,
+            int nonce,
+            int senderVaultId,
+            BigInteger token,
+            int receiverVaultId,
+            BigInteger receiverPublicKey,
+            int expirationTimeStamp,
+            BigInteger condition
+        )
+        {
+            var hash = new StringBuilder(BIG_INT_BUFFER_SIZE);
+            var msg = new TransferMsg();
+            msg.Amount = amount.ToString();
+            msg.Nonce = nonce.ToString();
+            msg.SenderVaultId = senderVaultId.ToString();
+            msg.Token = token.ToString("x");
+            msg.ReceiverVaultId = receiverVaultId.ToString();
+            msg.ReceiverPublicKey = receiverPublicKey.ToString("x");
+            msg.ExpirationTimeStamp = expirationTimeStamp.ToString();
+            msg.Condition = condition.ToString("x");
+            var errno = GetTransferMsgHash(msg, hash);
+
+            if (errno != 0)
+            {
+                throw new CryptoException(ExplainError(errno));
+            }
+
+            return ParsePositive(hash.ToString());
+        }
+
+        public static BigInteger GetLimitOrderMsgHash(
+            int vaultSell,
+            int vaultBuy,
+            int amountSell,
+            int amountBuy,
+            BigInteger tokenSell,
+            BigInteger tokenBuy,
+            int nonce,
+            int expirationTimeStamp
+        )
+        {
+            var hash = new StringBuilder(BIG_INT_BUFFER_SIZE);
+            var msg = new LimitOrderMsg();
+
+            msg.VaultSell = vaultSell.ToString();
+            msg.VaultBuy = vaultBuy.ToString();
+            msg.AmountSell = amountSell.ToString();
+            msg.AmountBuy = amountBuy.ToString();
+            msg.TokenSell = tokenSell.ToString("x");
+            msg.TokenBuy = tokenBuy.ToString("x");
+            msg.Nonce = nonce.ToString();
+            msg.ExpirationTimeStamp = expirationTimeStamp.ToString();
+
+            var errno = GetLimitOrderMsgHash(msg, hash);
+
+            if (errno != 0)
+            {
+                throw new CryptoException(ExplainError(errno));
+            }
+
+            return ParsePositive(hash.ToString());
         }
     }
 }
