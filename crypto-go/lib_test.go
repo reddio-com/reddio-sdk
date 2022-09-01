@@ -181,3 +181,109 @@ func TestGeneratePrivateKey(t *testing.T) {
 		assert.True(t, expectedKey.Cmp(privateKey) == 0)
 	}
 }
+
+func TestGetTransferMsgHash(t *testing.T) {
+	type GetTransferMsgHashCase struct {
+		amount              int64
+		nonce               int64
+		senderVaultID       int64
+		token               string
+		receiverVaultID     int64
+		receiverPublicKey   string
+		expirationTimeStamp int64
+		condition           *string
+		expectedHash        string
+	}
+	cases := []GetTransferMsgHashCase{
+		{
+			amount:              2154549703648910716,
+			nonce:               1,
+			senderVaultID:       34,
+			token:               "3003a65651d3b9fb2eff934a4416db301afd112a8492aaf8d7297fc87dcd9f4",
+			receiverVaultID:     21,
+			receiverPublicKey:   "5fa3383597691ea9d827a79e1a4f0f7949435ced18ca9619de8ab97e661020",
+			expirationTimeStamp: 438953,
+			condition:           nil,
+			expectedHash:        "6366b00c218fb4c8a8b142ca482145e8513c78e00faa0de76298ba14fc37ae7",
+		},
+	}
+
+	for _, c := range cases {
+		token, ok := new(big.Int).SetString(c.token, 16)
+		assert.True(t, ok)
+		receiverPublicKey, ok := new(big.Int).SetString(c.receiverPublicKey, 16)
+		assert.True(t, ok)
+		var condition *big.Int
+		if c.condition != nil {
+			condition, ok = new(big.Int).SetString(*c.condition, 16)
+			assert.True(t, ok)
+		}
+		expected, ok := new(big.Int).SetString(c.expectedHash, 16)
+		assert.True(t, ok)
+		msgHash, err := GetTransferMsgHash(
+			c.amount,
+			c.nonce,
+			c.senderVaultID,
+			token,
+			c.receiverVaultID,
+			receiverPublicKey,
+			c.expirationTimeStamp,
+			condition,
+		)
+
+		assert.Nil(t, err)
+		assert.NotNil(t, msgHash)
+		assert.True(t, expected.Cmp(msgHash) == 0)
+	}
+}
+
+func TestGetLimitOrderMsgHash(t *testing.T) {
+	type GetLimitOrderMsgHashCase struct {
+		vaultSell           int64
+		vaultBuy            int64
+		amountSell          int64
+		amountBuy           int64
+		tokenSell           string
+		tokenBuy            string
+		nonce               int64
+		expirationTimeStamp int64
+		expectedHash        string
+	}
+
+	cases := []GetLimitOrderMsgHashCase{
+		{
+			vaultSell:           21,
+			vaultBuy:            27,
+			amountSell:          2154686749748910716,
+			amountBuy:           1470242115489520459,
+			tokenSell:           "5fa3383597691ea9d827a79e1a4f0f7989c35ced18ca9619de8ab97e661020",
+			tokenBuy:            "774961c824a3b0fb3d2965f01471c9c7734bf8dbde659e0c08dca2ef18d56a",
+			nonce:               0,
+			expirationTimeStamp: 438953,
+			expectedHash:        "397e76d1667c4454bfb83514e120583af836f8e32a516765497823eabe16a3f",
+		},
+	}
+	for _, c := range cases {
+		tokenSell, ok := new(big.Int).SetString(c.tokenSell, 16)
+		assert.True(t, ok)
+		tokenBuy, ok := new(big.Int).SetString(c.tokenBuy, 16)
+		assert.True(t, ok)
+
+		expected, ok := new(big.Int).SetString(c.expectedHash, 16)
+		assert.True(t, ok)
+		msgHash, err := GetLimitOrderMsgHash(
+			c.vaultSell,
+			c.vaultBuy,
+			c.amountSell,
+			c.amountBuy,
+			tokenSell,
+			tokenBuy,
+			c.nonce,
+			c.expirationTimeStamp,
+		)
+
+		assert.Nil(t, err)
+		assert.NotNil(t, msgHash)
+		assert.True(t, expected.Cmp(msgHash) == 0)
+	}
+}

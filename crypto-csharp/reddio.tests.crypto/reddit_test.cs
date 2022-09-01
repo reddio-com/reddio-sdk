@@ -1,6 +1,7 @@
+using System;
 using System.Globalization;
 using System.Numerics;
-
+using Microsoft.VisualBasic.CompilerServices;
 using Xunit;
 
 using Reddio.Crypto;
@@ -68,6 +69,47 @@ namespace Reddio.Tests {
             var publicKeyBigInt = BigInteger.Parse(publicKey, NumberStyles.AllowHexSpecifier);
             var publicKeyResult = Crypto.CryptoService.GetPublicKey(privateKeyBigInt);
             Assert.Equal(publicKeyBigInt, publicKeyResult);
+        }
+
+        [Theory]
+        [InlineData(
+            "2154549703648910716",
+            "1",
+            "34",
+            "3003a65651d3b9fb2eff934a4416db301afd112a8492aaf8d7297fc87dcd9f4",
+            "21",
+            "5fa3383597691ea9d827a79e1a4f0f7949435ced18ca9619de8ab97e661020",
+            "438953",
+            null,
+            "6366b00c218fb4c8a8b142ca482145e8513c78e00faa0de76298ba14fc37ae7"
+            )]
+        public void TestGetTransferMsgHash(
+            string amount,
+            string nonce,
+            string senderVaultId,
+            string token,
+            string receiverVaultId,
+            string receiverPublicKey,
+            string expirationTimeStamp,
+            string? condition,
+            string expectedHash)
+        {
+            BigInteger? parsedCondition = null;
+            if (condition != null)
+            {
+                parsedCondition = BigInteger.Parse(condition);
+            }
+
+            var actual = CryptoService.GetTransferMsgHash(
+                Int64.Parse(amount),
+                Int64.Parse(nonce),
+                Int64.Parse(senderVaultId),
+                BigInteger.Parse(token, NumberStyles.AllowHexSpecifier),
+                Int64.Parse(receiverVaultId),
+                BigInteger.Parse(receiverPublicKey, NumberStyles.AllowHexSpecifier),
+                Int64.Parse(expirationTimeStamp),
+                parsedCondition);
+            Assert.Equal(expectedHash, actual.ToString("x"));
         }
     }
 }
