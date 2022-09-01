@@ -237,6 +237,73 @@ func TestGetTransferMsgHash(t *testing.T) {
 	}
 }
 
+func TestGetTransferMsgHashWithFee(t *testing.T) {
+	type GetTransferMsgHashWithFeeCase struct {
+		amount              int64
+		nonce               int64
+		senderVaultID       int64
+		token               string
+		receiverVaultID     int64
+		receiverPublicKey   string
+		expirationTimeStamp int64
+		feeVaultID          int64
+		feeLimit            int64
+		feeToken            string
+		condition           *string
+		expectedHash        string
+	}
+	cases := []GetTransferMsgHashWithFeeCase{
+		{
+			amount:              2154549703648910716,
+			nonce:               1,
+			senderVaultID:       34,
+			token:               "3003a65651d3b9fb2eff934a4416db301afd112a8492aaf8d7297fc87dcd9f4",
+			receiverVaultID:     21,
+			receiverPublicKey:   "5fa3383597691ea9d827a79e1a4f0f7949435ced18ca9619de8ab97e661020",
+			expirationTimeStamp: 438953,
+			feeVaultID:          593128169,
+			feeLimit:            7,
+			feeToken:            "70bf591713d7cb7150523cf64add8d49fa6b61036bba9f596bd2af8e3bb86f9",
+			condition:           nil,
+			expectedHash:        "5359c71cf08f394b7eb713532f1a0fcf1dccdf1836b10db2813e6ff6b6548db",
+		},
+	}
+
+	for _, c := range cases {
+		token, ok := new(big.Int).SetString(c.token, 16)
+		assert.True(t, ok)
+		receiverPublicKey, ok := new(big.Int).SetString(c.receiverPublicKey, 16)
+		assert.True(t, ok)
+		feeToken, ok := new(big.Int).SetString(c.feeToken, 16)
+		assert.True(t, ok)
+
+		var condition *big.Int
+		if c.condition != nil {
+			condition, ok = new(big.Int).SetString(*c.condition, 16)
+			assert.True(t, ok)
+		}
+		expected, ok := new(big.Int).SetString(c.expectedHash, 16)
+		assert.True(t, ok)
+		msgHash, err := GetTransferMsgHashWithFee(
+			c.amount,
+			c.nonce,
+			c.senderVaultID,
+			token,
+			c.receiverVaultID,
+			receiverPublicKey,
+			c.expirationTimeStamp,
+			c.feeVaultID,
+			c.feeLimit,
+			feeToken,
+			condition,
+		)
+
+		assert.Nil(t, err)
+		assert.NotNil(t, msgHash)
+		assert.True(t, expected.Cmp(msgHash) == 0)
+	}
+}
+
 func TestGetLimitOrderMsgHash(t *testing.T) {
 	type GetLimitOrderMsgHashCase struct {
 		vaultSell           int64
