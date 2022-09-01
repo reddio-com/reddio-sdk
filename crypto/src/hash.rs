@@ -99,12 +99,12 @@ pub struct TransferMsgWithFee {
     pub expiration_time_stamp: BigInt,
     /// hex string, notice that condition could be nullable
     pub condition: BigInt,
+    /// hex string
+    pub fee_token: BigInt,
     /// decimal string
     pub fee_vault_id: BigInt,
     /// decimal string
     pub fee_limit: BigInt,
-    /// hex string
-    pub fee_token: BigInt,
 }
 
 /// Same as getTransferMsgHash, but also requires the fee info.
@@ -239,12 +239,12 @@ pub struct LimitOrderMsgWithFee {
     pub nonce: BigInt,
     /// decimal string
     pub expiration_time_stamp: BigInt,
+    /// hex string
+    pub fee_token: BigInt,
     /// decimal string
     pub fee_vault_id: BigInt,
     /// decimal string
     pub fee_limit: BigInt,
-    /// hex string
-    pub fee_token: BigInt,
 }
 
 /// Same as getLimitOrderMsgHash, but also requires the fee info.

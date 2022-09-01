@@ -246,9 +246,9 @@ func TestGetTransferMsgHashWithFee(t *testing.T) {
 		receiverVaultID     int64
 		receiverPublicKey   string
 		expirationTimeStamp int64
+		feeToken            string
 		feeVaultID          int64
 		feeLimit            int64
-		feeToken            string
 		condition           *string
 		expectedHash        string
 	}
@@ -261,9 +261,9 @@ func TestGetTransferMsgHashWithFee(t *testing.T) {
 			receiverVaultID:     21,
 			receiverPublicKey:   "5fa3383597691ea9d827a79e1a4f0f7949435ced18ca9619de8ab97e661020",
 			expirationTimeStamp: 438953,
+			feeToken:            "70bf591713d7cb7150523cf64add8d49fa6b61036bba9f596bd2af8e3bb86f9",
 			feeVaultID:          593128169,
 			feeLimit:            7,
-			feeToken:            "70bf591713d7cb7150523cf64add8d49fa6b61036bba9f596bd2af8e3bb86f9",
 			condition:           nil,
 			expectedHash:        "5359c71cf08f394b7eb713532f1a0fcf1dccdf1836b10db2813e6ff6b6548db",
 		},
@@ -292,9 +292,9 @@ func TestGetTransferMsgHashWithFee(t *testing.T) {
 			c.receiverVaultID,
 			receiverPublicKey,
 			c.expirationTimeStamp,
+			feeToken,
 			c.feeVaultID,
 			c.feeLimit,
-			feeToken,
 			condition,
 		)
 
