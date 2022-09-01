@@ -82,6 +82,91 @@ pub unsafe extern "C" fn get_transfer_msg_hash(msg: TransferMsg, hash: MutBigInt
 }
 
 #[repr(C)]
+pub struct TransferMsgWithFee {
+    /// decimal string
+    pub amount: BigInt,
+    /// decimal string
+    pub nonce: BigInt,
+    /// decimal string
+    pub sender_vault_id: BigInt,
+    /// hex string
+    pub token: BigInt,
+    /// decimal string
+    pub receiver_vault_id: BigInt,
+    /// hex string
+    pub receiver_stark_key: BigInt,
+    /// decimal string
+    pub expiration_time_stamp: BigInt,
+    /// hex string, notice that condition could be nullable
+    pub condition: BigInt,
+    /// decimal string
+    pub fee_vault_id: BigInt,
+    /// decimal string
+    pub fee_limit: BigInt,
+    /// hex string
+    pub fee_token: BigInt,
+}
+
+/// Same as getTransferMsgHash, but also requires the fee info.
+///  ref: https://github.com/starkware-libs/starkware-crypto-utils/blob/d3a1e655105afd66ebc07f88a179a3042407cc7b/src/js/signature.js#L420-L491
+#[no_mangle]
+pub unsafe extern "C" fn get_transfer_msg_hash_with_fee(
+    msg: TransferMsgWithFee,
+    hash: MutBigInt,
+) -> Errno {
+    let get_transfer_msg_hash_with_fee_impl = move || {
+        let amount = parse_bigint_decimal(msg.amount)?;
+        let nonce = parse_bigint_decimal(msg.nonce)?;
+        let sender_vault_id = parse_bigint_decimal(msg.sender_vault_id)?;
+        let token = parse_bigint(msg.token)?;
+        let receiver_vault_id = parse_bigint_decimal(msg.receiver_vault_id)?;
+        let receiver_stark_key = parse_bigint(msg.receiver_stark_key)?;
+        let expiration_time_stamp = parse_bigint_decimal(msg.expiration_time_stamp)?;
+        let condition = if msg.condition.is_null() {
+            Option::None
+        } else {
+            Option::Some(parse_bigint(msg.condition)?)
+        };
+        let fee_vault_id = parse_bigint_decimal(msg.fee_vault_id)?;
+        let fee_limit = parse_bigint_decimal(msg.fee_limit)?;
+        let fee_token = parse_bigint(msg.fee_token)?;
+
+        let instruction_type = if condition.is_none() {
+            // 4
+            FieldElement::ONE + FieldElement::ONE + FieldElement::ONE + FieldElement::ONE
+        } else {
+            // 5
+            FieldElement::ONE
+                + FieldElement::ONE
+                + FieldElement::ONE
+                + FieldElement::ONE
+                + FieldElement::ONE
+        };
+        let result = hash_transfer_msg_with_fee(
+            instruction_type,
+            sender_vault_id,
+            receiver_vault_id,
+            amount,
+            nonce,
+            expiration_time_stamp,
+            token,
+            receiver_stark_key,
+            fee_token,
+            fee_vault_id,
+            fee_limit,
+            condition,
+        )?;
+        write_bigint(&result, hash);
+        Ok::<_, Errno>(())
+    };
+
+    match get_transfer_msg_hash_with_fee_impl() {
+        Ok(_) => Errno::Ok,
+        Err(e) => e,
+    }
+}
+
+#[repr(C)]
 pub struct LimitOrderMsg {
     /// decimal string
     pub vault_sell: BigInt,
@@ -185,6 +270,59 @@ fn hash_msg(
         )),
     }
 }
+
+/// ref: https://github.com/starkware-libs/starkware-crypto-utils/blob/d3a1e655105afd66ebc07f88a179a3042407cc7b/src/js/signature.js#L142
+#[allow(clippy::too_many_arguments)]
+fn hash_transfer_msg_with_fee(
+    instruction_type: FieldElement,
+    sender_vault_id: FieldElement,
+    receiver_vault_id: FieldElement,
+    amount: FieldElement,
+    nonce: FieldElement,
+    expiration_time_stamp: FieldElement,
+    transfer_token: FieldElement,
+    receiver_public_key: FieldElement,
+    fee_token: FieldElement,
+    fee_vault_id: FieldElement,
+    fee_limit: FieldElement,
+    condition: Option<FieldElement>,
+) -> Result<FieldElement> {
+    let mut packed_message1: U256 = U256::from_fe(&sender_vault_id);
+    packed_message1 =
+        (Wrapping(packed_message1 << 64) + Wrapping(U256::from_fe(&receiver_vault_id))).0;
+    packed_message1 = (Wrapping(packed_message1 << 64) + Wrapping(U256::from_fe(&fee_vault_id))).0;
+    packed_message1 = (Wrapping(packed_message1 << 32) + Wrapping(U256::from_fe(&nonce))).0;
+
+    let mut packed_message2: U256 = U256::from_fe(&instruction_type);
+    packed_message2 = (Wrapping(packed_message2 << 64) + Wrapping(U256::from_fe(&amount))).0;
+    packed_message2 = (Wrapping(packed_message2 << 64) + Wrapping(U256::from_fe(&fee_limit))).0;
+    packed_message2 =
+        (Wrapping(packed_message2 << 32) + Wrapping(U256::from_fe(&expiration_time_stamp))).0;
+    packed_message2 =
+        (Wrapping(packed_message2 << 81) + Wrapping(U256::from_fe(&FieldElement::ZERO))).0;
+
+    let tmp_hash = starknet_crypto::pedersen_hash(
+        &(starknet_crypto::pedersen_hash(&transfer_token, &fee_token)),
+        &receiver_public_key,
+    );
+
+    let packed_message1 = FieldElement::from_hex_be(format!("{packed_message1:x}").as_str())?;
+    let packed_message2 = FieldElement::from_hex_be(format!("{packed_message2:x}").as_str())?;
+
+    match condition {
+        Some(value) => Result::Ok(starknet_crypto::pedersen_hash(
+            &(starknet_crypto::pedersen_hash(
+                &(starknet_crypto::pedersen_hash(&tmp_hash, &value)),
+                &packed_message1,
+            )),
+            &packed_message2,
+        )),
+        None => Result::Ok(starknet_crypto::pedersen_hash(
+            &starknet_crypto::pedersen_hash(&tmp_hash, &packed_message1),
+            &packed_message2,
+        )),
+    }
+}
 #[cfg(test)]
 mod tests {
     use std::ffi::{c_char, CStr, CString};
@@ -192,6 +330,7 @@ mod tests {
 
     use super::{get_limit_order_msg_hash, get_transfer_msg_hash, LimitOrderMsg, TransferMsg};
     use crate::exports::BIG_INT_SIZE;
+    use crate::hash::{get_transfer_msg_hash_with_fee, TransferMsgWithFee};
 
     /// ref: https://github.com/starkware-libs/starkex-resources/blob/844ac3dcb1f735451457f7eecc6e37cd96d1cb2d/crypto/starkware/crypto/signature/signature_test_data.json#L38
     #[test]
@@ -260,6 +399,50 @@ mod tests {
             assert_eq!(
                 result,
                 "6366b00c218fb4c8a8b142ca482145e8513c78e00faa0de76298ba14fc37ae7"
+            )
+        }
+        Ok(())
+    }
+
+    /// ref: https://github.com/starkware-libs/starkware-crypto-utils/blob/d3a1e655105afd66ebc07f88a179a3042407cc7b/test/config/signature_test_data.json#L123
+    #[test]
+    fn test_get_transfer_msg_hash_with_fee() -> anyhow::Result<()> {
+        let buffer: *mut c_char = ([0 as c_char; BIG_INT_SIZE]).as_mut_ptr();
+        unsafe {
+            let errno = get_transfer_msg_hash_with_fee(
+                TransferMsgWithFee {
+                    amount: CString::new("2154549703648910716").unwrap().into_raw(),
+                    nonce: CString::new("1").unwrap().into_raw(),
+                    sender_vault_id: CString::new("34").unwrap().into_raw(),
+                    token: CString::new(
+                        "0x3003a65651d3b9fb2eff934a4416db301afd112a8492aaf8d7297fc87dcd9f4",
+                    )
+                    .unwrap()
+                    .into_raw(),
+                    receiver_vault_id: CString::new("21").unwrap().into_raw(),
+                    receiver_stark_key: CString::new(
+                        "0x5fa3383597691ea9d827a79e1a4f0f7949435ced18ca9619de8ab97e661020",
+                    )
+                    .unwrap()
+                    .into_raw(),
+                    expiration_time_stamp: CString::new("438953").unwrap().into_raw(),
+                    condition: null(),
+                    fee_limit: CString::new("7").unwrap().into_raw(),
+                    fee_token: CString::new(
+                        "0x70bf591713d7cb7150523cf64add8d49fa6b61036bba9f596bd2af8e3bb86f9",
+                    )
+                    .unwrap()
+                    .into_raw(),
+                    fee_vault_id: CString::new("593128169").unwrap().into_raw(),
+                },
+                buffer,
+            );
+            assert_eq!(errno as u8, 0);
+
+            let result = CStr::from_ptr(buffer).to_str()?;
+            assert_eq!(
+                result,
+                "5359c71cf08f394b7eb713532f1a0fcf1dccdf1836b10db2813e6ff6b6548db"
             )
         }
         Ok(())
