@@ -76,6 +76,28 @@ namespace Reddio.Crypto {
             [MarshalAs(UnmanagedType.LPStr)] StringBuilder hash
         );
 
+        private struct TransferMsgWithFee
+        {
+            [MarshalAs(UnmanagedType.LPStr)] public string Amount;
+            [MarshalAs(UnmanagedType.LPStr)] public string Nonce;
+            [MarshalAs(UnmanagedType.LPStr)] public string SenderVaultId;
+            [MarshalAs(UnmanagedType.LPStr)] public string Token;
+            [MarshalAs(UnmanagedType.LPStr)] public string ReceiverVaultId;
+            [MarshalAs(UnmanagedType.LPStr)] public string ReceiverStarkKey;
+            [MarshalAs(UnmanagedType.LPStr)] public string ExpirationTimeStamp;
+            [MarshalAs(UnmanagedType.LPStr)] public string FeeToken;
+            [MarshalAs(UnmanagedType.LPStr)] public string FeeVaultId;
+            [MarshalAs(UnmanagedType.LPStr)] public string FeeLimit;
+            [MarshalAs(UnmanagedType.LPStr)] public string? Condition;
+        }
+
+
+        [DllImport("libcrypto", EntryPoint = "get_transfer_msg_hash_with_fee")]
+        private static extern int GetTransferMsgHashWithFee(
+            TransferMsgWithFee msg,
+            [MarshalAs(UnmanagedType.LPStr)] StringBuilder hash
+        );
+
         private struct LimitOrderMsg
         {
             [MarshalAs(UnmanagedType.LPStr)] public string VaultSell;
@@ -212,6 +234,49 @@ namespace Reddio.Crypto {
             return ParsePositive(hash.ToString());
         }
 
+        
+        public static BigInteger GetTransferMsgHashWithFee(
+            Int64 amount,
+            Int64 nonce,
+            Int64 senderVaultId,
+            BigInteger token,
+            Int64 receiverVaultId,
+            BigInteger receiverStarkKey,
+            Int64 expirationTimeStamp,
+            BigInteger feeToken,
+            Int64 feeVaultId,
+            Int64 feeLimit,
+            BigInteger? condition
+        )
+        {
+            var hash = new StringBuilder(BIG_INT_BUFFER_SIZE);
+            var msg = new TransferMsgWithFee();
+            msg.Amount = amount.ToString();
+            msg.Nonce = nonce.ToString();
+            msg.SenderVaultId = senderVaultId.ToString();
+            msg.Token = token.ToString("x");
+            msg.ReceiverVaultId = receiverVaultId.ToString();
+            msg.ReceiverStarkKey = receiverStarkKey.ToString("x");
+            msg.ExpirationTimeStamp = expirationTimeStamp.ToString();
+            msg.FeeToken = feeToken.ToString("x");
+            msg.FeeVaultId = feeVaultId.ToString();
+            msg.FeeLimit = feeLimit.ToString();
+            
+            if (condition != null)
+            {
+                msg.Condition = condition.Value.ToString("x");
+            }
+            var errno = GetTransferMsgHashWithFee(msg, hash);
+
+            if (errno != 0)
+            {
+                throw new CryptoException(ExplainError(errno));
+            }
+
+            return ParsePositive(hash.ToString());
+        }
+
+        
         public static BigInteger GetLimitOrderMsgHash(
             int vaultSell,
             int vaultBuy,
