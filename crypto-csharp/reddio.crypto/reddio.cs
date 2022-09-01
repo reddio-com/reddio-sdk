@@ -115,6 +115,27 @@ namespace Reddio.Crypto {
             [MarshalAs(UnmanagedType.LPStr)] StringBuilder hash
         );
 
+        private struct LimitOrderMsgWithFee
+        {
+            [MarshalAs(UnmanagedType.LPStr)] public string VaultSell;
+            [MarshalAs(UnmanagedType.LPStr)] public string VaultBuy;
+            [MarshalAs(UnmanagedType.LPStr)] public string AmountSell;
+            [MarshalAs(UnmanagedType.LPStr)] public string AmountBuy;
+            [MarshalAs(UnmanagedType.LPStr)] public string TokenSell;
+            [MarshalAs(UnmanagedType.LPStr)] public string TokenBuy;
+            [MarshalAs(UnmanagedType.LPStr)] public string Nonce;
+            [MarshalAs(UnmanagedType.LPStr)] public string ExpirationTimeStamp;
+            [MarshalAs(UnmanagedType.LPStr)] public string FeeToken;
+            [MarshalAs(UnmanagedType.LPStr)] public string FeeVaultId;
+            [MarshalAs(UnmanagedType.LPStr)] public string FeeLimit;
+        }
+        [DllImport("libcrypto", EntryPoint = "get_limit_order_msg_hash_with_fee")]
+        private static extern int GetLimitOrderMsgHashWithFee(
+            LimitOrderMsgWithFee msg, 
+            [MarshalAs(UnmanagedType.LPStr)] StringBuilder hash
+        );
+
+        
         public static BigInteger ParsePositive(string hex) 
         {
             return BigInteger.Parse("0" + hex, NumberStyles.HexNumber);
@@ -278,14 +299,14 @@ namespace Reddio.Crypto {
 
         
         public static BigInteger GetLimitOrderMsgHash(
-            int vaultSell,
-            int vaultBuy,
-            int amountSell,
-            int amountBuy,
+            Int64 vaultSell,
+            Int64 vaultBuy,
+            Int64 amountSell,
+            Int64 amountBuy,
             BigInteger tokenSell,
             BigInteger tokenBuy,
-            int nonce,
-            int expirationTimeStamp
+            Int64 nonce,
+            Int64 expirationTimeStamp
         )
         {
             var hash = new StringBuilder(BIG_INT_BUFFER_SIZE);
@@ -301,6 +322,44 @@ namespace Reddio.Crypto {
             msg.ExpirationTimeStamp = expirationTimeStamp.ToString();
 
             var errno = GetLimitOrderMsgHash(msg, hash);
+
+            if (errno != 0)
+            {
+                throw new CryptoException(ExplainError(errno));
+            }
+
+            return ParsePositive(hash.ToString());
+        }
+        public static BigInteger GetLimitOrderMsgHashWithFee(
+            Int64 vaultSell,
+            Int64 vaultBuy,
+            Int64 amountSell,
+            Int64 amountBuy,
+            BigInteger tokenSell,
+            BigInteger tokenBuy,
+            Int64 nonce,
+            Int64 expirationTimeStamp,
+            BigInteger feeToken,
+            BigInteger feeVaultId,
+            BigInteger feeLimit
+        )
+        {
+            var hash = new StringBuilder(BIG_INT_BUFFER_SIZE);
+            var msg = new LimitOrderMsgWithFee();
+
+            msg.VaultSell = vaultSell.ToString();
+            msg.VaultBuy = vaultBuy.ToString();
+            msg.AmountSell = amountSell.ToString();
+            msg.AmountBuy = amountBuy.ToString();
+            msg.TokenSell = tokenSell.ToString("x");
+            msg.TokenBuy = tokenBuy.ToString("x");
+            msg.Nonce = nonce.ToString();
+            msg.ExpirationTimeStamp = expirationTimeStamp.ToString();
+            msg.FeeToken = feeToken.ToString("x");
+            msg.FeeVaultId = feeVaultId.ToString();
+            msg.FeeLimit = feeLimit.ToString();
+
+            var errno = GetLimitOrderMsgHashWithFee(msg, hash);
 
             if (errno != 0)
             {

@@ -161,5 +161,86 @@ namespace Reddio.Tests {
                 parsedCondition);
             Assert.Equal(expectedHash, actual.ToString("x"));
         }
+
+        [Theory]
+        [InlineData(
+            "21",
+            "27",
+            "2154686749748910716",
+            "1470242115489520459",
+            "5fa3383597691ea9d827a79e1a4f0f7989c35ced18ca9619de8ab97e661020",
+            "774961c824a3b0fb3d2965f01471c9c7734bf8dbde659e0c08dca2ef18d56a",
+            "0",
+            "438953",
+            "397e76d1667c4454bfb83514e120583af836f8e32a516765497823eabe16a3f"
+        )]
+        public void TestGetLimitOrderMsgHash(
+            string vaultSell,
+            string vaultBuy,
+            string amountSell,
+            string amountBuy,
+            string tokenSell,
+            string tokenBuy,
+            string nonce,
+            string expirationTimeStamp,
+            string expectedHash)
+        {
+            var actual = CryptoService.GetLimitOrderMsgHash(
+                Int64.Parse(vaultSell),
+                Int64.Parse(vaultBuy),
+                Int64.Parse(amountSell),
+                Int64.Parse(amountBuy),
+                BigInteger.Parse(tokenSell, NumberStyles.AllowHexSpecifier),
+                BigInteger.Parse(tokenBuy, NumberStyles.AllowHexSpecifier),
+                Int64.Parse(nonce),
+                Int64.Parse(expirationTimeStamp)
+            );
+            Assert.Equal(expectedHash, actual.ToString("x"));
+        }
+
+        [Theory]
+        [InlineData(
+            "21",
+            "27",
+            "2154686749748910716",
+            "1470242115489520459",
+            "5fa3383597691ea9d827a79e1a4f0f7989c35ced18ca9619de8ab97e661020",
+            "774961c824a3b0fb3d2965f01471c9c7734bf8dbde659e0c08dca2ef18d56a",
+            "0",
+            "438953",
+            "70bf591713d7cb7150523cf64add8d49fa6b61036bba9f596bd2af8e3bb86f9",
+            "593128169",
+            "7",
+            "2a6c0382404920ebd73c1cbc319cd38974e7e255e00394345e652b0ce2cefbd"
+        )]
+        public void TestGetLimitOrderMsgHashWithFee(
+            string vaultSell,
+            string vaultBuy,
+            string amountSell,
+            string amountBuy,
+            string tokenSell,
+            string tokenBuy,
+            string nonce,
+            string expirationTimeStamp,
+            string feeToken,
+            string feeVaultId,
+            string feeLimit,
+            string expectedHash)
+        {
+            var actual = CryptoService.GetLimitOrderMsgHashWithFee(
+                Int64.Parse(vaultSell),
+                Int64.Parse(vaultBuy),
+                Int64.Parse(amountSell),
+                Int64.Parse(amountBuy),
+                BigInteger.Parse(tokenSell, NumberStyles.AllowHexSpecifier),
+                BigInteger.Parse(tokenBuy, NumberStyles.AllowHexSpecifier),
+                Int64.Parse(nonce),
+                Int64.Parse(expirationTimeStamp),
+                BigInteger.Parse(feeToken, NumberStyles.AllowHexSpecifier),
+                Int64.Parse(feeVaultId),
+                Int64.Parse(feeLimit)
+            );
+            Assert.Equal(expectedHash, actual.ToString("x"));
+        }
     }
 }
