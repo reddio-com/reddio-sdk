@@ -67,7 +67,7 @@ namespace Reddio.Crypto {
             [MarshalAs(UnmanagedType.LPStr)] public string ReceiverVaultId;
             [MarshalAs(UnmanagedType.LPStr)] public string ReceiverPublicKey;
             [MarshalAs(UnmanagedType.LPStr)] public string ExpirationTimeStamp;
-            [MarshalAs(UnmanagedType.LPStr)] public string Condition;
+            [MarshalAs(UnmanagedType.LPStr)] public string? Condition;
         }
     
         [DllImport("libcrypto", EntryPoint = "get_transfer_msg_hash")]
@@ -179,14 +179,14 @@ namespace Reddio.Crypto {
         }
 
         public static BigInteger GetTransferMsgHash(
-            int amount,
-            int nonce,
-            int senderVaultId,
+            Int64 amount,
+            Int64 nonce,
+            Int64 senderVaultId,
             BigInteger token,
-            int receiverVaultId,
+            Int64 receiverVaultId,
             BigInteger receiverPublicKey,
-            int expirationTimeStamp,
-            BigInteger condition
+            Int64 expirationTimeStamp,
+            BigInteger? condition
         )
         {
             var hash = new StringBuilder(BIG_INT_BUFFER_SIZE);
@@ -198,7 +198,10 @@ namespace Reddio.Crypto {
             msg.ReceiverVaultId = receiverVaultId.ToString();
             msg.ReceiverPublicKey = receiverPublicKey.ToString("x");
             msg.ExpirationTimeStamp = expirationTimeStamp.ToString();
-            msg.Condition = condition.ToString("x");
+            if (condition != null)
+            {
+                msg.Condition = condition.Value.ToString("x");
+            }
             var errno = GetTransferMsgHash(msg, hash);
 
             if (errno != 0)
