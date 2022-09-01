@@ -237,6 +237,73 @@ func TestGetTransferMsgHash(t *testing.T) {
 	}
 }
 
+func TestGetTransferMsgHashWithFee(t *testing.T) {
+	type GetTransferMsgHashWithFeeCase struct {
+		amount              int64
+		nonce               int64
+		senderVaultID       int64
+		token               string
+		receiverVaultID     int64
+		receiverPublicKey   string
+		expirationTimeStamp int64
+		feeToken            string
+		feeVaultID          int64
+		feeLimit            int64
+		condition           *string
+		expectedHash        string
+	}
+	cases := []GetTransferMsgHashWithFeeCase{
+		{
+			amount:              2154549703648910716,
+			nonce:               1,
+			senderVaultID:       34,
+			token:               "3003a65651d3b9fb2eff934a4416db301afd112a8492aaf8d7297fc87dcd9f4",
+			receiverVaultID:     21,
+			receiverPublicKey:   "5fa3383597691ea9d827a79e1a4f0f7949435ced18ca9619de8ab97e661020",
+			expirationTimeStamp: 438953,
+			feeToken:            "70bf591713d7cb7150523cf64add8d49fa6b61036bba9f596bd2af8e3bb86f9",
+			feeVaultID:          593128169,
+			feeLimit:            7,
+			condition:           nil,
+			expectedHash:        "5359c71cf08f394b7eb713532f1a0fcf1dccdf1836b10db2813e6ff6b6548db",
+		},
+	}
+
+	for _, c := range cases {
+		token, ok := new(big.Int).SetString(c.token, 16)
+		assert.True(t, ok)
+		receiverPublicKey, ok := new(big.Int).SetString(c.receiverPublicKey, 16)
+		assert.True(t, ok)
+		feeToken, ok := new(big.Int).SetString(c.feeToken, 16)
+		assert.True(t, ok)
+
+		var condition *big.Int
+		if c.condition != nil {
+			condition, ok = new(big.Int).SetString(*c.condition, 16)
+			assert.True(t, ok)
+		}
+		expected, ok := new(big.Int).SetString(c.expectedHash, 16)
+		assert.True(t, ok)
+		msgHash, err := GetTransferMsgHashWithFee(
+			c.amount,
+			c.nonce,
+			c.senderVaultID,
+			token,
+			c.receiverVaultID,
+			receiverPublicKey,
+			c.expirationTimeStamp,
+			feeToken,
+			c.feeVaultID,
+			c.feeLimit,
+			condition,
+		)
+
+		assert.Nil(t, err)
+		assert.NotNil(t, msgHash)
+		assert.True(t, expected.Cmp(msgHash) == 0)
+	}
+}
+
 func TestGetLimitOrderMsgHash(t *testing.T) {
 	type GetLimitOrderMsgHashCase struct {
 		vaultSell           int64
@@ -280,6 +347,68 @@ func TestGetLimitOrderMsgHash(t *testing.T) {
 			tokenBuy,
 			c.nonce,
 			c.expirationTimeStamp,
+		)
+
+		assert.Nil(t, err)
+		assert.NotNil(t, msgHash)
+		assert.True(t, expected.Cmp(msgHash) == 0)
+	}
+}
+
+func TestGetLimitOrderMsgHashWithFee(t *testing.T) {
+	type GetLimitOrderMsgHashWithFeeCase struct {
+		vaultSell           int64
+		vaultBuy            int64
+		amountSell          int64
+		amountBuy           int64
+		tokenSell           string
+		tokenBuy            string
+		nonce               int64
+		expirationTimeStamp int64
+		feeToken            string
+		feeVaultID          int64
+		feeLimit            int64
+		expectedHash        string
+	}
+
+	cases := []GetLimitOrderMsgHashWithFeeCase{
+		{
+			vaultSell:           21,
+			vaultBuy:            27,
+			amountSell:          2154686749748910716,
+			amountBuy:           1470242115489520459,
+			tokenSell:           "5fa3383597691ea9d827a79e1a4f0f7989c35ced18ca9619de8ab97e661020",
+			tokenBuy:            "774961c824a3b0fb3d2965f01471c9c7734bf8dbde659e0c08dca2ef18d56a",
+			nonce:               0,
+			expirationTimeStamp: 438953,
+			feeToken:            "70bf591713d7cb7150523cf64add8d49fa6b61036bba9f596bd2af8e3bb86f9",
+			feeVaultID:          593128169,
+			feeLimit:            7,
+			expectedHash:        "2a6c0382404920ebd73c1cbc319cd38974e7e255e00394345e652b0ce2cefbd",
+		},
+	}
+	for _, c := range cases {
+		tokenSell, ok := new(big.Int).SetString(c.tokenSell, 16)
+		assert.True(t, ok)
+		tokenBuy, ok := new(big.Int).SetString(c.tokenBuy, 16)
+		assert.True(t, ok)
+		feeToken, ok := new(big.Int).SetString(c.feeToken, 16)
+		assert.True(t, ok)
+
+		expected, ok := new(big.Int).SetString(c.expectedHash, 16)
+		assert.True(t, ok)
+		msgHash, err := GetLimitOrderMsgHashWithFee(
+			c.vaultSell,
+			c.vaultBuy,
+			c.amountSell,
+			c.amountBuy,
+			tokenSell,
+			tokenBuy,
+			c.nonce,
+			c.expirationTimeStamp,
+			feeToken,
+			c.feeVaultID,
+			c.feeLimit,
 		)
 
 		assert.Nil(t, err)

@@ -163,6 +163,51 @@ func GetTransferMsgHash(
 	return result, err
 }
 
+func GetTransferMsgHashWithFee(
+	amount int64,
+	nonce int64,
+	senderVaultID int64,
+	token *big.Int,
+	receiverVaultID int64,
+	receiverPublicKey *big.Int,
+	expirationTimeStamp int64,
+	feeToken *big.Int,
+	feeVaultID int64,
+	feeLimit int64,
+	condition *big.Int,
+) (result *big.Int, err error) {
+	msg := C.TransferMsgWithFee{
+		amount:                C.CString(strconv.FormatInt(amount, 10)),
+		nonce:                 C.CString(strconv.FormatInt(nonce, 10)),
+		sender_vault_id:       C.CString(strconv.FormatInt(senderVaultID, 10)),
+		token:                 C.CString(token.Text(16)),
+		receiver_vault_id:     C.CString(strconv.FormatInt(receiverVaultID, 10)),
+		receiver_stark_key:    C.CString(receiverPublicKey.Text(16)),
+		expiration_time_stamp: C.CString(strconv.FormatInt(expirationTimeStamp, 10)),
+		fee_token:             C.CString(feeToken.Text(16)),
+		fee_vault_id:          C.CString(strconv.FormatInt(feeVaultID, 10)),
+		fee_limit:             C.CString(strconv.FormatInt(feeLimit, 10)),
+		condition:             nil,
+	}
+
+	if condition != nil {
+		msg.condition = C.CString(condition.Text(16))
+	}
+	hash := (*C.char)(C.malloc(C.size_t(C.BIG_INT_SIZE)))
+	defer C.free(unsafe.Pointer(hash))
+	errno := C.get_transfer_msg_hash_with_fee(msg, hash)
+	if errno != C.Ok {
+		return nil, errors.New(C.GoString(C.explain(errno)))
+	}
+
+	result = new(big.Int)
+	_, ok := result.SetString(C.GoString(hash), 16)
+	if !ok {
+		return nil, errors.New("hash is not a valid big.Int")
+	}
+	return result, err
+}
+
 func GetLimitOrderMsgHash(
 	vaultSell int64,
 	vaultBuy int64,
@@ -188,6 +233,47 @@ func GetLimitOrderMsgHash(
 		C.free(unsafe.Pointer(hash))
 	}()
 	errno := C.get_limit_order_msg_hash(msg, hash)
+	if errno != C.Ok {
+		return nil, errors.New(C.GoString(C.explain(errno)))
+	}
+	result = new(big.Int)
+	_, ok := result.SetString(C.GoString(hash), 16)
+	if !ok {
+		return nil, errors.New("hash is not a valid big.Int")
+	}
+	return result, err
+}
+func GetLimitOrderMsgHashWithFee(
+	vaultSell int64,
+	vaultBuy int64,
+	amountSell int64,
+	amountBuy int64,
+	tokenSell *big.Int,
+	tokenBuy *big.Int,
+	nonce int64,
+	expirationTimeStamp int64,
+	feeToken *big.Int,
+	feeVaultID int64,
+	feeLimit int64,
+) (result *big.Int, err error) {
+	msg := C.LimitOrderMsgWithFee{
+		vault_sell:            C.CString(strconv.FormatInt(vaultSell, 10)),
+		vault_buy:             C.CString(strconv.FormatInt(vaultBuy, 10)),
+		amount_sell:           C.CString(strconv.FormatInt(amountSell, 10)),
+		amount_buy:            C.CString(strconv.FormatInt(amountBuy, 10)),
+		token_sell:            C.CString(tokenSell.Text(16)),
+		token_buy:             C.CString(tokenBuy.Text(16)),
+		nonce:                 C.CString(strconv.FormatInt(nonce, 10)),
+		expiration_time_stamp: C.CString(strconv.FormatInt(expirationTimeStamp, 10)),
+		fee_token:             C.CString(feeToken.Text(16)),
+		fee_vault_id:          C.CString(strconv.FormatInt(feeVaultID, 10)),
+		fee_limit:             C.CString(strconv.FormatInt(feeLimit, 10)),
+	}
+	hash := (*C.char)(C.malloc(C.size_t(C.BIG_INT_SIZE)))
+	defer func() {
+		C.free(unsafe.Pointer(hash))
+	}()
+	errno := C.get_limit_order_msg_hash_with_fee(msg, hash)
 	if errno != C.Ok {
 		return nil, errors.New(C.GoString(C.explain(errno)))
 	}
