@@ -354,3 +354,65 @@ func TestGetLimitOrderMsgHash(t *testing.T) {
 		assert.True(t, expected.Cmp(msgHash) == 0)
 	}
 }
+
+func TestGetLimitOrderMsgHashWithFee(t *testing.T) {
+	type GetLimitOrderMsgHashWithFeeCase struct {
+		vaultSell           int64
+		vaultBuy            int64
+		amountSell          int64
+		amountBuy           int64
+		tokenSell           string
+		tokenBuy            string
+		nonce               int64
+		expirationTimeStamp int64
+		feeToken            string
+		feeVaultID          int64
+		feeLimit            int64
+		expectedHash        string
+	}
+
+	cases := []GetLimitOrderMsgHashWithFeeCase{
+		{
+			vaultSell:           21,
+			vaultBuy:            27,
+			amountSell:          2154686749748910716,
+			amountBuy:           1470242115489520459,
+			tokenSell:           "5fa3383597691ea9d827a79e1a4f0f7989c35ced18ca9619de8ab97e661020",
+			tokenBuy:            "774961c824a3b0fb3d2965f01471c9c7734bf8dbde659e0c08dca2ef18d56a",
+			nonce:               0,
+			expirationTimeStamp: 438953,
+			feeToken:            "70bf591713d7cb7150523cf64add8d49fa6b61036bba9f596bd2af8e3bb86f9",
+			feeVaultID:          593128169,
+			feeLimit:            7,
+			expectedHash:        "2a6c0382404920ebd73c1cbc319cd38974e7e255e00394345e652b0ce2cefbd",
+		},
+	}
+	for _, c := range cases {
+		tokenSell, ok := new(big.Int).SetString(c.tokenSell, 16)
+		assert.True(t, ok)
+		tokenBuy, ok := new(big.Int).SetString(c.tokenBuy, 16)
+		assert.True(t, ok)
+		feeToken, ok := new(big.Int).SetString(c.feeToken, 16)
+		assert.True(t, ok)
+
+		expected, ok := new(big.Int).SetString(c.expectedHash, 16)
+		assert.True(t, ok)
+		msgHash, err := GetLimitOrderMsgHashWithFee(
+			c.vaultSell,
+			c.vaultBuy,
+			c.amountSell,
+			c.amountBuy,
+			tokenSell,
+			tokenBuy,
+			c.nonce,
+			c.expirationTimeStamp,
+			feeToken,
+			c.feeVaultID,
+			c.feeLimit,
+		)
+
+		assert.Nil(t, err)
+		assert.NotNil(t, msgHash)
+		assert.True(t, expected.Cmp(msgHash) == 0)
+	}
+}

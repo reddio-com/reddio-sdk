@@ -256,7 +256,7 @@ func GetLimitOrderMsgHashWithFee(
 	feeVaultID int64,
 	feeLimit int64,
 ) (result *big.Int, err error) {
-	msg := C.LimitOrderMsg{
+	msg := C.LimitOrderMsgWithFee{
 		vault_sell:            C.CString(strconv.FormatInt(vaultSell, 10)),
 		vault_buy:             C.CString(strconv.FormatInt(vaultBuy, 10)),
 		amount_sell:           C.CString(strconv.FormatInt(amountSell, 10)),
@@ -265,12 +265,15 @@ func GetLimitOrderMsgHashWithFee(
 		token_buy:             C.CString(tokenBuy.Text(16)),
 		nonce:                 C.CString(strconv.FormatInt(nonce, 10)),
 		expiration_time_stamp: C.CString(strconv.FormatInt(expirationTimeStamp, 10)),
+		fee_token:             C.CString(feeToken.Text(16)),
+		fee_vault_id:          C.CString(strconv.FormatInt(feeVaultID, 10)),
+		fee_limit:             C.CString(strconv.FormatInt(feeLimit, 10)),
 	}
 	hash := (*C.char)(C.malloc(C.size_t(C.BIG_INT_SIZE)))
 	defer func() {
 		C.free(unsafe.Pointer(hash))
 	}()
-	errno := C.get_limit_order_msg_hash(msg, hash)
+	errno := C.get_limit_order_msg_hash_with_fee(msg, hash)
 	if errno != C.Ok {
 		return nil, errors.New(C.GoString(C.explain(errno)))
 	}
