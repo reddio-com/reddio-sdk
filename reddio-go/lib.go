@@ -1,9 +1,9 @@
-package crypto
+package reddio
 
 /*
-#cgo linux LDFLAGS: -L../output/lib -lcrypto -Wl,-rpath=../output/lib
-#cgo darwin LDFLAGS: -L../output/lib -lcrypto
-#include "../output/include/crypto.h"
+#cgo linux LDFLAGS: -L../output/lib -lreddio -Wl,-rpath=../output/lib
+#cgo darwin LDFLAGS: -L../output/lib -lreddio
+#include "../output/include/reddio.h"
 */
 import "C"
 import (

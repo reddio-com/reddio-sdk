@@ -13,7 +13,7 @@ namespace Reddio.Crypto {
     }
 
     public class CryptoService {
-        [DllImport("libcrypto", EntryPoint="get_private_key_from_eth_signature")]
+        [DllImport("libreddio", EntryPoint="get_private_key_from_eth_signature")]
         private static extern int GetPrivateKeyFromEthSignatureImpl([MarshalAs(UnmanagedType.LPStr)]string ethSignature, [MarshalAs(UnmanagedType.LPStr)]StringBuilder privateKeyStr);
 
         [StructLayout(LayoutKind.Sequential)]
@@ -36,7 +36,7 @@ namespace Reddio.Crypto {
 
         private const int BIG_INT_BUFFER_SIZE = 65;
 
-        [DllImport("libcrypto", EntryPoint="sign")]
+        [DllImport("libreddio", EntryPoint="sign")]
         private static extern int SignImpl(SignDocument doc, SignResult result);
 
         [StructLayout(LayoutKind.Sequential)]
@@ -50,12 +50,12 @@ namespace Reddio.Crypto {
             [MarshalAs(UnmanagedType.LPStr)]
             public string s;
         }
-        [DllImport("libcrypto", EntryPoint="verify")]
+        [DllImport("libreddio", EntryPoint="verify")]
         private static extern int VerifyImpl(Signature signature, ref bool ok);
-        [DllImport("libcrypto", EntryPoint="get_public_key")]
+        [DllImport("libreddio", EntryPoint="get_public_key")]
         private static extern int GetPublicKey([MarshalAs(UnmanagedType.LPStr)]string privateKey, [MarshalAs(UnmanagedType.LPStr)]StringBuilder publicKey);
         
-        [DllImport("libcrypto", EntryPoint="explain")]
+        [DllImport("libreddio", EntryPoint="explain")]
         private static extern string ExplainError(int errno);
 
         private struct TransferMsg
@@ -70,7 +70,7 @@ namespace Reddio.Crypto {
             [MarshalAs(UnmanagedType.LPStr)] public string? Condition;
         }
     
-        [DllImport("libcrypto", EntryPoint = "get_transfer_msg_hash")]
+        [DllImport("libreddio", EntryPoint = "get_transfer_msg_hash")]
         private static extern int GetTransferMsgHash(
             TransferMsg msg,
             [MarshalAs(UnmanagedType.LPStr)] StringBuilder hash
@@ -92,7 +92,7 @@ namespace Reddio.Crypto {
         }
 
 
-        [DllImport("libcrypto", EntryPoint = "get_transfer_msg_hash_with_fee")]
+        [DllImport("libreddio", EntryPoint = "get_transfer_msg_hash_with_fee")]
         private static extern int GetTransferMsgHashWithFee(
             TransferMsgWithFee msg,
             [MarshalAs(UnmanagedType.LPStr)] StringBuilder hash
@@ -109,7 +109,7 @@ namespace Reddio.Crypto {
             [MarshalAs(UnmanagedType.LPStr)] public string Nonce;
             [MarshalAs(UnmanagedType.LPStr)] public string ExpirationTimeStamp;
         }
-        [DllImport("libcrypto", EntryPoint = "get_limit_order_msg_hash")]
+        [DllImport("libreddio", EntryPoint = "get_limit_order_msg_hash")]
         private static extern int GetLimitOrderMsgHash(
             LimitOrderMsg msg, 
             [MarshalAs(UnmanagedType.LPStr)] StringBuilder hash
@@ -129,7 +129,7 @@ namespace Reddio.Crypto {
             [MarshalAs(UnmanagedType.LPStr)] public string FeeVaultId;
             [MarshalAs(UnmanagedType.LPStr)] public string FeeLimit;
         }
-        [DllImport("libcrypto", EntryPoint = "get_limit_order_msg_hash_with_fee")]
+        [DllImport("libreddio", EntryPoint = "get_limit_order_msg_hash_with_fee")]
         private static extern int GetLimitOrderMsgHashWithFee(
             LimitOrderMsgWithFee msg, 
             [MarshalAs(UnmanagedType.LPStr)] StringBuilder hash

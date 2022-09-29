@@ -1,49 +1,49 @@
-CRYPTO_DEV_OPTIONS=--manifest-path=crypto/Cargo.toml
+REDDIO_DEV_OPTIONS=--manifest-path=reddio/Cargo.toml
 OUTPUT_DIR=./output
 OUTPUT_HEADER_DIR=./output/include
 OUTPUT_LIB_DIR=./output/lib
 
 export CGO_ENABLED=1
 
-build: build-crypto build-crypto-go
+build: build-reddio build-reddio-go
 
-release: release-crypto build-crypto-go
+release: release-reddio build-reddio-go
 
-clean: clean-crypto
+clean: clean-reddio
 	rm -rf output
 
-check: check-crypto build-crypto-go
+check: check-reddio build-reddio-go
 
-test: test-crypto test-crypto-go
+test: test-reddio test-reddio-go
 
-fmt: fmt-crypto fmt-crypto-go
+fmt: fmt-reddio fmt-reddio-go
 
-lint: lint-crypto lint-crypto-go
+lint: lint-reddio lint-reddio-go
 
-build-crypto: generate-header
+build-reddio: generate-header
 	mkdir -p $(OUTPUT_LIB_DIR)
-	cargo build $(CRYPTO_DEV_OPTIONS)
-	cp crypto/target/debug/libcrypto.* $(OUTPUT_LIB_DIR)
+	cargo build $(REDDIO_DEV_OPTIONS)
+	cp reddio/target/debug/libreddio.* $(OUTPUT_LIB_DIR)
 
-release-crypto: generate-header
+release-reddio: generate-header
 	mkdir -p $(OUTPUT_LIB_DIR)
-	cargo build $(CRYPTO_DEV_OPTIONS) --release
-	cp crypto/target/release/libcrypto.* $(OUTPUT_LIB_DIR)
+	cargo build $(REDDIO_DEV_OPTIONS) --release
+	cp reddio/target/release/libreddio.* $(OUTPUT_LIB_DIR)
 
-clean-crypto:
-	cargo clean $(CRYPTO_DEV_OPTIONS)
+clean-reddio:
+	cargo clean $(REDDIO_DEV_OPTIONS)
 
-check-crypto:
-	cargo check $(CRYPTO_DEV_OPTIONS)
+check-reddio:
+	cargo check $(REDDIO_DEV_OPTIONS)
 
-test-crypto:
-	cargo test $(CRYPTO_DEV_OPTIONS)
+test-reddio:
+	cargo test $(REDDIO_DEV_OPTIONS)
 
-fmt-crypto:
-	cargo fmt $(CRYPTO_DEV_OPTIONS)
+fmt-reddio:
+	cargo fmt $(REDDIO_DEV_OPTIONS)
 
-lint-crypto:
-	cargo clippy $(CRYPTO_DEV_OPTIONS)
+lint-reddio:
+	cargo clippy $(REDDIO_DEV_OPTIONS)
 
 cbindgen:
 	mkdir -p $(OUTPUT_DIR)
@@ -52,16 +52,16 @@ cbindgen:
 
 generate-header: cbindgen
 	mkdir -p $(OUTPUT_HEADER_DIR)
-	$(OUTPUT_DIR)/bin/cbindgen --lang c crypto/src/lib.rs -o $(OUTPUT_HEADER_DIR)/crypto.h
+	$(OUTPUT_DIR)/bin/cbindgen --lang c reddio/src/lib.rs -o $(OUTPUT_HEADER_DIR)/reddio.h
 
-build-crypto-go: build-crypto
-	cd crypto-go && go build
+build-reddio-go: build-reddio
+	cd reddio-go && go build
 
-test-crypto-go: build-crypto
-	cd crypto-go && go test
+test-reddio-go: build-reddio
+	cd reddio-go && go test
 
-fmt-crypto-go:
-	cd crypto-go && go fmt
+fmt-reddio-go:
+	cd reddio-go && go fmt
 
-lint-crypto-go:
-	cd crypto-go && go vet
+lint-reddio-go:
+	cd reddio-go && go vet

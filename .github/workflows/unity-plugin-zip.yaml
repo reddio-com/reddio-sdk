@@ -17,14 +17,14 @@ jobs:
           target: x86_64-unknown-linux-gnu
       - name: Compile
         run: |
-          cd crypto && cargo build --release --target x86_64-unknown-linux-gnu
+          cd reddio && cargo build --release --target x86_64-unknown-linux-gnu
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: libcrypto-x86_64-unknown-linux-gnu
+          name: libreddio-x86_64-unknown-linux-gnu
           path: |
-            crypto/target/x86_64-unknown-linux-gnu/release/libcrypto.a
-            crypto/target/x86_64-unknown-linux-gnu/release/libcrypto.so
+            reddio/target/x86_64-unknown-linux-gnu/release/libreddio.a
+            reddio/target/x86_64-unknown-linux-gnu/release/libreddio.so
   android_share_library:
     name: Android Shared Library
     runs-on: ubuntu-20.04
@@ -52,28 +52,28 @@ jobs:
           ndk-version: r25
       - name: Build Android Shared Library
         run: |
-          cd crypto && cargo ndk -t armeabi-v7a -t arm64-v8a -t x86_64 build --release
+          cd reddio && cargo ndk -t armeabi-v7a -t arm64-v8a -t x86_64 build --release
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: libcrypto-aarch64-linux-android
+          name: libreddio-aarch64-linux-android
           path: |
-            crypto/target/aarch64-linux-android/release/libcrypto.a
-            crypto/target/aarch64-linux-android/release/libcrypto.so
+            reddio/target/aarch64-linux-android/release/libreddio.a
+            reddio/target/aarch64-linux-android/release/libreddio.so
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: libcrypto-armv7-linux-androideabi
+          name: libreddio-armv7-linux-androideabi
           path: |
-            crypto/target/armv7-linux-androideabi/release/libcrypto.a
-            crypto/target/armv7-linux-androideabi/release/libcrypto.so
+            reddio/target/armv7-linux-androideabi/release/libreddio.a
+            reddio/target/armv7-linux-androideabi/release/libreddio.so
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: libcrypto-x86_64-linux-android
+          name: libreddio-x86_64-linux-android
           path: |
-            crypto/target/x86_64-linux-android/release/libcrypto.a
-            crypto/target/x86_64-linux-android/release/libcrypto.so
+            reddio/target/x86_64-linux-android/release/libreddio.a
+            reddio/target/x86_64-linux-android/release/libreddio.so
   windows_shared_library:
     name: Windows Shared Library
     runs-on: windows-2022
@@ -86,14 +86,14 @@ jobs:
           target: x86_64-pc-windows-msvc
       - name: Compile
         run: |
-          cd crypto && cargo build --release --target x86_64-pc-windows-msvc
+          cd reddio && cargo build --release --target x86_64-pc-windows-msvc
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: libcrypto-x86_64-pc-windows-msvc
+          name: libreddio-x86_64-pc-windows-msvc
           path: |
-            crypto/target/x86_64-pc-windows-msvc/release/crypto.lib
-            crypto/target/x86_64-pc-windows-msvc/release/crypto.dll
+            reddio/target/x86_64-pc-windows-msvc/release/reddio.lib
+            reddio/target/x86_64-pc-windows-msvc/release/reddio.dll
   macos_shared_library:
     name: macOS Shared Library
     runs-on: macos-12
@@ -110,21 +110,21 @@ jobs:
           target: x86_64-apple-darwin
       - name: Build macOS shared Library
         run: |
-          cd crypto && cargo build --target x86_64-apple-darwin --target aarch64-apple-darwin --release
+          cd reddio && cargo build --target x86_64-apple-darwin --target aarch64-apple-darwin --release
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: libcrypto-aarch64-apple-darwin
+          name: libreddio-aarch64-apple-darwin
           path: |
-            crypto/target/aarch64-apple-darwin/release/libcrypto.a
-            crypto/target/aarch64-apple-darwin/release/libcrypto.dylib
+            reddio/target/aarch64-apple-darwin/release/libreddio.a
+            reddio/target/aarch64-apple-darwin/release/libreddio.dylib
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: libcrypto-x86_64-apple-darwin
+          name: libreddio-x86_64-apple-darwin
           path: |
-            crypto/target/x86_64-apple-darwin/release/libcrypto.a
-            crypto/target/x86_64-apple-darwin/release/libcrypto.dylib
+            reddio/target/x86_64-apple-darwin/release/libreddio.a
+            reddio/target/x86_64-apple-darwin/release/libreddio.dylib
   ios_static_library:
     name: iOS Static Library
     runs-on: macos-12
@@ -144,13 +144,13 @@ jobs:
           target: x86_64-apple-ios
       - name: Build iOS Static Library
         run: |
-          cd crypto && cargo lipo --release
+          cd reddio && cargo lipo --release
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: libcrypto-universal-apple-ios
+          name: libreddio-universal-apple-ios
           path: |
-            crypto/target/universal/release/libcrypto.a
+            reddio/target/universal/release/libreddio.a
   unity_plugin_zip:
     name: Package Unity Plugin Zip
     runs-on: ubuntu-20.04
@@ -182,21 +182,21 @@ jobs:
           mkdir -p unity/Plugins/reddio-sdk-unity/Editor/x86_64
 
           # iOS
-          cp artifacts/libcrypto-universal-apple-ios/libcrypto.a unity/Plugins/reddio-sdk-unity/iOS/libcrypto.a
+          cp artifacts/libreddio-universal-apple-ios/libreddio.a unity/Plugins/reddio-sdk-unity/iOS/libreddio.a
 
           # Android
-          cp artifacts/libcrypto-aarch64-linux-android/libcrypto.so unity/Plugins/reddio-sdk-unity/Android/arm64/libcrypto.so
-          cp artifacts/libcrypto-armv7-linux-androideabi/libcrypto.so unity/Plugins/reddio-sdk-unity/Android/armeabi-v7a/libcrypto.so
-          cp artifacts/libcrypto-x86_64-linux-android/libcrypto.so unity/Plugins/reddio-sdk-unity/Android/x86_64/libcrypto.so
+          cp artifacts/libreddio-aarch64-linux-android/libreddio.so unity/Plugins/reddio-sdk-unity/Android/arm64/libreddio.so
+          cp artifacts/libreddio-armv7-linux-androideabi/libreddio.so unity/Plugins/reddio-sdk-unity/Android/armeabi-v7a/libreddio.so
+          cp artifacts/libreddio-x86_64-linux-android/libreddio.so unity/Plugins/reddio-sdk-unity/Android/x86_64/libreddio.so
 
           # Editor / Standalone
-          cp artifacts/libcrypto-aarch64-apple-darwin/libcrypto.dylib unity/Plugins/reddio-sdk-unity/Editor/aarch64/libcrypto.dylib
-          cp artifacts/libcrypto-x86_64-pc-windows-msvc/crypto.dll unity/Plugins/reddio-sdk-unity/Editor/x86_64/crypto.dll
-          cp artifacts/libcrypto-x86_64-apple-darwin/libcrypto.dylib unity/Plugins/reddio-sdk-unity/Editor/x86_64/libcrypto.dylib
-          cp artifacts/libcrypto-x86_64-unknown-linux-gnu/libcrypto.so unity/Plugins/reddio-sdk-unity/Editor/x86_64/libcrypto.so
+          cp artifacts/libreddio-aarch64-apple-darwin/libreddio.dylib unity/Plugins/reddio-sdk-unity/Editor/aarch64/libreddio.dylib
+          cp artifacts/libreddio-x86_64-pc-windows-msvc/reddio.dll unity/Plugins/reddio-sdk-unity/Editor/x86_64/reddio.dll
+          cp artifacts/libreddio-x86_64-apple-darwin/libreddio.dylib unity/Plugins/reddio-sdk-unity/Editor/x86_64/libreddio.dylib
+          cp artifacts/libreddio-x86_64-unknown-linux-gnu/libreddio.so unity/Plugins/reddio-sdk-unity/Editor/x86_64/libreddio.so
 
           # Script
-          cp crypto-csharp/reddio.crypto/reddio.cs unity/Plugins/reddio-sdk-unity/reddio.cs
+          cp reddio-csharp/reddio.crypto/reddio.cs unity/Plugins/reddio-sdk-unity/reddio.cs
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:

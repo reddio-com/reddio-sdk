@@ -1,4 +1,4 @@
-module github.com/reddio-com/reddio-sdk/crypto-go
+module github.com/reddio-com/reddio-sdk/reddio-go
 
 go 1.18
 
