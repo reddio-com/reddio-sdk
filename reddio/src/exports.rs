@@ -1,8 +1,10 @@
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 use std::ptr::{copy, write_bytes};
+use std::str::FromStr;
 
 use elliptic_curve::bigint::{Encoding, U256};
+use rand::Rng;
 use sha2::{Digest, Sha256};
 use starknet_crypto::{rfc6979_generate_k, FieldElement};
 
@@ -139,6 +141,54 @@ pub unsafe extern "C" fn get_private_key_from_eth_signature(
     }
 }
 
+#[no_mangle]
+pub unsafe extern "C" fn get_random_private_key(private_key: MutBigInt) -> Errno {
+    let get_random_private_key_impl = move || {
+        let result = get_random_private_key_internal()?;
+        write_bigint(&result, private_key);
+        anyhow::Ok::<_>(())
+    };
+
+    match get_random_private_key_impl() {
+        Err(e) => {
+            // if e is Errno
+            if let Ok(errno) = e.downcast::<Errno>() {
+                errno
+            } else {
+                Errno::Unknown
+            }
+        }
+        Ok(_) => Errno::Ok,
+    }
+}
+
+/// reference: https://github.com/reddio-com/test-service/blame/main/script/generate_keys.py#L62-L64
+fn get_random_private_key_internal() -> anyhow::Result<FieldElement> {
+    let ec_order = num_bigint::BigUint::from_str(
+        "3618502788666131213697322783095070105526743751716087489154079457884512865583",
+    )?;
+    let mut rng = rand::thread_rng();
+    let mut number = num_bigint::BigUint::default();
+    while !(number != num_bigint::BigUint::default() && number < ec_order) {
+        number = rng.sample(num_bigint::RandomBits::new(256));
+    }
+    return Ok(biguint_to_field_element(number)?);
+}
+
+fn biguint_to_field_element(value: num_bigint::BigUint) -> anyhow::Result<FieldElement> {
+    let mut unaligned_bytes = value.to_bytes_le();
+    if unaligned_bytes.len() < 32 {
+        for _ in 0..(32 - unaligned_bytes.len()) {
+            unaligned_bytes.push(0);
+        }
+    }
+    unaligned_bytes.reverse();
+    let aligned_be_bytes = unaligned_bytes;
+    let temp: [u8; 32] = aligned_be_bytes.as_slice().try_into().unwrap();
+    let result = FieldElement::from_bytes_be(&temp).unwrap();
+    return Ok(result);
+}
+
 fn grind_key(seed: &str) -> Result<FieldElement> {
     // the `key_val_limit` is hard coded to the `n` of the stark curve
     let key_val_limit =
@@ -202,8 +252,11 @@ fn hash_key_with_index(seed: &str, index: usize) -> Result<U256> {
 mod tests {
     use std::ffi::{c_char, CStr, CString};
     use std::ptr::null;
+    use std::str::FromStr;
 
-    use super::{sign, SignDocument, SignResult};
+    use super::{
+        biguint_to_field_element, get_random_private_key_internal, sign, SignDocument, SignResult,
+    };
     use crate::exports::BIG_INT_SIZE;
 
     #[test]
@@ -281,6 +334,25 @@ mod tests {
                 "64d393473af2ebab736c579ad511bf439263e4740f9ad299498bda2e75b0e9"
             );
         }
+        Ok(())
+    }
+
+    #[test]
+    fn test_random_private_key() -> anyhow::Result<()> {
+        let random_private_key = get_random_private_key_internal()?;
+        let public_key = starknet_crypto::get_public_key(&random_private_key);
+        println!(
+            "private key: {}, public key: {}",
+            random_private_key, public_key
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn could_always_align_with_u256() -> anyhow::Result<()> {
+        let number = num_bigint::BigUint::from_str("255")?;
+        let field_element = biguint_to_field_element(number)?;
+        assert_eq!(format!("{}", field_element), "255");
         Ok(())
     }
 }

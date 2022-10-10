@@ -4,6 +4,7 @@ use starknet_crypto::{SignError, VerifyError};
 use starknet_ff::{FromDecStrError, FromHexError};
 
 #[repr(C)]
+#[derive(Debug)]
 pub enum Errno {
     Ok,
 
@@ -18,6 +19,11 @@ pub enum Errno {
     InternelInvalidK,
 
     Unknown,
+}
+impl std::fmt::Display for Errno {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
 }
 
 pub type Result<T> = std::result::Result<T, Errno>;
