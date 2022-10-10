@@ -168,11 +168,9 @@ fn get_random_private_key_internal() -> anyhow::Result<FieldElement> {
         "3618502788666131213697322783095070105526743751716087489154079457884512865583",
     )?;
     let mut rng = rand::thread_rng();
-    let mut number = num_bigint::BigUint::default();
-    while !(number != num_bigint::BigUint::default() && number < ec_order) {
-        number = rng.sample(num_bigint::RandomBits::new(256));
-    }
-    return Ok(biguint_to_field_element(number)?);
+    let zero = num_bigint::BigUint::default();
+    let result = rng.gen_range(zero..ec_order);
+    return Ok(biguint_to_field_element(result)?);
 }
 
 fn biguint_to_field_element(value: num_bigint::BigUint) -> anyhow::Result<FieldElement> {
