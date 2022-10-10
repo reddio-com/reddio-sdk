@@ -16,6 +16,9 @@ namespace Reddio.Crypto {
         [DllImport("libreddio", EntryPoint="get_private_key_from_eth_signature")]
         private static extern int GetPrivateKeyFromEthSignatureImpl([MarshalAs(UnmanagedType.LPStr)]string ethSignature, [MarshalAs(UnmanagedType.LPStr)]StringBuilder privateKeyStr);
 
+        [DllImport("libreddio", EntryPoint="get_random_private_key")]
+        private static extern int GetRandomPrivateKeyImpl([MarshalAs(UnmanagedType.LPStr)]StringBuilder privateKeyStr);
+        
         [StructLayout(LayoutKind.Sequential)]
         private struct SignDocument {
             [MarshalAs(UnmanagedType.LPStr)]
@@ -152,6 +155,18 @@ namespace Reddio.Crypto {
             var privateKeyStr = new StringBuilder(BIG_INT_BUFFER_SIZE);
 
             var errno = GetPrivateKeyFromEthSignatureImpl(ethSignatureStr, privateKeyStr);
+            if (errno != 0) {
+                throw new CryptoException(ExplainError(errno));
+            }
+
+            return ParsePositive(privateKeyStr.ToString());
+        }
+
+        public static BigInteger GetRandomPrivateKey()
+        {
+            var privateKeyStr = new StringBuilder(BIG_INT_BUFFER_SIZE);
+
+            var errno = GetRandomPrivateKeyImpl(privateKeyStr);
             if (errno != 0) {
                 throw new CryptoException(ExplainError(errno));
             }
