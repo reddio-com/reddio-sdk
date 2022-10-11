@@ -1,15 +1,20 @@
 using System;
 using System.Globalization;
 using System.Numerics;
-using Microsoft.VisualBasic.CompilerServices;
 using Xunit;
 
 using Reddio.Crypto;
+using Xunit.Abstractions;
 
 namespace Reddio.Tests {
 
-    public class CryptoServiceTest 
+    public class CryptoServiceTest
     {
+        private ITestOutputHelper _testOutputHelper;
+        public CryptoServiceTest(ITestOutputHelper testOutputHelper)
+        {
+            this._testOutputHelper = testOutputHelper;
+        }
         [Fact]
         public void TestGetPrivateKeyFromEthSignature()
         {
@@ -20,6 +25,14 @@ namespace Reddio.Tests {
             var expectedPrivateKey = BigInteger.Parse(expectedPrivateKeyStr, NumberStyles.AllowHexSpecifier);
 
             Assert.Equal(expectedPrivateKey, Crypto.CryptoService.GetPrivateKeyFromEthSignature(ethSignature));
+        }
+
+        [Fact]
+        public void TestGetRandomPrivateKey()
+        {
+           var actual = CryptoService.GetRandomPrivateKey();
+           var publicKey = CryptoService.GetPublicKey(actual);
+           _testOutputHelper.WriteLine("public key: {0}\nprivate key: {1}",actual,publicKey);
         }
 
         BigInteger privateKey = BigInteger.Parse("3c1e9550e66958296d11b60f8e8e7a7ad990d07fa65d5f7652c4a6c87d4e3cc", NumberStyles.AllowHexSpecifier);
