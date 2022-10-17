@@ -48,7 +48,7 @@ public class ReddioRestClient : IReddioRestClient
     public async Task<ResponseWrapper<GetVaultIdResponse>> GetVaultId(GetVaultIdMessage getVaultIdMessage)
     {
         var endpoint =
-            $"{_baseEndpoint}/v1/vaults?asset_id={getVaultIdMessage.AssetId}&stark_keys={getVaultIdMessage.StarkKeys}";
+            $"{_baseEndpoint}/v1/vaults?asset_id={getVaultIdMessage.AssetId}&stark_keys={String.Join(",", getVaultIdMessage.StarkKeys)}";
         var client = new HttpClient();
         var response = await client.GetAsync(endpoint);
         response.EnsureSuccessStatusCode();

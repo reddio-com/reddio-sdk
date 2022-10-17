@@ -4,5 +4,5 @@ namespace Reddio.Api.V1.Rest;
 
 public class GetVaultIdResponse
 {
-    [JsonPropertyName("vault_id")] public Int64 VaultId;
+    [JsonPropertyName("vault_ids")] public List<String> VaultIds;
 }

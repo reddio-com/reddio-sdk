@@ -1,5 +1,7 @@
 ﻿namespace Reddio.Api.V1.Rest;
-
+/// <summary>
+/// Low-Level API.
+/// </summary>
 public interface IReddioRestClient
 {
     /// <summary>

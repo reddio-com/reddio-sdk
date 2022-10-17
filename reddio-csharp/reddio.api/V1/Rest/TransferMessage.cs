@@ -19,10 +19,33 @@ public class TransferMessage
     public Int64 ExpirationTimestamp;
 
     [JsonPropertyName("signature")] public Signature Signature;
+
+    public TransferMessage()
+    {
+    }
+
+    public TransferMessage(string tokenId, string starkKey, string amount, long nonce, string vaultId, string receiver, string receiverVaultId, long expirationTimestamp, Signature signature)
+    {
+        TokenID = tokenId;
+        StarkKey = starkKey;
+        Amount = amount;
+        Nonce = nonce;
+        VaultID = vaultId;
+        Receiver = receiver;
+        ReceiverVaultID = receiverVaultId;
+        ExpirationTimestamp = expirationTimestamp;
+        Signature = signature;
+    }
 }
 
 public class Signature
 {
     [JsonPropertyName("r")] public String R;
     [JsonPropertyName("s")] public String S;
+
+    public Signature(string r, string s)
+    {
+        R = r;
+        S = s;
+    }
 }
