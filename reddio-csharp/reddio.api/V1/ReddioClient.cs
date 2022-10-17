@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Numerics;
 using Reddio.Api.V1.Rest;
 using Reddio.Crypto;
 
@@ -61,16 +63,18 @@ public class ReddioClient : IReddioClient
         String token,
         String receiverVaultId,
         String receiverPublicKey,
-        Int64 expirationTimeStamp
+        Int64 expirationTimeStamp = 4194303
     )
     {
-        var (r, s) = CryptoService.Sign(CryptoService.ParsePositive(privateKey), CryptoService.GetTransferMsgHash(
+        var (r, s) = CryptoService.Sign(
+            BigInteger.Parse(privateKey, NumberStyles.AllowHexSpecifier),
+            CryptoService.GetTransferMsgHash(
                 Int64.Parse(amount),
                 nonce,
                 Int64.Parse(senderVaultId),
-                CryptoService.ParsePositive(token),
+                BigInteger.Parse(token, NumberStyles.AllowHexSpecifier),
                 Int64.Parse(receiverVaultId),
-                CryptoService.ParsePositive(receiverPublicKey),
+                BigInteger.Parse(receiverPublicKey, NumberStyles.AllowHexSpecifier),
                 expirationTimeStamp,
                 null
             ),
