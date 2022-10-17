@@ -56,12 +56,12 @@ public class ReddioRestClient : IReddioRestClient
         return result!;
     }
 
-    public static ReddioRestClient MainnetClient()
+    public static ReddioRestClient Mainnet()
     {
         return new ReddioRestClient(MainnetApiEndpoint);
     }
 
-    public static ReddioRestClient TestnetClient()
+    public static ReddioRestClient Testnet()
     {
         return new ReddioRestClient(TestnetApiEndpoint);
     }

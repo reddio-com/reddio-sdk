@@ -7,6 +7,11 @@ public class ReddioClient : IReddioClient
 {
     private IReddioRestClient _restClient;
 
+    public ReddioClient(IReddioRestClient restClient)
+    {
+        _restClient = restClient;
+    }
+
     public async Task<ResponseWrapper<TransferResponse>> Transfer(string starkKey, string privateKey, string amount,
         string contractAddress, string tokenId, string type,
         string receiver, long expirationTimeStamp = 4194303)
@@ -48,5 +53,15 @@ public class ReddioClient : IReddioClient
         );
         
         return await _restClient.Transfer(transferMessage);
+    }
+
+    public static ReddioClient Mainnet()
+    {
+        return new ReddioClient(ReddioRestClient.Mainnet());
+    }
+    
+    public static ReddioClient Testnet()
+    {
+        return new ReddioClient(ReddioRestClient.Testnet());
     }
 }
