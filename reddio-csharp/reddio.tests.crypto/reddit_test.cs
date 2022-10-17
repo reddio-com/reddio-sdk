@@ -2,7 +2,6 @@ using System;
 using System.Globalization;
 using System.Numerics;
 using Xunit;
-
 using Reddio.Crypto;
 using Xunit.Abstractions;
 

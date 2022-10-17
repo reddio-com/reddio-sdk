@@ -1,5 +1,5 @@
 name: Build Unity Plugin Zip
-on: 
+on:
   workflow_dispatch: {}
   label:
     types:
@@ -196,7 +196,8 @@ jobs:
           cp artifacts/libreddio-x86_64-unknown-linux-gnu/libreddio.so unity/Plugins/reddio-sdk-unity/Editor/x86_64/libreddio.so
 
           # Script
-          cp reddio-csharp/reddio.crypto/reddio.cs unity/Plugins/reddio-sdk-unity/reddio.cs
+          cp -r reddio-csharp/reddio.crypto unity/Plugins/reddio-sdk-unity/reddio.crypto
+          cp -r reddio-csharp/reddio.api unity/Plugins/reddio-sdk-unity/reddio.api
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
