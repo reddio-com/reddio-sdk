@@ -4,6 +4,14 @@ namespace Reddio.Api.V1.Rest;
 
 public class TransferResponse
 {
-    [JsonPropertyName("sequence_id")]
-    public Int64 SequenceId;
+    public TransferResponse()
+    {
+    }
+
+    public TransferResponse(long sequenceId)
+    {
+        SequenceId = sequenceId;
+    }
+
+    [JsonPropertyName("sequence_id")] public Int64 SequenceId { get; set; }
 }

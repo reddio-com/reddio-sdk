@@ -4,9 +4,9 @@ namespace Reddio.Api.V1.Rest;
 
 public class GetAssetIdMessage
 {
-    [JsonPropertyName("contract_address")] public String ContractAddress;
-    [JsonPropertyName("type")] public String Type;
-    [JsonPropertyName("token_id")] public String TokenId;
+    [JsonPropertyName("contract_address")] public String ContractAddress { get; set; }
+    [JsonPropertyName("type")] public String Type { get; set; }
+    [JsonPropertyName("token_id")] public String TokenId { get; set; }
 
     public GetAssetIdMessage()
     {
@@ -18,6 +18,4 @@ public class GetAssetIdMessage
         Type = type;
         TokenId = tokenId;
     }
-
-
 }

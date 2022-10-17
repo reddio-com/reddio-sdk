@@ -1,6 +1,7 @@
 using Reddio.Api.V1.Rest;
 
-namespace reddio.api.V1;
+namespace Reddio.Api.V1;
+
 /// <summary>
 /// High-Level API.
 /// </summary>

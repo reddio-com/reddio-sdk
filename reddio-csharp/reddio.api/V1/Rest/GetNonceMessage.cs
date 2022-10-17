@@ -4,7 +4,7 @@ namespace Reddio.Api.V1.Rest;
 
 public class GetNonceMessage
 {
-    [JsonPropertyName("stark_key")] public String StarkKey;
+    [JsonPropertyName("stark_key")] public String StarkKey { get; set; }
 
     public GetNonceMessage()
     {

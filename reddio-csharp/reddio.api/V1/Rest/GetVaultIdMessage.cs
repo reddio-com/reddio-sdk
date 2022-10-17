@@ -4,8 +4,8 @@ namespace Reddio.Api.V1.Rest;
 
 public class GetVaultIdMessage
 {
-    [JsonPropertyName("asset_id")] public String AssetId;
-    [JsonPropertyName("stark_keys")] public List<String> StarkKeys;
+    [JsonPropertyName("asset_id")] public String AssetId { get; set; }
+    [JsonPropertyName("stark_keys")] public List<String> StarkKeys { get; set; }
 
     public GetVaultIdMessage()
     {
@@ -16,6 +16,4 @@ public class GetVaultIdMessage
         AssetId = assetId;
         StarkKeys = starkKeys;
     }
-
- 
 }
