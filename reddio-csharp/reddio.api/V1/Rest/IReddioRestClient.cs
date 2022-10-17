@@ -1,4 +1,4 @@
-﻿namespace Reddio.Api.Rest.V1;
+﻿namespace Reddio.Api.V1.Rest;
 
 public interface IReddioRestClient
 {

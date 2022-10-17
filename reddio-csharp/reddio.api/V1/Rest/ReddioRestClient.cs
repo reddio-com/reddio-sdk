@@ -1,6 +1,6 @@
 using System.Net.Http.Json;
 
-namespace Reddio.Api.Rest.V1;
+namespace Reddio.Api.V1.Rest;
 
 public class ReddioRestClient : IReddioRestClient
 {
