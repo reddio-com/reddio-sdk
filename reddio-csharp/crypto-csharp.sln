@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "reddio.crypto", "reddio.cry
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "reddio.tests.crypto", "reddio.tests.crypto\reddio.tests.crypto.csproj", "{1BCB204F-18EA-457B-9EB3-0DFF67638483}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "reddio.api", "reddio.api\reddio.api.csproj", "{B0D084C3-0448-4417-9CD3-2D464B3F1FC0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{1BCB204F-18EA-457B-9EB3-0DFF67638483}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1BCB204F-18EA-457B-9EB3-0DFF67638483}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1BCB204F-18EA-457B-9EB3-0DFF67638483}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0D084C3-0448-4417-9CD3-2D464B3F1FC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0D084C3-0448-4417-9CD3-2D464B3F1FC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0D084C3-0448-4417-9CD3-2D464B3F1FC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0D084C3-0448-4417-9CD3-2D464B3F1FC0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
