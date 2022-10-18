@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace Reddio.Api.V1.Rest
 {
@@ -40,19 +40,19 @@ namespace Reddio.Api.V1.Rest
         {
         }
 
-        [JsonPropertyName("amount")] public string Amount { get; set; }
-        [JsonPropertyName("asset_id")] public string AssetId { get; set; }
-        [JsonPropertyName("asset_name")] public string AssetName { get; set; }
-        [JsonPropertyName("asset_type")] public string AssetType { get; set; }
-        [JsonPropertyName("contract_address")] public string ContractAddress { get; set; }
-        [JsonPropertyName("display_value")] public string DisplayValue { get; set; }
-        [JsonPropertyName("from")] public string From { get; set; }
-        [JsonPropertyName("record_type")] public int RecordType { get; set; }
-        [JsonPropertyName("sequence_id")] public Int64 SequenceId { get; set; }
-        [JsonPropertyName("stark_key")] public string StarkKey { get; set; }
-        [JsonPropertyName("status")] public int Status { get; set; }
-        [JsonPropertyName("time")] public Int64 Time { get; set; }
-        [JsonPropertyName("to")] public string To { get; set; }
-        [JsonPropertyName("token_id")] public string TokenId { get; set; }
+        [JsonProperty("amount")] public string Amount { get; set; }
+        [JsonProperty("asset_id")] public string AssetId { get; set; }
+        [JsonProperty("asset_name")] public string AssetName { get; set; }
+        [JsonProperty("asset_type")] public string AssetType { get; set; }
+        [JsonProperty("contract_address")] public string ContractAddress { get; set; }
+        [JsonProperty("display_value")] public string DisplayValue { get; set; }
+        [JsonProperty("from")] public string From { get; set; }
+        [JsonProperty("record_type")] public int RecordType { get; set; }
+        [JsonProperty("sequence_id")] public Int64 SequenceId { get; set; }
+        [JsonProperty("stark_key")] public string StarkKey { get; set; }
+        [JsonProperty("status")] public int Status { get; set; }
+        [JsonProperty("time")] public Int64 Time { get; set; }
+        [JsonProperty("to")] public string To { get; set; }
+        [JsonProperty("token_id")] public string TokenId { get; set; }
     }
 }

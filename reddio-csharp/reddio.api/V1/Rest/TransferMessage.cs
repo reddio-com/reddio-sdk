@@ -1,25 +1,24 @@
 using System;
-using System.Numerics;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace Reddio.Api.V1.Rest
 {
     public class TransferMessage
     {
-        [JsonPropertyName("asset_id")] public string AssetId { get; set; }
-        [JsonPropertyName("stark_key")] public string StarkKey { get; set; }
-        [JsonPropertyName("amount")] public string Amount { get; set; }
-        [JsonPropertyName("nonce")] public Int64 Nonce { get; set; }
-        [JsonPropertyName("vault_id")] public string VaultId { get; set; }
-        [JsonPropertyName("receiver")] public string Receiver { get; set; }
+        [JsonProperty("asset_id")] public string AssetId { get; set; }
+        [JsonProperty("stark_key")] public string StarkKey { get; set; }
+        [JsonProperty("amount")] public string Amount { get; set; }
+        [JsonProperty("nonce")] public Int64 Nonce { get; set; }
+        [JsonProperty("vault_id")] public string VaultId { get; set; }
+        [JsonProperty("receiver")] public string Receiver { get; set; }
 
-        [JsonPropertyName("receiver_vault_id")]
+        [JsonProperty("receiver_vault_id")]
         public string ReceiverVaultId { get; set; }
 
-        [JsonPropertyName("expiration_timestamp")]
+        [JsonProperty("expiration_timestamp")]
         public Int64 ExpirationTimestamp { get; set; }
 
-        [JsonPropertyName("signature")] public Signature Signature { get; set; }
+        [JsonProperty("signature")] public Signature Signature { get; set; }
 
         public TransferMessage()
         {

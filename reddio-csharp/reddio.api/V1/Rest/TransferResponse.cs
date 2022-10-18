@@ -1,5 +1,5 @@
 using System;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace Reddio.Api.V1.Rest
 {
@@ -14,6 +14,6 @@ namespace Reddio.Api.V1.Rest
             SequenceId = sequenceId;
         }
 
-        [JsonPropertyName("sequence_id")] public Int64 SequenceId { get; set; }
+        [JsonProperty("sequence_id")] public Int64 SequenceId { get; set; }
     }
 }

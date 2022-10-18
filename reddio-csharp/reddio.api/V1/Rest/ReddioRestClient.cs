@@ -1,9 +1,9 @@
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace Reddio.Api.V1.Rest
 {
@@ -27,13 +27,26 @@ namespace Reddio.Api.V1.Rest
             return client;
         }
 
+        private static HttpContent JsonStringContent<T>(T payload)
+        {
+            var jsonString = JsonConvert.SerializeObject(payload);
+            var content = new StringContent(jsonString, Encoding.UTF8, "application/json");
+            return content;
+        }
+
+        private static async Task<T> ReadAsJsonAsync<T>(HttpResponseMessage response)
+        {
+            var responseContent = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<T>(responseContent)!;
+        }
+
         public async Task<ResponseWrapper<TransferResponse>> Transfer(TransferMessage transferMessage)
         {
             var endpoint = $"{_baseEndpoint}/v1/transfers";
             var client = HttpClientWithReddioUA();
-            var response = await client.PostAsJsonAsync(endpoint, transferMessage);
+            var response = await client.PostAsync(endpoint, JsonStringContent(transferMessage));
             response.EnsureSuccessStatusCode();
-            var result = await response.Content.ReadFromJsonAsync<ResponseWrapper<TransferResponse>>();
+            var result = await ReadAsJsonAsync<ResponseWrapper<TransferResponse>>(response);
             return result!;
         }
 
@@ -43,7 +56,7 @@ namespace Reddio.Api.V1.Rest
             var client = HttpClientWithReddioUA();
             var response = await client.GetAsync(endpoint);
             response.EnsureSuccessStatusCode();
-            var result = await response.Content.ReadFromJsonAsync<ResponseWrapper<GetNonceResponse>>();
+            var result = await ReadAsJsonAsync<ResponseWrapper<GetNonceResponse>>(response);
             return result!;
         }
 
@@ -55,7 +68,7 @@ namespace Reddio.Api.V1.Rest
             request.Content = new StringContent("", Encoding.UTF8, "application/json");
             var client = HttpClientWithReddioUA();
             var response = await client.SendAsync(request);
-            var result = await response.Content.ReadFromJsonAsync<ResponseWrapper<GetAssetIdResponse>>();
+            var result = await ReadAsJsonAsync<ResponseWrapper<GetAssetIdResponse>>(response);
             return result!;
         }
 
@@ -66,7 +79,7 @@ namespace Reddio.Api.V1.Rest
             var client = HttpClientWithReddioUA();
             var response = await client.GetAsync(endpoint);
             response.EnsureSuccessStatusCode();
-            var result = await response.Content.ReadFromJsonAsync<ResponseWrapper<GetVaultIdResponse>>();
+            var result = await ReadAsJsonAsync<ResponseWrapper<GetVaultIdResponse>>(response);
             return result!;
         }
 
@@ -78,7 +91,7 @@ namespace Reddio.Api.V1.Rest
             var response = await client.GetAsync(endpoint);
             var body = await response.Content.ReadAsStringAsync();
             response.EnsureSuccessStatusCode();
-            var result = await response.Content.ReadFromJsonAsync<ResponseWrapper<GetRecordResponse>>();
+            var result = await ReadAsJsonAsync<ResponseWrapper<GetRecordResponse>>(response);
             return result!;
         }
 

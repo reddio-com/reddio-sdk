@@ -1,5 +1,5 @@
 using System;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace Reddio.Api.V1.Rest
 {
@@ -14,6 +14,6 @@ namespace Reddio.Api.V1.Rest
             Nonce = nonce;
         }
 
-        [JsonPropertyName("nonce")] public Int64 Nonce { get; set; }
+        [JsonProperty("nonce")] public Int64 Nonce { get; set; }
     }
 }

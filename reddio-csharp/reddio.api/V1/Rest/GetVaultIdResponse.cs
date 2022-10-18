@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace Reddio.Api.V1.Rest
 {
@@ -14,6 +14,6 @@ namespace Reddio.Api.V1.Rest
             VaultIds = vaultIds;
         }
 
-        [JsonPropertyName("vault_ids")] public List<string> VaultIds { get; set; }
+        [JsonProperty("vault_ids")] public List<string> VaultIds { get; set; }
     }
 }

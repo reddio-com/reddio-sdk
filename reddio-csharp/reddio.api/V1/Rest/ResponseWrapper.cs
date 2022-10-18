@@ -1,12 +1,12 @@
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace Reddio.Api.V1.Rest
 {
     public class ResponseWrapper<T>
     {
-        [JsonPropertyName("status")] public string Status { get; set; }
-        [JsonPropertyName("error")] public string Error { get; set; }
-        [JsonPropertyName("data")] public T Data { get; set; }
+        [JsonProperty("status")] public string Status { get; set; }
+        [JsonProperty("error")] public string Error { get; set; }
+        [JsonProperty("data")] public T Data { get; set; }
 
         public ResponseWrapper()
         {
