@@ -47,6 +47,37 @@ public class ReddioClient : IReddioClient
         return await _restClient.Transfer(transferMessage);
     }
 
+    public async Task<ResponseWrapper<GetRecordResponse>> GetRecord(string starkKey, long sequenceId)
+    {
+        return await this._restClient.GetRecord(new GetRecordMessage(starkKey, sequenceId));
+    }
+
+    public async Task<ResponseWrapper<GetRecordResponse>> WaitingTransferGetApproved(string starkKey, long sequenceId)
+    {
+        var interval = TimeSpan.FromSeconds(5);
+        var timeout = TimeSpan.FromMinutes(1);
+        CancellationTokenSource source = new CancellationTokenSource(timeout);
+        return await WaitingTransferGetApproved(starkKey, sequenceId, interval, source.Token);
+    }
+
+    public async Task<ResponseWrapper<GetRecordResponse>> WaitingTransferGetApproved(string starkKey, long sequenceId,
+        TimeSpan interval,
+        CancellationToken cancellationToken)
+    {
+        var getRecordMessage = new GetRecordMessage(starkKey, sequenceId);
+        for (;;)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var response = await _restClient.GetRecord(getRecordMessage);
+            if (SequenceRecord.SequenceStatusAccepted == response.Data[0].Status)
+            {
+                return response;
+            }
+
+            await Task.Delay(interval, cancellationToken);
+        }
+    }
+
     internal async Task<string> GetAssetId(string contractAddress, string tokenId, string type)
     {
         var getAssetIdMessage = new GetAssetIdMessage(contractAddress, type, tokenId);

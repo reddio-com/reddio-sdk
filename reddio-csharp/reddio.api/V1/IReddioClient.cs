@@ -17,4 +17,14 @@ public interface IReddioClient
         String receiver,
         Int64 expirationTimeStamp
     );
+
+    public Task<ResponseWrapper<GetRecordResponse>> GetRecord(string starkKey, Int64 sequenceId);
+    public Task<ResponseWrapper<GetRecordResponse>> WaitingTransferGetApproved(string starkKey, Int64 sequenceId);
+
+    public Task<ResponseWrapper<GetRecordResponse>> WaitingTransferGetApproved(
+        string starkKey,
+        Int64 sequenceId,
+        TimeSpan interval,
+        CancellationToken cancellationToken
+    );
 }
