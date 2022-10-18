@@ -74,11 +74,11 @@ public class ReddioClientTests
     }
 
     [Fact]
-    public async void TestWaitingRecordGetApproved()
+    public async void TestWaitingRecordGetAccepted()
     {
         var client = ReddioClient.Testnet();
         var result =
-            await client.WaitingTransferGetApproved("0x6736f7449da3bf44bf0f7bdd6463818e1ef272641d43021e8bca17b32ec2df0",
+            await client.WaitingTransferGetAccepted("0x6736f7449da3bf44bf0f7bdd6463818e1ef272641d43021e8bca17b32ec2df0",
                 300523);
         Assert.Equal("OK", result.Status);
         Assert.Single(result.Data);

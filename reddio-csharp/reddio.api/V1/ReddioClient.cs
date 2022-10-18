@@ -54,16 +54,16 @@ namespace Reddio.Api.V1
             return await this._restClient.GetRecord(new GetRecordMessage(starkKey, sequenceId));
         }
 
-        public async Task<ResponseWrapper<GetRecordResponse>> WaitingTransferGetApproved(string starkKey,
+        public async Task<ResponseWrapper<GetRecordResponse>> WaitingTransferGetAccepted(string starkKey,
             long sequenceId)
         {
             var interval = TimeSpan.FromSeconds(5);
             var timeout = TimeSpan.FromMinutes(1);
             CancellationTokenSource source = new CancellationTokenSource(timeout);
-            return await WaitingTransferGetApproved(starkKey, sequenceId, interval, source.Token);
+            return await WaitingTransferGetAccepted(starkKey, sequenceId, interval, source.Token);
         }
 
-        public async Task<ResponseWrapper<GetRecordResponse>> WaitingTransferGetApproved(string starkKey,
+        public async Task<ResponseWrapper<GetRecordResponse>> WaitingTransferGetAccepted(string starkKey,
             long sequenceId,
             TimeSpan interval,
             CancellationToken cancellationToken)
