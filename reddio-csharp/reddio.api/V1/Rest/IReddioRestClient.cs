@@ -41,4 +41,13 @@ public interface IReddioRestClient
     /// <param name="getVaultIdMessage"></param>
     /// <returns></returns>
     public Task<ResponseWrapper<GetVaultIdResponse>> GetVaultId(GetVaultIdMessage getVaultIdMessage);
+
+    /// <summary>
+    /// Retrieve record based on start_key and sequence id
+    ///
+    /// See API References: https://docs.reddio.com/api/layer2-apis.html#get-record
+    /// </summary>
+    /// <param name="getRecordMessage"></param>
+    /// <returns></returns>
+    public Task<ResponseWrapper<GetRecordResponse>> GetRecord(GetRecordMessage getRecordMessage);
 }

@@ -37,15 +37,3 @@ public class TransferMessage
         Signature = signature;
     }
 }
-
-public class Signature
-{
-    [JsonPropertyName("r")] public String R { get; set; }
-    [JsonPropertyName("s")] public String S { get; set; }
-
-    public Signature(string r, string s)
-    {
-        R = r;
-        S = s;
-    }
-}

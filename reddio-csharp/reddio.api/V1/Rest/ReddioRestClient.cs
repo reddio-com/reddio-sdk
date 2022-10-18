@@ -1,8 +1,6 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace Reddio.Api.V1.Rest;
 
@@ -66,6 +64,18 @@ public class ReddioRestClient : IReddioRestClient
         var response = await client.GetAsync(endpoint);
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<ResponseWrapper<GetVaultIdResponse>>();
+        return result!;
+    }
+
+    public async Task<ResponseWrapper<GetRecordResponse>> GetRecord(GetRecordMessage getRecordMessage)
+    {
+        var endpoint =
+            $"{_baseEndpoint}/v1/record?stark_key={getRecordMessage.StarkKey}&sequence_id={getRecordMessage.SequenceId}";
+        var client = HttpClientWithReddioUA();
+        var response = await client.GetAsync(endpoint);
+        var body = await response.Content.ReadAsStringAsync();
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<ResponseWrapper<GetRecordResponse>>();
         return result!;
     }
 
