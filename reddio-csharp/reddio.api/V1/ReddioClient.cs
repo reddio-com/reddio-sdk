@@ -78,6 +78,11 @@ namespace Reddio.Api.V1
                     return response;
                 }
 
+                if (SequenceRecord.SequenceStatusFailed == response.Data[0].Status)
+                {
+                    throw new TransferFailedException("Transfer failed", response.Data);
+                }
+
                 await Task.Delay(interval, cancellationToken);
             }
         }
@@ -136,6 +141,16 @@ namespace Reddio.Api.V1
         public static ReddioClient Testnet()
         {
             return new ReddioClient(ReddioRestClient.Testnet());
+        }
+    }
+
+    public class TransferFailedException : Exception
+    {
+        public GetRecordResponse Reocrd { get; }
+
+        public TransferFailedException(string message, GetRecordResponse reocrd) : base(message)
+        {
+            this.Reocrd = reocrd;
         }
     }
 }
