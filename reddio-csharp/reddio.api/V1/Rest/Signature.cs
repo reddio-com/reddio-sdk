@@ -1,15 +1,16 @@
 using System.Text.Json.Serialization;
 
-namespace Reddio.Api.V1.Rest;
-
-public class Signature
+namespace Reddio.Api.V1.Rest
 {
-    [JsonPropertyName("r")] public String R { get; set; }
-    [JsonPropertyName("s")] public String S { get; set; }
-
-    public Signature(string r, string s)
+    public class Signature
     {
-        R = r;
-        S = s;
+        [JsonPropertyName("r")] public string R { get; set; }
+        [JsonPropertyName("s")] public string S { get; set; }
+
+        public Signature(string r, string s)
+        {
+            R = r;
+            S = s;
+        }
     }
 }

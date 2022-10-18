@@ -1,17 +1,18 @@
 using System.Text.Json.Serialization;
 
-namespace Reddio.Api.V1.Rest;
-
-public class GetAssetIdResponse
+namespace Reddio.Api.V1.Rest
 {
-    [JsonPropertyName("asset_id")] public String AssetId { get; set; }
-
-    public GetAssetIdResponse()
+    public class GetAssetIdResponse
     {
-    }
+        [JsonPropertyName("asset_id")] public string AssetId { get; set; }
 
-    public GetAssetIdResponse(string assetId)
-    {
-        AssetId = assetId;
+        public GetAssetIdResponse()
+        {
+        }
+
+        public GetAssetIdResponse(string assetId)
+        {
+            AssetId = assetId;
+        }
     }
 }

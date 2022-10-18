@@ -1,17 +1,18 @@
 using System.Text.Json.Serialization;
 
-namespace Reddio.Api.V1.Rest;
-
-public class GetNonceMessage
+namespace Reddio.Api.V1.Rest
 {
-    [JsonPropertyName("stark_key")] public String StarkKey { get; set; }
-
-    public GetNonceMessage()
+    public class GetNonceMessage
     {
-    }
+        [JsonPropertyName("stark_key")] public string StarkKey { get; set; }
 
-    public GetNonceMessage(string starkKey)
-    {
-        StarkKey = starkKey;
+        public GetNonceMessage()
+        {
+        }
+
+        public GetNonceMessage(string starkKey)
+        {
+            StarkKey = starkKey;
+        }
     }
 }
