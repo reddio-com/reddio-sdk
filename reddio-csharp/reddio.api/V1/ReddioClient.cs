@@ -28,13 +28,13 @@ public class ReddioClient : IReddioClient
             amount,
             nonce,
             senderVaultId,
-            tokenId,
+            assetId,
             receiverVaultId,
             receiver,
             expirationTimeStamp);
 
         var transferMessage = new TransferMessage(
-            tokenId,
+            assetId,
             starkKey,
             amount,
             nonce,
@@ -67,20 +67,20 @@ public class ReddioClient : IReddioClient
     )
     {
         var (r, s) = CryptoService.Sign(
-            BigInteger.Parse(privateKey, NumberStyles.AllowHexSpecifier),
+            CryptoService.ParsePositive(privateKey.ToLower().Replace("0x", "")),
             CryptoService.GetTransferMsgHash(
                 Int64.Parse(amount),
                 nonce,
                 Int64.Parse(senderVaultId),
-                BigInteger.Parse(token, NumberStyles.AllowHexSpecifier),
+                CryptoService.ParsePositive(token.ToLower().Replace("0x", "")),
                 Int64.Parse(receiverVaultId),
-                BigInteger.Parse(receiverPublicKey, NumberStyles.AllowHexSpecifier),
+                CryptoService.ParsePositive(receiverPublicKey.ToLower().Replace("0x", "")),
                 expirationTimeStamp,
                 null
             ),
             null
         );
-        var result = new Signature(r.ToString("x"), s.ToString("x"));
+        var result = new Signature($"0x{r.ToString("x")}", $"0x{s.ToString("x")}");
         return result;
     }
 
