@@ -28,13 +28,13 @@ public class ReddioClient : IReddioClient
             amount,
             nonce,
             senderVaultId,
-            tokenId,
+            assetId,
             receiverVaultId,
             receiver,
             expirationTimeStamp);
 
         var transferMessage = new TransferMessage(
-            tokenId,
+            assetId,
             starkKey,
             amount,
             nonce,
@@ -45,6 +45,37 @@ public class ReddioClient : IReddioClient
             signature
         );
         return await _restClient.Transfer(transferMessage);
+    }
+
+    public async Task<ResponseWrapper<GetRecordResponse>> GetRecord(string starkKey, long sequenceId)
+    {
+        return await this._restClient.GetRecord(new GetRecordMessage(starkKey, sequenceId));
+    }
+
+    public async Task<ResponseWrapper<GetRecordResponse>> WaitingTransferGetApproved(string starkKey, long sequenceId)
+    {
+        var interval = TimeSpan.FromSeconds(5);
+        var timeout = TimeSpan.FromMinutes(1);
+        CancellationTokenSource source = new CancellationTokenSource(timeout);
+        return await WaitingTransferGetApproved(starkKey, sequenceId, interval, source.Token);
+    }
+
+    public async Task<ResponseWrapper<GetRecordResponse>> WaitingTransferGetApproved(string starkKey, long sequenceId,
+        TimeSpan interval,
+        CancellationToken cancellationToken)
+    {
+        var getRecordMessage = new GetRecordMessage(starkKey, sequenceId);
+        for (;;)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var response = await _restClient.GetRecord(getRecordMessage);
+            if (SequenceRecord.SequenceStatusAccepted == response.Data[0].Status)
+            {
+                return response;
+            }
+
+            await Task.Delay(interval, cancellationToken);
+        }
     }
 
     internal async Task<string> GetAssetId(string contractAddress, string tokenId, string type)
@@ -67,20 +98,20 @@ public class ReddioClient : IReddioClient
     )
     {
         var (r, s) = CryptoService.Sign(
-            BigInteger.Parse(privateKey, NumberStyles.AllowHexSpecifier),
+            CryptoService.ParsePositive(privateKey.ToLower().Replace("0x", "")),
             CryptoService.GetTransferMsgHash(
                 Int64.Parse(amount),
                 nonce,
                 Int64.Parse(senderVaultId),
-                BigInteger.Parse(token, NumberStyles.AllowHexSpecifier),
+                CryptoService.ParsePositive(token.ToLower().Replace("0x", "")),
                 Int64.Parse(receiverVaultId),
-                BigInteger.Parse(receiverPublicKey, NumberStyles.AllowHexSpecifier),
+                CryptoService.ParsePositive(receiverPublicKey.ToLower().Replace("0x", "")),
                 expirationTimeStamp,
                 null
             ),
             null
         );
-        var result = new Signature(r.ToString("x"), s.ToString("x"));
+        var result = new Signature($"0x{r.ToString("x")}", $"0x{s.ToString("x")}");
         return result;
     }
 

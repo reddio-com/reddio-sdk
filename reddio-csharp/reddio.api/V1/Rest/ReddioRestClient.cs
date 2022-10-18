@@ -1,7 +1,6 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
-using System.Text.Json.Serialization;
 
 namespace Reddio.Api.V1.Rest;
 
@@ -20,13 +19,14 @@ public class ReddioRestClient : IReddioRestClient
     private static HttpClient HttpClientWithReddioUA()
     {
         var client = new HttpClient();
-        client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("reddio", "0.0.1"));
+        // TODO(@STRRL): use the release version
+        client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("reddio-client-csharp", "0.0.1"));
         return client;
     }
 
     public async Task<ResponseWrapper<TransferResponse>> Transfer(TransferMessage transferMessage)
     {
-        var endpoint = $"{_baseEndpoint}/v1/transfer";
+        var endpoint = $"{_baseEndpoint}/v1/transfers";
         var client = HttpClientWithReddioUA();
         var response = await client.PostAsJsonAsync(endpoint, transferMessage);
         response.EnsureSuccessStatusCode();
@@ -64,6 +64,18 @@ public class ReddioRestClient : IReddioRestClient
         var response = await client.GetAsync(endpoint);
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<ResponseWrapper<GetVaultIdResponse>>();
+        return result!;
+    }
+
+    public async Task<ResponseWrapper<GetRecordResponse>> GetRecord(GetRecordMessage getRecordMessage)
+    {
+        var endpoint =
+            $"{_baseEndpoint}/v1/record?stark_key={getRecordMessage.StarkKey}&sequence_id={getRecordMessage.SequenceId}";
+        var client = HttpClientWithReddioUA();
+        var response = await client.GetAsync(endpoint);
+        var body = await response.Content.ReadAsStringAsync();
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<ResponseWrapper<GetRecordResponse>>();
         return result!;
     }
 
