@@ -92,6 +92,28 @@ namespace Reddio.Api.V1.Rest
             return result!;
         }
 
+        public async Task<ResponseWrapper<GetBalanceResponse>> GetBalance(GetBalanceMessage getBalanceMessage)
+        {
+            var endpoint =
+                $"{_baseEndpoint}/v1/balance?stark_key={getBalanceMessage.StarkKey}&asset_id={getBalanceMessage.AssetId}";
+            var client = HttpClientWithReddioUA();
+            var response = await client.GetAsync(endpoint);
+            response.EnsureSuccessStatusCode();
+            var result = await ReadAsJsonAsync<ResponseWrapper<GetBalanceResponse>>(response);
+            return result!;
+        }
+
+        public async Task<ResponseWrapper<GetBalancesResponse>> GetBalances(GetBalancesMessage getBalancesMessage)
+        {
+            var endpoint =
+                $"{_baseEndpoint}/v1/balances?stark_key={getBalancesMessage.StarkKey}";
+            var client = HttpClientWithReddioUA();
+            var response = await client.GetAsync(endpoint);
+            response.EnsureSuccessStatusCode();
+            var result = await ReadAsJsonAsync<ResponseWrapper<GetBalancesResponse>>(response);
+            return result!;
+        }
+
         public static ReddioRestClient Mainnet()
         {
             return new ReddioRestClient(MainnetApiEndpoint);
