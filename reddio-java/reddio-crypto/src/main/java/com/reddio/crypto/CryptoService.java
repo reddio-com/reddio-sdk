@@ -29,7 +29,7 @@ public class CryptoService {
         SignResult ret = new SignResult();
         int errno = Reddio.instance.sign(document, ret);
         if (errno != 0) {
-            throw new RuntimeException(Reddio.instance.explain(errno));
+            throw new ReddioException(Reddio.instance.explain(errno));
         }
         return new Signature(StandardCharsets.UTF_8.decode(ret.r).toString().trim(), StandardCharsets.UTF_8.decode(ret.s).toString().trim());
     }
