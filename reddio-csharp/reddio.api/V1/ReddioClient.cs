@@ -87,6 +87,16 @@ namespace Reddio.Api.V1
             }
         }
 
+        public async Task<ResponseWrapper<GetBalanceResponse>> GetBalance(string starkKey, string assetId)
+        {
+            return await _restClient.GetBalance(new GetBalanceMessage(starkKey, assetId));
+        }
+
+        public async Task<ResponseWrapper<GetBalancesResponse>> GetBalances(string starkKey)
+        {
+            return await _restClient.GetBalances(new GetBalancesMessage(starkKey));
+        }
+
         internal async Task<string> GetAssetId(string contractAddress, string tokenId, string type)
         {
             var getAssetIdMessage = new GetAssetIdMessage(contractAddress, type, tokenId);

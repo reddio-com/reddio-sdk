@@ -30,5 +30,8 @@ namespace Reddio.Api.V1
             TimeSpan interval,
             CancellationToken cancellationToken
         );
+
+        public Task<ResponseWrapper<GetBalanceResponse>> GetBalance(string starkKey, string assetId);
+        public Task<ResponseWrapper<GetBalancesResponse>> GetBalances(string starkKey);
     }
 }

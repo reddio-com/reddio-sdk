@@ -52,5 +52,23 @@ namespace Reddio.Api.V1.Rest
         /// <param name="getRecordMessage"></param>
         /// <returns></returns>
         public Task<ResponseWrapper<GetRecordResponse>> GetRecord(GetRecordMessage getRecordMessage);
+
+        /// <summary>
+        /// Retrieve account balance based on the stark_key and asset_id.
+        ///
+        /// See API Reference: https://docs.reddio.com/api/layer2-apis.html#get-balance
+        /// </summary>
+        /// <param name="getBalanceMessage"></param>
+        /// <returns></returns>
+        public Task<ResponseWrapper<GetBalanceResponse>> GetBalance(GetBalanceMessage getBalanceMessage);
+
+        /// <summary>
+        /// Retrieve account balances in batch based on the stark_key
+        ///
+        /// See API Reference: https://docs.reddio.com/api/layer2-apis.html#get-balances
+        /// </summary>
+        /// <param name="getBalancesMessage"></param>
+        /// <returns></returns>
+        public Task<ResponseWrapper<GetBalancesResponse>> GetBalances(GetBalancesMessage getBalancesMessage);
     }
 }
