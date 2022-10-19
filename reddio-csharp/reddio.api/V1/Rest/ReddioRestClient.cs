@@ -64,10 +64,8 @@ namespace Reddio.Api.V1.Rest
         {
             var endpoint =
                 $"{_baseEndpoint}/v1/assetid?type={getAssetIdMessage.Type}&contract_address={getAssetIdMessage.ContractAddress}&token_id={getAssetIdMessage.TokenId}";
-            var request = new HttpRequestMessage(HttpMethod.Get, endpoint);
-            request.Content = new StringContent("", Encoding.UTF8, "application/json");
             var client = HttpClientWithReddioUA();
-            var response = await client.SendAsync(request);
+            var response = await client.GetAsync(endpoint);
             var result = await ReadAsJsonAsync<ResponseWrapper<GetAssetIdResponse>>(response);
             return result!;
         }
@@ -89,7 +87,6 @@ namespace Reddio.Api.V1.Rest
                 $"{_baseEndpoint}/v1/record?stark_key={getRecordMessage.StarkKey}&sequence_id={getRecordMessage.SequenceId}";
             var client = HttpClientWithReddioUA();
             var response = await client.GetAsync(endpoint);
-            var body = await response.Content.ReadAsStringAsync();
             response.EnsureSuccessStatusCode();
             var result = await ReadAsJsonAsync<ResponseWrapper<GetRecordResponse>>(response);
             return result!;
