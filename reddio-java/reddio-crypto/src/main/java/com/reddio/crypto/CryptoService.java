@@ -32,7 +32,7 @@ public class CryptoService {
         SignResult ret = new SignResult();
         int errno = Reddio.instance.sign(document, ret);
         if (errno != 0) {
-            throw new ReddioException(Reddio.instance.explain(errno));
+            throw new ReddioCryptoException(Reddio.instance.explain(errno));
         }
         return new Signature(StandardCharsets.UTF_8.decode(ret.r).toString().trim(), StandardCharsets.UTF_8.decode(ret.s).toString().trim());
     }
@@ -63,7 +63,7 @@ public class CryptoService {
         ByteBuffer ret = ByteBuffer.allocateDirect(Reddio.STRING_MAX_SIZE);
         int errno = Reddio.instance.get_transfer_msg_hash(msg, ret);
         if (errno != 0) {
-            throw new ReddioException(Reddio.instance.explain(errno));
+            throw new ReddioCryptoException(Reddio.instance.explain(errno));
         }
         return new BigInteger(StandardCharsets.UTF_8.decode(ret).toString().trim(), 16);
     }
