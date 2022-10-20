@@ -1,0 +1,41 @@
+name: Build Java SDK Jars
+on:
+  workflow_dispatch: {}
+  label:
+    types:
+      - created
+
+jobs:
+  build-java-sdk:
+    name: Download Native Library
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Download Latest Native Library
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          workflow: unity-plugin-zip.yaml
+          workflow_conclusion: success
+          path: artifacts
+      - name: Copy Native Library to Java Project
+        run: |
+          mkdir -p output/lib 
+          cp artifacts/libreddio-x86_64-pc-windows-msvc/reddio.dll output/lib/reddio.dll
+          cp artifacts/libreddio-x86_64-apple-darwin/libreddio.dylib output/liblibreddio.dylib
+          cp artifacts/libreddio-x86_64-unknown-linux-gnu/libreddio.so output/liblibreddio.so
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: "adopt"
+          java-version: "8"
+      - name: Build Java SDK Jars
+        working-directory: reddio-java
+        run: |
+          mvn -B clean verify -DskipTests
+      - name: Upload Jars
+        uses: actions/upload-artifact@v3
+        with:
+          path: |
+            reddio-java/**/*.jar

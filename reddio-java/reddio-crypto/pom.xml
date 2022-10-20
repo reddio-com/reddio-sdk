@@ -48,6 +48,42 @@
                             </resources>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>copy-resources-osx</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${basedir}/target/classes/osx-x86-64</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>../../output/lib</directory>
+                                    <includes>
+                                        <include>libreddio.dylib</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-resources-windows</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${basedir}/target/classes/windows-x86-64</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>../../output/lib</directory>
+                                    <includes>
+                                        <include>reddio.dll</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
         </plugins>
