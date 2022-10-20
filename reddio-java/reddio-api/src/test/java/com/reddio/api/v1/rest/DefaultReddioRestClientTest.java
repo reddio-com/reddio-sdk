@@ -6,8 +6,6 @@ import org.junit.Assert;
 import java.util.concurrent.ExecutionException;
 
 public class DefaultReddioRestClientTest extends TestCase {
-
-
     public void testGetRecord() throws ExecutionException, InterruptedException {
         DefaultReddioRestClient client = DefaultReddioRestClient.testnet();
         ResponseWrapper<GetRecordResponse> response = client.getRecord(
