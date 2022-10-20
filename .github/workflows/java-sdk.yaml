@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-java-sdk:
-    name: Download Native Library
+    name: Build Java SDK
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
@@ -23,8 +23,9 @@ jobs:
         run: |
           mkdir -p output/lib 
           cp artifacts/libreddio-x86_64-pc-windows-msvc/reddio.dll output/lib/reddio.dll
-          cp artifacts/libreddio-x86_64-apple-darwin/libreddio.dylib output/liblibreddio.dylib
-          cp artifacts/libreddio-x86_64-unknown-linux-gnu/libreddio.so output/liblibreddio.so
+          cp artifacts/libreddio-x86_64-apple-darwin/libreddio.dylib output/lib/libreddio.dylib
+          cp artifacts/libreddio-x86_64-unknown-linux-gnu/libreddio.so output/lib/libreddio.so
+          ls -alh output/lib
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
@@ -37,5 +38,6 @@ jobs:
       - name: Upload Jars
         uses: actions/upload-artifact@v3
         with:
+          name: reddio-java-sdk
           path: |
             reddio-java/**/*.jar
