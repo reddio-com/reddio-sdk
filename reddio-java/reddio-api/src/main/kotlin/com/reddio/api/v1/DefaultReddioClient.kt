@@ -2,10 +2,17 @@ package com.reddio.api.v1
 
 import com.reddio.api.v1.rest.*
 import com.reddio.crypto.CryptoService
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
+import java.lang.RuntimeException
 import java.math.BigInteger
+import java.time.Duration
+import java.time.Instant
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.time.toKotlinDuration
 
 class DefaultReddioClient(private val restClient: ReddioRestClient) : ReddioClient {
 
@@ -27,14 +34,7 @@ class DefaultReddioClient(private val restClient: ReddioRestClient) : ReddioClie
                 val receiverVaultId = vaultsIds.receiverVaultId
                 val nonce = restClient.getNonce(GetNonceMessage.of(starkKey)).await().getData().getNonce()
                 val signature = signTransferMessage(
-                    privateKey,
-                    amount,
-                    nonce,
-                    senderVaultId,
-                    assetId,
-                    receiverVaultId,
-                    receiver,
-                    expirationTimeStamp
+                    privateKey, amount, nonce, senderVaultId, assetId, receiverVaultId, receiver, expirationTimeStamp
                 )
                 restClient.transfer(
                     TransferMessage.of(
@@ -49,6 +49,54 @@ class DefaultReddioClient(private val restClient: ReddioRestClient) : ReddioClie
                         signature
                     )
                 ).await()
+            }
+        }
+    }
+
+    override fun getRecord(starkKey: String?, sequenceId: Long): CompletableFuture<ResponseWrapper<GetRecordResponse>> {
+        return restClient.getRecord(GetRecordMessage.of(starkKey, sequenceId))
+    }
+
+    override fun waitingTransferGetApproved(
+        starkKey: String, sequenceId: Long
+    ): CompletableFuture<ResponseWrapper<GetRecordResponse>> {
+        val neverStop = AtomicBoolean(false);
+        return waitingTransferGetApproved(
+            starkKey, sequenceId,
+            Duration.ofSeconds(5),
+            Duration.ofSeconds(60),
+            neverStop,
+        )
+    }
+
+    override fun waitingTransferGetApproved(
+        starkKey: String, sequenceId: Long, interval: Duration, deadline: Duration, shouldStop: AtomicBoolean
+    ): CompletableFuture<ResponseWrapper<GetRecordResponse>> {
+        val startTime = Instant.now()
+        return CompletableFuture.supplyAsync {
+            val result: ResponseWrapper<GetRecordResponse>
+            runBlocking {
+                while (true) {
+                    if (shouldStop.get()) {
+                        throw InterruptedException("cancelled")
+                    }
+                    if (Thread.interrupted()) {
+                        throw InterruptedException("cancelled")
+                    }
+                    if (startTime.plus(deadline).isBefore(Instant.now())) {
+                        throw InterruptedException("timed out")
+                    }
+                    val record = restClient.getRecord(GetRecordMessage.of(starkKey, sequenceId)).await()
+                    if (GetRecordResponse.SequenceRecord.SEQUENCE_STATUS_ACCEPTED == record.getData()[0].getStatus()) {
+                        result = record
+                        break
+                    }
+                    if (GetRecordResponse.SequenceRecord.SEQUENCE_STATUS_FAILED == record.getData()[0].getStatus()) {
+                        throw RuntimeException("transfer failed")
+                    }
+                    delay(interval.toKotlinDuration())
+                }
+                result
             }
         }
     }
@@ -78,8 +126,7 @@ class DefaultReddioClient(private val restClient: ReddioRestClient) : ReddioClie
         expirationTimestamp: Long = 4194303L,
     ): Signature {
         val result = CryptoService.sign(
-            BigInteger(privateKey.lowercase().replace("0x", ""), 16),
-            CryptoService.getTransferMsgHash(
+            BigInteger(privateKey.lowercase().replace("0x", ""), 16), CryptoService.getTransferMsgHash(
                 amount.toLong(),
                 nonce,
                 senderVaultId.toLong(),
@@ -96,12 +143,10 @@ class DefaultReddioClient(private val restClient: ReddioRestClient) : ReddioClie
 
     companion object {
         @JvmStatic
-        fun mainnet(): DefaultReddioClient =
-            DefaultReddioClient(DefaultReddioRestClient.mainnet())
+        fun mainnet(): DefaultReddioClient = DefaultReddioClient(DefaultReddioRestClient.mainnet())
 
         @JvmStatic
-        fun testnet(): DefaultReddioClient =
-            DefaultReddioClient(DefaultReddioRestClient.testnet())
+        fun testnet(): DefaultReddioClient = DefaultReddioClient(DefaultReddioRestClient.testnet())
 
         private data class VaultIds(val senderVaultId: String, val receiverVaultId: String)
     }
