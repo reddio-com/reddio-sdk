@@ -9,7 +9,7 @@
     <version>${revision}</version>
     <modules>
         <module>reddio-crypto</module>
-        <module>reddio-java-sdk</module>
+        <module>reddio-api</module>
     </modules>
 
     <name>reddio-java</name>

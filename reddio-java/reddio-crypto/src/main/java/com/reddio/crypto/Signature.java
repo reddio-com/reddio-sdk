@@ -39,4 +39,12 @@ public class Signature {
     public int hashCode() {
         return Objects.hash(r, s);
     }
+
+    @Override
+    public String toString() {
+        return "Signature{" +
+                "r='" + r + '\'' +
+                ", s='" + s + '\'' +
+                '}';
+    }
 }
