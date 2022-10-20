@@ -92,7 +92,7 @@ class DefaultReddioClient(private val restClient: ReddioRestClient) : ReddioClie
                         break
                     }
                     if (GetRecordResponse.SequenceRecord.SEQUENCE_STATUS_FAILED == record.getData()[0].getStatus()) {
-                        throw RuntimeException("transfer failed")
+                        throw TransferFailedException("transfer failed", record.getData())
                     }
                     delay(interval.toKotlinDuration())
                 }
