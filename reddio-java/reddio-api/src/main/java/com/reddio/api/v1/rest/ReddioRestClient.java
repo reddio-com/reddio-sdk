@@ -62,4 +62,7 @@ public interface ReddioRestClient {
      * @return
      */
     CompletableFuture<ResponseWrapper<WithdrawalToResponse>> withdrawalTo(WithdrawalToMessage withdrawalToMessage);
+
+    CompletableFuture<ResponseWrapper<OrderResponse>> order(OrderMessage orderMessage);
+    CompletableFuture<ResponseWrapper<OrderInfoResponse>> orderInfo(OrderInfoMessage orderInfoMessage);
 }

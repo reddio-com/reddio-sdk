@@ -10,25 +10,25 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(staticName = "of")
 public class WithdrawalToMessage {
     @JsonProperty("contract_address")
-    public String ContractAddress;
+    public String contractAddress;
     @JsonProperty("asset_id")
-    public String AssetId;
+    public String assetId;
     @JsonProperty("stark_key")
-    public String StarkKey;
+    public String starkKey;
     @JsonProperty("amount")
-    public String Amount;
+    public String amount;
     @JsonProperty("token_id")
-    public String TokenId;
+    public String tokenId;
     @JsonProperty("nonce")
-    public Long Nonce;
+    public Long nonce;
     @JsonProperty("vault_id")
-    public String VaultId;
+    public String vaultId;
     @JsonProperty("receiver")
-    public String Receiver;
+    public String receiver;
     @JsonProperty("receiver_vault_id")
-    public String ReceiverVaultId;
+    public String receiverVaultId;
     @JsonProperty("expiration_timestamp")
-    public Long ExpirationTimestamp;
+    public Long expirationTimestamp;
     @JsonProperty("signature")
-    public Signature Signature;
+    public Signature signature;
 }

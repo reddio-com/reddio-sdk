@@ -5,6 +5,7 @@ import com.reddio.crypto.CryptoService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
+import org.web3j.utils.Convert
 import java.math.BigInteger
 import java.time.Duration
 import java.time.Instant
@@ -138,6 +139,80 @@ class DefaultReddioClient(private val restClient: ReddioRestClient) : ReddioClie
         }
     }
 
+    override fun order(
+        privateKey: String,
+        starkKey: String,
+        price: String,
+        amount: String,
+        tokenAddress: String,
+        tokenId: String,
+        marketplaceUuid: String,
+        tokenType: String,
+        orderType: OrderType
+    ): CompletableFuture<ResponseWrapper<OrderResponse>> {
+        return CompletableFuture.supplyAsync {
+            runBlocking {
+                val orderInfoResponse = restClient.orderInfo(
+                    OrderInfoMessage.of(
+                        starkKey,
+                        "ETH:ETH",
+                        String.format("%s:%s:%s", tokenType, tokenAddress, tokenId)
+                    )
+                ).await()
+                if (orderInfoResponse.status != "OK") {
+                    throw RuntimeException("get order info, status is " + orderInfoResponse.status + ", error is " + orderInfoResponse.error)
+                }
+                val vaultIds = orderInfoResponse.data.getVaultIds()
+                val quoteToken = orderInfoResponse.data.assetIds[1]
+                val direction =
+                    if (orderType == OrderType.BUY) OrderMessage.DIRECTION_BID else OrderMessage.DIRECTION_ASK
+
+                val amountBuy =
+                    Convert.fromWei((price.toDouble() * amount.toDouble()).toString(), Convert.Unit.MWEI).toString()
+//                val formatPrice = Convert.fromWei(price, Convert.Unit.MWEI).toString()
+                val orderMessage = OrderMessage()
+                orderMessage.expirationTimestamp = 4194303;
+                orderMessage.nonce = orderInfoResponse.data.nonce;
+                orderMessage.feeInfo = FeeInfo.of(
+                    (orderInfoResponse.data.feeRate.toDouble() * amountBuy.toDouble()).toLong(),
+                    orderInfoResponse.data.feeToken,
+                    vaultIds[0].toLong()
+                )
+                if (orderType == OrderType.BUY) {
+                    orderMessage.tokenSell = orderInfoResponse.data.baseToken
+                    orderMessage.tokenBuy = quoteToken
+                    orderMessage.amountSell = amountBuy
+                    orderMessage.amountBuy = amount
+                    orderMessage.vaultIdBuy = vaultIds[1]
+                    orderMessage.vaultIdSell = vaultIds[0]
+                } else {
+                    orderMessage.tokenSell = quoteToken
+                    orderMessage.tokenBuy = orderInfoResponse.data.baseToken
+                    orderMessage.amountSell = amount
+                    orderMessage.amountBuy = amountBuy
+                    orderMessage.vaultIdBuy = vaultIds[0]
+                    orderMessage.vaultIdSell = vaultIds[1]
+                }
+                orderMessage.signature =
+                    signOrderMsgWithFee(
+                        privateKey,
+                        orderMessage.vaultIdSell,
+                        orderMessage.vaultIdBuy,
+                        orderMessage.amountSell,
+                        orderMessage.amountBuy,
+                        orderMessage.tokenSell,
+                        orderMessage.tokenBuy,
+                        orderMessage.nonce,
+                        orderMessage.expirationTimestamp,
+                        orderMessage.feeInfo.tokenId,
+                        orderMessage.feeInfo.sourceVaultId,
+                        orderMessage.feeInfo.feeLimit
+                    )
+                restClient.order(orderMessage).await()
+            }
+        }
+    }
+
     private suspend fun getAssetId(
         contractAddress: String,
         tokenId: String,
@@ -177,6 +252,36 @@ class DefaultReddioClient(private val restClient: ReddioRestClient) : ReddioClie
         return Signature.of("0x${result.r}", "0x${result.s}")
     }
 
+    internal fun signOrderMsgWithFee(
+        privateKey: String,
+        vaultIdSell: String,
+        vaultIdBuy: String,
+        amountSell: String,
+        amountBuy: String,
+        tokenSell: String,
+        tokenBuy: String,
+        nonce: Long,
+        expirationTimestamp: Long = 4194303L,
+        feeToken: String,
+        feeSourceVaultId: Long,
+        feeLimit: Long,
+    ): Signature {
+        val hash = CryptoService.getLimitOrderMsgHashWithFee(
+            vaultIdSell.toLong(),
+            vaultIdBuy.toLong(),
+            amountSell.toLong(),
+            amountBuy.toLong(),
+            BigInteger(tokenSell.lowercase().replace("0x", ""), 16),
+            BigInteger(tokenBuy.lowercase().replace("0x", ""), 16),
+            nonce,
+            expirationTimestamp,
+            BigInteger(feeToken.lowercase().replace("0x", ""), 16),
+            feeSourceVaultId,
+            feeLimit
+        )
+        val result = CryptoService.sign(BigInteger(privateKey.lowercase().replace("0x", ""), 16), hash, null);
+        return Signature.of("0x${result.r}", "0x${result.s}")
+    }
 
     companion object {
         @JvmStatic

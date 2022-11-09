@@ -103,6 +103,34 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         });
     }
 
+    @Override
+    public CompletableFuture<ResponseWrapper<OrderResponse>> order(OrderMessage orderMessage) {
+        String endpoint = baseEndpoint + "/v1/order";
+
+        final String jsonString;
+        try {
+            jsonString = objectMapper.writeValueAsString(orderMessage);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        Request request = new Request.Builder().url(endpoint).post(RequestBody.create(jsonString, JSON)).build();
+        Call call = this.httpClient.newCall(request);
+
+        return asFuture(call, new TypeReference<ResponseWrapper<OrderResponse>>() {
+        });
+    }
+
+    @Override
+    public CompletableFuture<ResponseWrapper<OrderInfoResponse>> orderInfo(OrderInfoMessage orderInfoMessage) {
+        String endpoint = baseEndpoint + "/v1/order/info?stark_key=" + orderInfoMessage.getStarkKey() + "&contract1=" + orderInfoMessage.getContract1() + "&contract2=" + orderInfoMessage.getContract2();
+
+        Request request = new Request.Builder().url(endpoint).get().build();
+        Call call = this.httpClient.newCall(request);
+        return asFuture(call, new TypeReference<ResponseWrapper<OrderInfoResponse>>() {
+        });
+    }
+
     private static <T> CompletableFuture<T> asFuture(Call call, TypeReference<T> typeReference) {
         CompletableFuture<T> future = new CompletableFuture<>();
         // notice: the HTTP request would execute in the background after call.enqueue(), not after the future.get().

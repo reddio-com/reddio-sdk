@@ -1,9 +1,6 @@
 package com.reddio.api.v1;
 
-import com.reddio.api.v1.rest.GetRecordResponse;
-import com.reddio.api.v1.rest.ResponseWrapper;
-import com.reddio.api.v1.rest.TransferResponse;
-import com.reddio.api.v1.rest.WithdrawalToResponse;
+import com.reddio.api.v1.rest.*;
 
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
@@ -38,4 +35,15 @@ public interface ReddioClient {
             long expirationTimeStamp
     );
 
+    CompletableFuture<ResponseWrapper<OrderResponse>> order(
+            String privateKey,
+            String starkKey,
+            String price,
+            String amount,
+            String tokenAddress,
+            String tokenId,
+            String marketplaceUuid,
+            String tokenType,
+            OrderType orderType
+    );
 }
