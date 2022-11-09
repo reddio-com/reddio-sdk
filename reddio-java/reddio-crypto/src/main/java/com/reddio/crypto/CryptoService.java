@@ -18,6 +18,8 @@ public class CryptoService {
         int sign(SignDocument document, SignResult ret);
 
         int get_transfer_msg_hash(TransferMsg msg, ByteBuffer ret);
+
+        int get_limit_order_msg_hash_with_fee(LimitOrderMsgWithFee msg, ByteBuffer ret);
     }
 
     public static Signature sign(BigInteger privateKey, BigInteger msgHash, BigInteger seed) {
@@ -62,6 +64,39 @@ public class CryptoService {
         }
         ByteBuffer ret = ByteBuffer.allocateDirect(Reddio.STRING_MAX_SIZE);
         int errno = Reddio.instance.get_transfer_msg_hash(msg, ret);
+        if (errno != 0) {
+            throw new ReddioCryptoException(Reddio.instance.explain(errno));
+        }
+        return new BigInteger(StandardCharsets.UTF_8.decode(ret).toString().trim(), 16);
+    }
+
+    public static BigInteger getLimitOrderMsgHashWithFee(
+            long vaultSell,
+            long vaultBuy,
+            long amountSell,
+            long amountBuy,
+            BigInteger token_sell,
+            BigInteger token_buy,
+            long nonce,
+            long expirationTimestamp,
+            BigInteger feeToken,
+            long feeVaultId,
+            long feeLimit
+    ){
+        LimitOrderMsgWithFee msg = new LimitOrderMsgWithFee();
+        msg.vault_sell = String.valueOf(vaultSell);
+        msg.vault_buy = String.valueOf(vaultBuy);
+        msg.amount_sell = String.valueOf(amountSell);
+        msg.amount_buy = String.valueOf(amountBuy);
+        msg.token_sell = token_sell.toString(16);
+        msg.token_buy = token_buy.toString(16);
+        msg.nonce = String.valueOf(nonce);
+        msg.expiration_time_stamp = String.valueOf(expirationTimestamp);
+        msg.fee_token = feeToken.toString(16);
+        msg.fee_vault_id = String.valueOf(feeVaultId);
+        msg.fee_limit = String.valueOf(feeLimit);
+        ByteBuffer ret = ByteBuffer.allocateDirect(Reddio.STRING_MAX_SIZE);
+        int errno = Reddio.instance.get_limit_order_msg_hash_with_fee(msg, ret);
         if (errno != 0) {
             throw new ReddioCryptoException(Reddio.instance.explain(errno));
         }

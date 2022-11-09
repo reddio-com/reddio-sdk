@@ -28,4 +28,22 @@ public class CryptoServiceTest extends TestCase {
         );
         Assert.assertEquals("6366b00c218fb4c8a8b142ca482145e8513c78e00faa0de76298ba14fc37ae7", hash.toString(16));
     }
+
+    public void testGetLimitOrderMsgHashWithFee(){
+        BigInteger hash = CryptoService.getLimitOrderMsgHashWithFee(
+                21,
+                27,
+                2154686749748910716L,
+                1470242115489520459L,
+                new BigInteger("5fa3383597691ea9d827a79e1a4f0f7989c35ced18ca9619de8ab97e661020", 16),
+                new BigInteger("774961c824a3b0fb3d2965f01471c9c7734bf8dbde659e0c08dca2ef18d56a", 16),
+        0,
+                438953,
+                new BigInteger("70bf591713d7cb7150523cf64add8d49fa6b61036bba9f596bd2af8e3bb86f9", 16),
+
+                593128169,
+                7
+        );
+        Assert.assertEquals("2a6c0382404920ebd73c1cbc319cd38974e7e255e00394345e652b0ce2cefbd", hash.toString(16));
+    }
 }
