@@ -5,12 +5,10 @@ import com.reddio.crypto.CryptoService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
-import java.lang.RuntimeException
 import java.math.BigInteger
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.time.toKotlinDuration
 
@@ -97,6 +95,45 @@ class DefaultReddioClient(private val restClient: ReddioRestClient) : ReddioClie
                     delay(interval.toKotlinDuration())
                 }
                 result
+            }
+        }
+    }
+
+    override fun withdrawal(
+        starkKey: String,
+        privateKey: String,
+        amount: String,
+        contractAddress: String,
+        tokenId: String,
+        type: String,
+        receiver: String,
+        expirationTimeStamp: Long
+    ): CompletableFuture<ResponseWrapper<WithdrawalToResponse>> {
+        return CompletableFuture.supplyAsync {
+            runBlocking {
+                val assetId = getAssetId(contractAddress, tokenId, type)
+                val vaultsIds = getVaultsIds(assetId, starkKey, receiver)
+                val senderVaultId = vaultsIds.senderVaultId
+                val receiverVaultId = vaultsIds.receiverVaultId
+                val nonce = restClient.getNonce(GetNonceMessage.of(starkKey)).await().getData().getNonce()
+                val signature = signTransferMessage(
+                    privateKey, amount, nonce, senderVaultId, assetId, receiverVaultId, receiver, expirationTimeStamp
+                )
+                restClient.withdrawalTo(
+                    WithdrawalToMessage.of(
+                        contractAddress,
+                        assetId,
+                        starkKey,
+                        amount,
+                        tokenId,
+                        nonce,
+                        senderVaultId,
+                        receiver,
+                        receiverVaultId,
+                        expirationTimeStamp,
+                        signature
+                    )
+                ).await()
             }
         }
     }

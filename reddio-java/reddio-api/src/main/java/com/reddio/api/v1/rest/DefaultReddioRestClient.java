@@ -85,6 +85,24 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         });
     }
 
+    @Override
+    public CompletableFuture<ResponseWrapper<WithdrawalToResponse>> withdrawalTo(WithdrawalToMessage withdrawalToMessage) {
+        String endpoint = baseEndpoint + "/v1/withdrawalto";
+
+        final String jsonString;
+        try {
+            jsonString = objectMapper.writeValueAsString(withdrawalToMessage);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        Request request = new Request.Builder().url(endpoint).post(RequestBody.create(jsonString, JSON)).build();
+        Call call = this.httpClient.newCall(request);
+
+        return asFuture(call, new TypeReference<ResponseWrapper<WithdrawalToResponse>>() {
+        });
+    }
+
     private static <T> CompletableFuture<T> asFuture(Call call, TypeReference<T> typeReference) {
         CompletableFuture<T> future = new CompletableFuture<>();
         // notice: the HTTP request would execute in the background after call.enqueue(), not after the future.get().
