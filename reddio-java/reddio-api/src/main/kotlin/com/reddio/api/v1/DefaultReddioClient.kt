@@ -218,7 +218,10 @@ class DefaultReddioClient(private val restClient: ReddioRestClient) : ReddioClie
         tokenId: String,
         type: String,
     ): String {
-        val result = restClient.getAssetId(GetAssetIdMessage.of(contractAddress, type, tokenId)).await()
+        val contractInfo =
+            restClient.getContractInfo(GetContractInfoMessage.of(type, contractAddress)).await().getData()
+        val result =
+            restClient.getAssetId(GetAssetIdMessage.of(contractAddress, type, tokenId, contractInfo.quantum)).await()
         return result.getData().getAssetId()
     }
 

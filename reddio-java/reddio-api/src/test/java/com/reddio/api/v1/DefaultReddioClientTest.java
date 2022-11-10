@@ -2,18 +2,16 @@ package com.reddio.api.v1;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.reddio.api.v1.rest.GetRecordResponse;
-import com.reddio.api.v1.rest.ResponseWrapper;
-import com.reddio.api.v1.rest.Signature;
-import com.reddio.api.v1.rest.TransferResponse;
-import junit.framework.TestCase;
+import com.reddio.api.v1.rest.*;
 import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
 
-public class DefaultReddioClientTest extends TestCase {
+public class DefaultReddioClientTest {
+    @Test
     public void testSign() {
         DefaultReddioClient client = DefaultReddioClient.testnet();
         Signature signature = client.signTransferMessage$reddio_api(
@@ -29,6 +27,7 @@ public class DefaultReddioClientTest extends TestCase {
         Assert.assertEquals("0x21f3a32d5779668d66af7f9f161d90afb3765c3a6326b6397f73ea346f94e5d", signature.s);
     }
 
+    @Test
     public void testTransfer() throws ExecutionException, InterruptedException, JsonProcessingException {
         DefaultReddioClient client = DefaultReddioClient.testnet();
         CompletableFuture<ResponseWrapper<TransferResponse>> future = client.transfer(
@@ -46,11 +45,50 @@ public class DefaultReddioClientTest extends TestCase {
         System.out.println(new ObjectMapper().writeValueAsString(result));
     }
 
+    @Test
     public void testWaitingRecordGetApproved() throws ExecutionException, InterruptedException, JsonProcessingException {
         DefaultReddioClient client = DefaultReddioClient.testnet();
         CompletableFuture<ResponseWrapper<GetRecordResponse>> future = client.waitingTransferGetApproved("0x6736f7449da3bf44bf0f7bdd6463818e1ef272641d43021e8bca17b32ec2df0",
                 300523);
         ResponseWrapper<GetRecordResponse> result = future.get();
+        Assert.assertEquals("OK", result.status);
+        System.out.println(new ObjectMapper().writeValueAsString(result));
+    }
+
+    @Test
+    public void testWithdrawalGoerliETH() throws ExecutionException, InterruptedException, JsonProcessingException {
+        DefaultReddioClient client = DefaultReddioClient.testnet();
+        CompletableFuture<ResponseWrapper<WithdrawalToResponse>> future = client.withdrawal(
+                "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
+                "0x4d55b547af138c5b6200495d86ab6aed3e06c25fdd75b4b6a00e48515df2b3d",
+                // 13x10^-6, 0.000013 ETH
+                "13",
+                "ETH",
+                "",
+                "ETH",
+                "0x76f2Fc7ed90039d986e3eb4DB294f05E160c8F03",
+                4194303L
+        );
+        ResponseWrapper<WithdrawalToResponse> result = future.get();
+        Assert.assertEquals("OK", result.status);
+        System.out.println(new ObjectMapper().writeValueAsString(result));
+    }
+
+    @Test
+    @Ignore("this test is not reproducible because it depends on the real stock of the NFT on layer2")
+    public void testWithdrawalNTF() throws ExecutionException, InterruptedException, JsonProcessingException {
+        DefaultReddioClient client = DefaultReddioClient.testnet();
+        CompletableFuture<ResponseWrapper<WithdrawalToResponse>> future = client.withdrawal(
+                "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
+                "0x4d55b547af138c5b6200495d86ab6aed3e06c25fdd75b4b6a00e48515df2b3d",
+                "1",
+                "0x941661bd1134dc7cc3d107bf006b8631f6e65ad5",
+                "1022",
+                "ERC721",
+                "0x76f2Fc7ed90039d986e3eb4DB294f05E160c8F03",
+                4194303L
+        );
+        ResponseWrapper<WithdrawalToResponse> result = future.get();
         Assert.assertEquals("OK", result.status);
         System.out.println(new ObjectMapper().writeValueAsString(result));
     }

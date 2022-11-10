@@ -60,7 +60,11 @@ public class DefaultReddioRestClient implements ReddioRestClient {
 
     @Override
     public CompletableFuture<ResponseWrapper<GetAssetIdResponse>> getAssetId(GetAssetIdMessage getAssetIdMessage) {
-        String endpoint = baseEndpoint + "/v1/assetid?type=" + getAssetIdMessage.getType() + "&contract_address=" + getAssetIdMessage.getContractAddress() + "&token_id=" + getAssetIdMessage.getTokenId();
+        String endpoint = baseEndpoint +
+                "/v1/assetid?type=" + getAssetIdMessage.getType() +
+                "&contract_address=" + getAssetIdMessage.getContractAddress() +
+                "&token_id=" + getAssetIdMessage.getTokenId() +
+                "&quantum=" + getAssetIdMessage.getQuantum();
         Request request = new Request.Builder().url(endpoint).get().build();
         Call call = this.httpClient.newCall(request);
         return asFuture(call, new TypeReference<ResponseWrapper<GetAssetIdResponse>>() {
@@ -131,6 +135,17 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         });
     }
 
+
+    @Override
+    public CompletableFuture<ResponseWrapper<GetContractInfoResponse>> getContractInfo(GetContractInfoMessage getContractInfoMessage) {
+        String endpoint = baseEndpoint + "/v1/contract_info?type=" + getContractInfoMessage.type + "&contract_address=" + getContractInfoMessage.contractAddress;
+
+        Request request = new Request.Builder().url(endpoint).get().build();
+        Call call = this.httpClient.newCall(request);
+        return asFuture(call, new TypeReference<ResponseWrapper<GetContractInfoResponse>>() {
+        });
+    }
+
     private static <T> CompletableFuture<T> asFuture(Call call, TypeReference<T> typeReference) {
         CompletableFuture<T> future = new CompletableFuture<>();
         // notice: the HTTP request would execute in the background after call.enqueue(), not after the future.get().
@@ -147,7 +162,6 @@ public class DefaultReddioRestClient implements ReddioRestClient {
             this.typeReference = typeReference;
         }
 
-
         @Override
         public void onFailure(@NotNull Call call, IOException e) {
             this.future.completeExceptionally(e);
@@ -155,7 +169,8 @@ public class DefaultReddioRestClient implements ReddioRestClient {
 
         @Override
         public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-            this.future.complete(objectMapper.readValue(Objects.requireNonNull(response.body()).string(), typeReference));
+            String jsonString = Objects.requireNonNull(response.body()).string();
+            this.future.complete(objectMapper.readValue(jsonString, typeReference));
         }
     }
 

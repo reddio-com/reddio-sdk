@@ -4,18 +4,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "of")
-public class GetAssetIdMessage {
-    @JsonProperty("contract_address")
-    public String contractAddress;
+public class GetContractInfoMessage {
     @JsonProperty("type")
     public String type;
-    @JsonProperty("token_id")
-    public String tokenId;
-    @JsonProperty("quantum")
-    public Long quantum = 1L;
+    @JsonProperty("contract_address")
+    public String contractAddress;
 }

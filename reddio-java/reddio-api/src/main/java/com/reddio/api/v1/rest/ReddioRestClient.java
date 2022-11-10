@@ -65,4 +65,6 @@ public interface ReddioRestClient {
 
     CompletableFuture<ResponseWrapper<OrderResponse>> order(OrderMessage orderMessage);
     CompletableFuture<ResponseWrapper<OrderInfoResponse>> orderInfo(OrderInfoMessage orderInfoMessage);
+
+    CompletableFuture<ResponseWrapper<GetContractInfoResponse>> getContractInfo(GetContractInfoMessage getContractInfoMessage);
 }
