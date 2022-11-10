@@ -76,7 +76,7 @@ public class DefaultReddioClientTest {
 
     @Test
     @Ignore("this test is not reproducible because it depends on the real stock of the NFT on layer2")
-    public void testWithdrawalNTF() throws ExecutionException, InterruptedException, JsonProcessingException {
+    public void testWithdrawalNTFERC721() throws ExecutionException, InterruptedException, JsonProcessingException {
         DefaultReddioClient client = DefaultReddioClient.testnet();
         CompletableFuture<ResponseWrapper<WithdrawalToResponse>> future = client.withdrawal(
                 "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
@@ -85,6 +85,24 @@ public class DefaultReddioClientTest {
                 "0x941661bd1134dc7cc3d107bf006b8631f6e65ad5",
                 "1022",
                 "ERC721",
+                "0x76f2Fc7ed90039d986e3eb4DB294f05E160c8F03",
+                4194303L
+        );
+        ResponseWrapper<WithdrawalToResponse> result = future.get();
+        Assert.assertEquals("OK", result.status);
+        System.out.println(new ObjectMapper().writeValueAsString(result));
+    }
+    @Test
+    @Ignore("this test is not reproducible because it depends on the real stock of the NFT on layer2")
+    public void testWithdrawalNTFERC721M() throws ExecutionException, InterruptedException, JsonProcessingException {
+        DefaultReddioClient client = DefaultReddioClient.testnet();
+        CompletableFuture<ResponseWrapper<WithdrawalToResponse>> future = client.withdrawal(
+                "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
+                "0x4d55b547af138c5b6200495d86ab6aed3e06c25fdd75b4b6a00e48515df2b3d",
+                "1",
+                "0xe3d2a2ca17a8dedb740b6c259b4eeeaaf81c9fb6",
+                "3",
+                "ERC721M",
                 "0x76f2Fc7ed90039d986e3eb4DB294f05E160c8F03",
                 4194303L
         );
