@@ -20,6 +20,10 @@ public class CryptoService {
         int get_transfer_msg_hash(TransferMsg msg, ByteBuffer ret);
 
         int get_limit_order_msg_hash_with_fee(LimitOrderMsgWithFee msg, ByteBuffer ret);
+
+        int get_random_private_key(ByteBuffer ret);
+
+        int get_public_key(String privateKey, ByteBuffer ret);
     }
 
     public static Signature sign(BigInteger privateKey, BigInteger msgHash, BigInteger seed) {
@@ -82,7 +86,7 @@ public class CryptoService {
             BigInteger feeToken,
             long feeVaultId,
             long feeLimit
-    ){
+    ) {
         LimitOrderMsgWithFee msg = new LimitOrderMsgWithFee();
         msg.vault_sell = String.valueOf(vaultSell);
         msg.vault_buy = String.valueOf(vaultBuy);
@@ -97,6 +101,23 @@ public class CryptoService {
         msg.fee_limit = String.valueOf(feeLimit);
         ByteBuffer ret = ByteBuffer.allocateDirect(Reddio.STRING_MAX_SIZE);
         int errno = Reddio.instance.get_limit_order_msg_hash_with_fee(msg, ret);
+        if (errno != 0) {
+            throw new ReddioCryptoException(Reddio.instance.explain(errno));
+        }
+        return new BigInteger(StandardCharsets.UTF_8.decode(ret).toString().trim(), 16);
+    }
+
+    public static BigInteger getPublicKey(BigInteger privateKey) {
+        ByteBuffer ret = ByteBuffer.allocateDirect(Reddio.STRING_MAX_SIZE);
+        int errno = Reddio.instance.get_public_key(privateKey.toString(16), ret);
+        if (errno != 0) {
+            throw new ReddioCryptoException(Reddio.instance.explain(errno));
+        }
+        return new BigInteger(StandardCharsets.UTF_8.decode(ret).toString().trim(), 16);
+    }
+    public static BigInteger getRandomPrivateKey() {
+        ByteBuffer ret = ByteBuffer.allocateDirect(Reddio.STRING_MAX_SIZE);
+        int errno = Reddio.instance.get_random_private_key(ret);
         if (errno != 0) {
             throw new ReddioCryptoException(Reddio.instance.explain(errno));
         }
