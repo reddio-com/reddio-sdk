@@ -162,15 +162,19 @@ class DefaultReddioClient(private val restClient: ReddioRestClient) : ReddioClie
                 if (orderInfoResponse.status != "OK") {
                     throw RuntimeException("get order info, status is " + orderInfoResponse.status + ", error is " + orderInfoResponse.error)
                 }
+
                 val vaultIds = orderInfoResponse.data.getVaultIds()
                 val quoteToken = orderInfoResponse.data.assetIds[1]
-                val direction =
-                    if (orderType == OrderType.BUY) OrderMessage.DIRECTION_BID else OrderMessage.DIRECTION_ASK
-
                 val amountBuy =
-                    Convert.fromWei((price.toDouble() * amount.toDouble()).toString(), Convert.Unit.MWEI).toString()
-//                val formatPrice = Convert.fromWei(price, Convert.Unit.MWEI).toString()
+                    Convert.toWei((price.toDouble() * amount.toDouble()).toString(), Convert.Unit.MWEI).toLong().toString()
+                val formatPrice = Convert.toWei(price, Convert.Unit.MWEI).toString()
+
                 val orderMessage = OrderMessage()
+                orderMessage.amount = amount;
+                orderMessage.baseToken = orderInfoResponse.data.getBaseToken()
+                orderMessage.quoteToken = quoteToken
+                orderMessage.price = formatPrice
+                orderMessage.starkKey = starkKey
                 orderMessage.expirationTimestamp = 4194303;
                 orderMessage.nonce = orderInfoResponse.data.nonce;
                 orderMessage.feeInfo = FeeInfo.of(
@@ -179,6 +183,7 @@ class DefaultReddioClient(private val restClient: ReddioRestClient) : ReddioClie
                     vaultIds[0].toLong()
                 )
                 if (orderType == OrderType.BUY) {
+                    orderMessage.direction = OrderMessage.DIRECTION_BID
                     orderMessage.tokenSell = orderInfoResponse.data.baseToken
                     orderMessage.tokenBuy = quoteToken
                     orderMessage.amountSell = amountBuy
@@ -186,6 +191,7 @@ class DefaultReddioClient(private val restClient: ReddioRestClient) : ReddioClie
                     orderMessage.vaultIdBuy = vaultIds[1]
                     orderMessage.vaultIdSell = vaultIds[0]
                 } else {
+                    orderMessage.direction = OrderMessage.DIRECTION_ASK
                     orderMessage.tokenSell = quoteToken
                     orderMessage.tokenBuy = orderInfoResponse.data.baseToken
                     orderMessage.amountSell = amount

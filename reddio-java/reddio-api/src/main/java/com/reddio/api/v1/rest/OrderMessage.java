@@ -13,31 +13,38 @@ public class OrderMessage {
     public static final Long DIRECTION_BID = 1L;
 
     @JsonProperty("amount")
-    public String Amount;
+    public String amount;
     @JsonProperty("amount_buy")
-    public String AmountBuy;
+    public String amountBuy;
     @JsonProperty("amount_sell")
-    public String AmountSell;
+    public String amountSell;
     @JsonProperty("token_buy")
-    public String TokenBuy;
+    public String tokenBuy;
     @JsonProperty("token_sell")
-    public String TokenSell;
+    public String tokenSell;
     @JsonProperty("base_token")
-    public String BaseToken;
+    public String baseToken;
+    @JsonProperty("quote_token")
+    public String quoteToken;
     @JsonProperty("vault_id_buy")
-    public String VaultIdBuy;
+    public String vaultIdBuy;
     @JsonProperty("vault_id_sell")
-    public String VaultIdSell;
+    public String vaultIdSell;
     @JsonProperty("expiration_timestamp")
-    public Long ExpirationTimestamp;
+    public Long expirationTimestamp;
     @JsonProperty("nonce")
-    public Long Nonce;
+    public Long nonce;
     @JsonProperty("signature")
     public Signature signature;
     @JsonProperty("account_id")
-    public String AccountId;
+    public String accountId;
     @JsonProperty("direction")
-    public Long Direction;
+    public Long direction;
     @JsonProperty("fee_info")
     public FeeInfo feeInfo;
+    @JsonProperty("price")
+    public String price;
+
+    @JsonProperty("stark_key")
+    public String starkKey;
 }

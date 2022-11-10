@@ -146,6 +146,15 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         });
     }
 
+    @Override
+    public CompletableFuture<ResponseWrapper<GetBalancesResponse>> getBalances(GetBalancesMessage getBalancesMessage) {
+        String endpoint = baseEndpoint + "/v1/balances?stark_key=" + getBalancesMessage.getStarkKey() + "&contract_address=" + getBalancesMessage.contractAddress;
+        Request request = new Request.Builder().url(endpoint).get().build();
+        Call call = this.httpClient.newCall(request);
+        return asFuture(call, new TypeReference<ResponseWrapper<GetBalancesResponse>>() {
+        });
+    }
+
     private static <T> CompletableFuture<T> asFuture(Call call, TypeReference<T> typeReference) {
         CompletableFuture<T> future = new CompletableFuture<>();
         // notice: the HTTP request would execute in the background after call.enqueue(), not after the future.get().

@@ -3,6 +3,7 @@ package com.reddio.api.v1;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.reddio.api.v1.rest.*;
+import com.reddio.crypto.CryptoService;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -92,6 +93,7 @@ public class DefaultReddioClientTest {
         Assert.assertEquals("OK", result.status);
         System.out.println(new ObjectMapper().writeValueAsString(result));
     }
+
     @Test
     @Ignore("this test is not reproducible because it depends on the real stock of the NFT on layer2")
     public void testWithdrawalNTFERC721M() throws ExecutionException, InterruptedException, JsonProcessingException {
@@ -109,5 +111,34 @@ public class DefaultReddioClientTest {
         ResponseWrapper<WithdrawalToResponse> result = future.get();
         Assert.assertEquals("OK", result.status);
         System.out.println(new ObjectMapper().writeValueAsString(result));
+    }
+
+    @Test
+    @Ignore("not reproducible test")
+    public void testOrder() throws ExecutionException, InterruptedException, JsonProcessingException {
+        DefaultReddioClient client = DefaultReddioClient.testnet();
+        DefaultReddioRestClient restClient = DefaultReddioRestClient.testnet();
+        CompletableFuture<ResponseWrapper<GetBalancesResponse>> balancesFuture = restClient.getBalances(GetBalancesMessage.of(
+                "0x6ecaebbe5b9486472d964217e5470380782823bb0d865240ba916d01636310a",
+                "0x941661Bd1134DC7cc3D107BF006B8631F6E65Ad5",
+                10L)
+        );
+        ResponseWrapper<GetBalancesResponse> balances = balancesFuture.get();
+        Assert.assertEquals("OK", balances.status);
+        GetBalancesResponse.BalanceRecord toSell = balances.getData().getList().get(0);
+        CompletableFuture<ResponseWrapper<OrderResponse>> future = client.order(
+                "0x4d55b547af138c5b6200495d86ab6aed3e06c25fdd75b4b6a00e48515df2b3d",
+                "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
+                "0.013",
+                "1",
+                "0x941661Bd1134DC7cc3D107BF006B8631F6E65Ad5",
+                toSell.getTokenId(),
+                "11ed793a-cc11-4e44-9738-97165c4e14a7",
+                "ERC721",
+                OrderType.SELL
+        );
+        ResponseWrapper<OrderResponse> result = future.get();
+        System.out.println(new ObjectMapper().writeValueAsString(result));
+        Assert.assertEquals("OK", result.status);
     }
 }

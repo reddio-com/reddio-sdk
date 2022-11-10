@@ -8,11 +8,11 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "of")
-public class FeeInfo {
-    @JsonProperty("fee_limit")
-    public Long feeLimit;
-    @JsonProperty("token_id")
-    public String tokenId;
-    @JsonProperty("source_vault_id")
-    public Long sourceVaultId;
+public class GetBalancesMessage {
+    @JsonProperty("stark_key")
+    public String starkKey;
+    @JsonProperty("contract_address")
+    public String contractAddress;
+    @JsonProperty("limit")
+    public Long limit;
 }
