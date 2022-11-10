@@ -189,7 +189,7 @@ public class DefaultReddioRestClient implements ReddioRestClient {
             Request originalRequest = chain.request();
             Request requestWithUserAgent = originalRequest.newBuilder()
                     // TODO(@STRRL): use the release version
-                    .header("User-Agent", "reddio-client-java/0.0.1").build();
+                    .header("User-Agent", "reddio-client-java/0.0.2").build();
             return chain.proceed(requestWithUserAgent);
         }
 
