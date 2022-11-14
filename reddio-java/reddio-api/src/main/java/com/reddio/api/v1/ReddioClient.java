@@ -1,6 +1,7 @@
 package com.reddio.api.v1;
 
 import com.reddio.api.v1.rest.*;
+import com.reddio.gas.GasOption;
 
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
@@ -46,4 +47,12 @@ public interface ReddioClient {
             String tokenType,
             OrderType orderType
     );
+
+    CompletableFuture<LogDeposit> depositETH(
+            String privateKey,
+            String contractAddress,
+            String starkKey,
+            String quantizedAmount,
+            GasOption gasOption
+            );
 }

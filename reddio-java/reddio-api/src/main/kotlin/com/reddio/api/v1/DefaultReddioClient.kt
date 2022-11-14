@@ -1,10 +1,17 @@
 package com.reddio.api.v1
 
+import com.reddio.abi.Deposits
 import com.reddio.api.v1.rest.*
 import com.reddio.crypto.CryptoService
+import com.reddio.gas.GasOption
+import com.reddio.gas.StaticGasLimitSuggestionPriceGasProvider
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
+import org.web3j.crypto.Credentials
+import org.web3j.protocol.Web3j
+import org.web3j.protocol.core.DefaultBlockParameterNumber
+import org.web3j.protocol.http.HttpService
 import org.web3j.utils.Convert
 import java.math.BigInteger
 import java.time.Duration
@@ -13,7 +20,7 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.time.toKotlinDuration
 
-class DefaultReddioClient(private val restClient: ReddioRestClient) : ReddioClient {
+class DefaultReddioClient(private val restClient: ReddioRestClient, private val chainId: Long) : ReddioClient {
 
     override fun transfer(
         starkKey: String,
@@ -154,9 +161,7 @@ class DefaultReddioClient(private val restClient: ReddioRestClient) : ReddioClie
             runBlocking {
                 val orderInfoResponse = restClient.orderInfo(
                     OrderInfoMessage.of(
-                        starkKey,
-                        "ETH:ETH",
-                        String.format("%s:%s:%s", tokenType, tokenAddress, tokenId)
+                        starkKey, "ETH:ETH", String.format("%s:%s:%s", tokenType, tokenAddress, tokenId)
                     )
                 ).await()
                 if (orderInfoResponse.status != "OK") {
@@ -166,7 +171,8 @@ class DefaultReddioClient(private val restClient: ReddioRestClient) : ReddioClie
                 val vaultIds = orderInfoResponse.data.getVaultIds()
                 val quoteToken = orderInfoResponse.data.assetIds[1]
                 val amountBuy =
-                    Convert.toWei((price.toDouble() * amount.toDouble()).toString(), Convert.Unit.MWEI).toLong().toString()
+                    Convert.toWei((price.toDouble() * amount.toDouble()).toString(), Convert.Unit.MWEI).toLong()
+                        .toString()
                 val formatPrice = Convert.toWei(price, Convert.Unit.MWEI).toString()
 
                 val orderMessage = OrderMessage()
@@ -199,23 +205,89 @@ class DefaultReddioClient(private val restClient: ReddioRestClient) : ReddioClie
                     orderMessage.vaultIdBuy = vaultIds[0]
                     orderMessage.vaultIdSell = vaultIds[1]
                 }
-                orderMessage.signature =
-                    signOrderMsgWithFee(
-                        privateKey,
-                        orderMessage.vaultIdSell,
-                        orderMessage.vaultIdBuy,
-                        orderMessage.amountSell,
-                        orderMessage.amountBuy,
-                        orderMessage.tokenSell,
-                        orderMessage.tokenBuy,
-                        orderMessage.nonce,
-                        orderMessage.expirationTimestamp,
-                        orderMessage.feeInfo.tokenId,
-                        orderMessage.feeInfo.sourceVaultId,
-                        orderMessage.feeInfo.feeLimit
-                    )
+                orderMessage.signature = signOrderMsgWithFee(
+                    privateKey,
+                    orderMessage.vaultIdSell,
+                    orderMessage.vaultIdBuy,
+                    orderMessage.amountSell,
+                    orderMessage.amountBuy,
+                    orderMessage.tokenSell,
+                    orderMessage.tokenBuy,
+                    orderMessage.nonce,
+                    orderMessage.expirationTimestamp,
+                    orderMessage.feeInfo.tokenId,
+                    orderMessage.feeInfo.sourceVaultId,
+                    orderMessage.feeInfo.feeLimit
+                )
                 restClient.order(orderMessage).await()
             }
+        }
+    }
+
+    override fun depositETH(
+        privateKey: String,
+        contractAddress: String,
+        starkKey: String,
+        quantizedAmount: String,
+        gasOption: GasOption,
+    ): CompletableFuture<LogDeposit> {
+        return CompletableFuture.supplyAsync {
+            runBlocking {
+                asyncDepositETH(privateKey, contractAddress, starkKey, quantizedAmount, gasOption)
+            }
+        }
+    }
+
+    internal suspend fun asyncDepositETH(
+        privateKey: String, contractAddress: String, starkKey: String, quantizedAmount: String, gasOption: GasOption
+    ): LogDeposit {
+        val (assetId, assetType) = getAssetTypeAndId("ETH", "ETH", "")
+
+        val vaultId =
+            restClient.getVaultId(GetVaultIdMessage.of(assetId, listOf(starkKey))).await().getData().vaultIds[0]
+
+        val web3j = Web3j.build(HttpService("https://eth-goerli.g.alchemy.com/v2/yyabgQ1GlM0xxqDC4ZBbR1lBcBKQmnxT"))
+
+        val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
+            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+        )
+        val deposits = Deposits.load(
+            "0x8Eb82154f314EC687957CE1e9c1A5Dc3A3234DF9", web3j, Credentials.create(privateKey), gasProvider
+        )
+        val call = deposits.depositEth(
+            BigInteger(starkKey.lowercase().replace("0x", ""), 16),
+            BigInteger(assetType.lowercase().replace("0x", ""), 16),
+            BigInteger(vaultId.lowercase().replace("0x", ""), 16),
+            Convert.toWei(quantizedAmount, Convert.Unit.ETHER).toBigInteger()
+        )
+        val transactionReceipt = call.sendAsync().await()
+        val future = CompletableFuture<LogDeposit>()
+        val currentBlock = web3j.ethBlockNumber().sendAsync().await()
+        val from = DefaultBlockParameterNumber(currentBlock.blockNumber.subtract(BigInteger("10")))
+        val to = DefaultBlockParameterNumber(currentBlock.blockNumber.add(BigInteger("5")))
+        val subscription = deposits.logDepositEventFlowable(
+            from, to
+        ).subscribe({
+            future.complete(
+                LogDeposit.of(
+                    it.depositorEthKey,
+                    it.starkKey.toString(16),
+                    it.vaultId.toString(16),
+                    it.assetType.toString(16),
+                    it.nonQuantizedAmount.toString(16),
+                    it.quantizedAmount.toString(16)
+                )
+            )
+        }, {
+            future.completeExceptionally(it)
+        }
+        )
+
+        return try {
+            val result = future.await()
+            result
+        } finally {
+            subscription.dispose()
         }
     }
 
@@ -229,6 +301,17 @@ class DefaultReddioClient(private val restClient: ReddioRestClient) : ReddioClie
         val result =
             restClient.getAssetId(GetAssetIdMessage.of(contractAddress, type, tokenId, contractInfo.quantum)).await()
         return result.getData().getAssetId()
+    }
+
+    private suspend fun getAssetTypeAndId(
+        type: String,
+        tokenAddress: String,
+        tokenId: String,
+    ): AssetIdAndAssetType {
+        val contractInfo = restClient.getContractInfo(GetContractInfoMessage.of(type, tokenAddress)).await().getData()
+        val result =
+            restClient.getAssetId(GetAssetIdMessage.of(tokenAddress, type, tokenId, contractInfo.quantum)).await()
+        return AssetIdAndAssetType(result.getData().getAssetId(), contractInfo.getAssetType())
     }
 
     private suspend fun getVaultsIds(assetId: String, starkKey: String, receiver: String): VaultIds {
@@ -293,11 +376,14 @@ class DefaultReddioClient(private val restClient: ReddioRestClient) : ReddioClie
     }
 
     companion object {
-        @JvmStatic
-        fun mainnet(): DefaultReddioClient = DefaultReddioClient(DefaultReddioRestClient.mainnet())
+        const val MAINNET_ID = 1L
+        const val GOERLI_ID = 5L
 
         @JvmStatic
-        fun testnet(): DefaultReddioClient = DefaultReddioClient(DefaultReddioRestClient.testnet())
+        fun mainnet(): DefaultReddioClient = DefaultReddioClient(DefaultReddioRestClient.mainnet(), MAINNET_ID)
+
+        @JvmStatic
+        fun testnet(): DefaultReddioClient = DefaultReddioClient(DefaultReddioRestClient.testnet(), GOERLI_ID)
 
         private data class VaultIds(val senderVaultId: String, val receiverVaultId: String)
     }
