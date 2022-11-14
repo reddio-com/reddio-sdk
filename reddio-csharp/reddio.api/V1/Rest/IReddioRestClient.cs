@@ -53,6 +53,8 @@ namespace Reddio.Api.V1.Rest
         /// <returns></returns>
         public Task<ResponseWrapper<GetRecordResponse>> GetRecord(GetRecordMessage getRecordMessage);
 
+        public Task<ResponseWrapper<GetRecordsResponse>> GetRecords(GetRecordsMessage getRecordsMessage);
+
         /// <summary>
         /// Retrieve account balance based on the stark_key and asset_id.
         ///

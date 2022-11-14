@@ -92,6 +92,17 @@ namespace Reddio.Api.V1.Rest
             return result!;
         }
 
+        public async Task<ResponseWrapper<GetRecordsResponse>> GetRecords(GetRecordsMessage getRecordsMessage)
+        {
+            var endpoint =
+                $"{_baseEndpoint}/v1/records?stark_key={getRecordsMessage.StarkKey}";
+            var client = HttpClientWithReddioUA();
+            var response = await client.GetAsync(endpoint);
+            response.EnsureSuccessStatusCode();
+            var result = await ReadAsJsonAsync<ResponseWrapper<GetRecordsResponse>>(response);
+            return result!;
+        }
+
         public async Task<ResponseWrapper<GetBalanceResponse>> GetBalance(GetBalanceMessage getBalanceMessage)
         {
             var endpoint =
