@@ -23,7 +23,7 @@ namespace Reddio.Api.V1.Rest
         {
             var client = new HttpClient();
             // TODO(@STRRL): use the release version
-            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("reddio-client-csharp", "0.0.1"));
+            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("reddio-client-csharp", "0.0.8"));
             return client;
         }
 
