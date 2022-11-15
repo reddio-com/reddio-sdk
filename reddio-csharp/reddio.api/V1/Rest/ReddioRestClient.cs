@@ -4,6 +4,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using reddio.api;
 
 namespace Reddio.Api.V1.Rest
 {
@@ -23,7 +24,8 @@ namespace Reddio.Api.V1.Rest
         {
             var client = new HttpClient();
             // TODO(@STRRL): use the release version
-            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("reddio-client-csharp", "0.0.8"));
+            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("reddio-client-csharp",
+                Versions.getUAVersion()));
             return client;
         }
 

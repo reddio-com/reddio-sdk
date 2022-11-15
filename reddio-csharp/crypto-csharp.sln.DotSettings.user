@@ -3,6 +3,7 @@
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=ae79ebd7_002Dc176_002D42ed_002D81f5_002Dcd341a52498c/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="TestGetRecords" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
   &lt;TestAncestor&gt;
     &lt;TestId&gt;xUnit::94DEE188-2D3D-4107-872F-713AB912A6DD::net7.0::Reddio.Tests.Api.V1.Rest.ReddioRestClientTest&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::94DEE188-2D3D-4107-872F-713AB912A6DD::net7.0::reddio.tests.api.V2.Rest.ReddioRestClientTest.TestGetBalance&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String>
 	
