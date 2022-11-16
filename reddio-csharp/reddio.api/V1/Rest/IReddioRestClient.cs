@@ -10,7 +10,7 @@ namespace Reddio.Api.V1.Rest
         /// <summary>
         /// Transfer assets from sender to receiver on layer 2.
         /// 
-        /// See API References: https://docs.reddio.com/api/layer2-apis.html#transfer
+        /// See API References: https://docs.reddio.com/guide/api-reference/transfer.html#transfer-to
         /// </summary>
         /// <param name="transferMessage"></param>
         /// <returns></returns>
@@ -29,7 +29,7 @@ namespace Reddio.Api.V1.Rest
         /// <summary>
         /// Retrieve asset id based on contract address
         ///
-        /// See API References: https://docs.reddio.com/api/layer2-apis.html#get-asset-id
+        /// See API References: https://docs.reddio.com/guide/api-reference/asset.html#get-asset-id
         /// </summary>
         /// <param name="getAssetIdMessage"></param>
         /// <returns></returns>
@@ -38,7 +38,7 @@ namespace Reddio.Api.V1.Rest
         /// <summary>
         /// Retrieve the vault id
         ///
-        /// See API References: https://docs.reddio.com/api/layer2-apis.html#retrieve-the-vault
+        /// See API References: https://docs.reddio.com/guide/api-reference/vault.html#retrieve-vault-id
         /// </summary>
         /// <param name="getVaultIdMessage"></param>
         /// <returns></returns>
@@ -47,18 +47,24 @@ namespace Reddio.Api.V1.Rest
         /// <summary>
         /// Retrieve record based on start_key and sequence id
         ///
-        /// See API References: https://docs.reddio.com/api/layer2-apis.html#get-record
+        /// See API References: https://docs.reddio.com/guide/api-reference/record.html#get-record
         /// </summary>
         /// <param name="getRecordMessage"></param>
         /// <returns></returns>
         public Task<ResponseWrapper<GetRecordResponse>> GetRecord(GetRecordMessage getRecordMessage);
 
+        /// <summary>
+        /// Retrieve records based on start_key
+        /// See API References: https://docs.reddio.com/guide/api-reference/record.html#get-records
+        /// </summary>
+        /// <param name="getRecordsMessage"></param>
+        /// <returns></returns>
         public Task<ResponseWrapper<GetRecordsResponse>> GetRecords(GetRecordsMessage getRecordsMessage);
 
         /// <summary>
         /// Retrieve account balance based on the stark_key and asset_id.
         ///
-        /// See API Reference: https://docs.reddio.com/api/layer2-apis.html#get-balance
+        /// See API Reference: https://docs.reddio.com/guide/api-reference/balance.html#get-balance
         /// </summary>
         /// <param name="getBalanceMessage"></param>
         /// <returns></returns>
@@ -67,7 +73,7 @@ namespace Reddio.Api.V1.Rest
         /// <summary>
         /// Retrieve account balances in batch based on the stark_key
         ///
-        /// See API Reference: https://docs.reddio.com/api/layer2-apis.html#get-balances
+        /// See API Reference: https://docs.reddio.com/guide/api-reference/balance.html#get-balances-v1
         /// </summary>
         /// <param name="getBalancesMessage"></param>
         /// <returns></returns>
