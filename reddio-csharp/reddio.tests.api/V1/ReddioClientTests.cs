@@ -56,7 +56,7 @@ public class ReddioClientTests
     }
 
     [Fact]
-    public async void TestTransfer()
+    public async void TestTransferNFT()
     {
         var client = ReddioClient.Testnet();
         var result = await client.Transfer(
@@ -66,6 +66,23 @@ public class ReddioClientTests
             "0x941661bd1134dc7cc3d107bf006b8631f6e65ad5",
             "497",
             "ERC721",
+            "0x7865bc66b610d6196a7cbeb9bf066c64984f6f06b5ed3b6f5788bd9a6cb099c"
+        );
+        Assert.Equal("OK", result.Status);
+        _testOutputHelper.WriteLine(JsonSerializer.Serialize(result));
+    }
+
+    [Fact]
+    public async void TestTrasnferERC20()
+    {
+        var client = ReddioClient.Testnet();
+        var result = await client.Transfer(
+            "0x1ccc27877014bc1a81919fc855ebbd1b874603283c9ea93397d970b0704e581",
+            "0xf0b94c9485dfb212b5e7882670657ef8aca14ffd8d5dedc918fd9237ccd724",
+            "0.0013",
+            "0x57f3560b6793dcc2cb274c39e8b8eba1dd18a086",
+            "",
+            "ERC20",
             "0x7865bc66b610d6196a7cbeb9bf066c64984f6f06b5ed3b6f5788bd9a6cb099c"
         );
         Assert.Equal("OK", result.Status);

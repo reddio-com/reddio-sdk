@@ -1,4 +1,5 @@
 using System.Reflection;
+using Reddio.Api.V1;
 using Reddio.Api.V1.Rest;
 using Xunit;
 
@@ -26,5 +27,29 @@ public class ReddioRestClientTest
             null
         ));
         Assert.NotEmpty(response.Data.List);
+    }
+
+    [Fact]
+    public async void TestGetContractInfoERC721()
+    {
+        var restClient = ReddioRestClient.Testnet();
+        var response =
+            await restClient.GetContractInfo(new GetContractInfoMessage("ERC721",
+                "0x941661bd1134dc7cc3d107bf006b8631f6e65ad5"));
+        Assert.Equal("OK", response.Status);
+        Assert.Equal(1, response.Data.Quantum);
+        Assert.Equal("0", response.Data.Decimals);
+    }
+    
+    [Fact]
+    public async void TestGetContractInfoEth()
+    {
+        var restClient = ReddioRestClient.Testnet();
+        var response =
+            await restClient.GetContractInfo(new GetContractInfoMessage("ETH",
+                "ETH"));
+        Assert.Equal("OK", response.Status);
+        Assert.Equal(1000000000000, response.Data.Quantum);
+        Assert.Equal("18", response.Data.Decimals);
     }
 }
