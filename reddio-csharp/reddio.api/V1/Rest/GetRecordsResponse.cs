@@ -1,9 +1,11 @@
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Reddio.Api.V1.Rest
 {
     public class GetRecordsResponse
     {
-        public List<SequenceRecord> list { get; set; }
+        [JsonProperty] 
+        public List<SequenceRecord> List { get; set; }
     }
 }

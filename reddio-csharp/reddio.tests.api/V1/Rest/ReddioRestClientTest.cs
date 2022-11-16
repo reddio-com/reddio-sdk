@@ -21,6 +21,6 @@ public class ReddioRestClientTest
         var restClient = ReddioRestClient.Testnet();
         var response = await restClient.GetRecords(new GetRecordsMessage(
             "0x6736f7449da3bf44bf0f7bdd6463818e1ef272641d43021e8bca17b32ec2df0"));
-        Assert.NotEmpty(response.Data.list);
+        Assert.NotEmpty(response.Data.List);
     }
 }
