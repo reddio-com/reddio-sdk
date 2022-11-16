@@ -96,8 +96,24 @@ namespace Reddio.Api.V1.Rest
 
         public async Task<ResponseWrapper<GetRecordsResponse>> GetRecords(GetRecordsMessage getRecordsMessage)
         {
+            var query = System.Web.HttpUtility.ParseQueryString(String.Empty);
+            query["stark_key"] = getRecordsMessage.StarkKey;
+            if (getRecordsMessage.Limit != null)
+            {
+                query["limit"] = getRecordsMessage.Limit;
+            }
+
+            if (getRecordsMessage.Page != null)
+            {
+                query["page"] = getRecordsMessage.Page;
+            }
+
+            if (getRecordsMessage.ContractAddress != null)
+            {
+                query["contract_address"] = getRecordsMessage.ContractAddress;
+            }
             var endpoint =
-                $"{_baseEndpoint}/v1/records?stark_key={getRecordsMessage.StarkKey}";
+                $"{_baseEndpoint}/v1/records?{query}";
             var client = HttpClientWithReddioUA();
             var response = await client.GetAsync(endpoint);
             response.EnsureSuccessStatusCode();

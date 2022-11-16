@@ -70,7 +70,6 @@ public class ReddioClientTests
         );
         Assert.Equal("OK", result.Status);
         _testOutputHelper.WriteLine(JsonSerializer.Serialize(result));
-
     }
 
     [Fact]
@@ -83,6 +82,23 @@ public class ReddioClientTests
         Assert.Equal("OK", result.Status);
         Assert.Single(result.Data);
         Assert.Equal(SequenceRecord.SequenceStatusAccepted, result.Data[0].Status);
+        _testOutputHelper.WriteLine(JsonSerializer.Serialize(result));
+    }
+
+    [Fact]
+    public async void TestGetRecords()
+    {
+        var client = ReddioClient.Testnet();
+        var result = await client.GetRecords("0x6736f7449da3bf44bf0f7bdd6463818e1ef272641d43021e8bca17b32ec2df0");
+        _testOutputHelper.WriteLine(JsonSerializer.Serialize(result));
+    }
+
+    [Fact]
+    public async void TestGetRecordsPagination()
+    {
+        var client = ReddioClient.Testnet();
+        var result = await client.GetRecords("0x6736f7449da3bf44bf0f7bdd6463818e1ef272641d43021e8bca17b32ec2df0", 0);
+        Assert.Equal(5, result.Data.List.Count);
         _testOutputHelper.WriteLine(JsonSerializer.Serialize(result));
     }
 }

@@ -23,7 +23,12 @@ namespace Reddio.Api.V1
 
         public Task<ResponseWrapper<GetRecordResponse>> GetRecord(string starkKey, Int64 sequenceId);
 
-        public Task<ResponseWrapper<GetRecordsResponse>> GetRecords(string starkKey);
+        public Task<ResponseWrapper<GetRecordsResponse>> GetRecords(
+            string starkKey,
+            long? limit = null,
+            long? page = null,
+            string? contractAddress = null
+        );
 
         public Task<ResponseWrapper<GetRecordResponse>> WaitingTransferGetAccepted(string starkKey, Int64 sequenceId);
 

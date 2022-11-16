@@ -32,15 +32,6 @@ namespace reddio.api.V2.Rest
         {
             var query = System.Web.HttpUtility.ParseQueryString(string.Empty);
             query["stark_key"] = getBalanceMessage.StarkKey;
-            if (getBalanceMessage.Limit != null)
-            {
-                query["limit"] = getBalanceMessage.Limit;
-            }
-
-            if (getBalanceMessage.Page != null)
-            {
-                query["page"] = getBalanceMessage.Page;
-            }
 
             if (getBalanceMessage.ContractAddress != null)
             {

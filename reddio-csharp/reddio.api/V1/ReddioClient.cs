@@ -54,9 +54,17 @@ namespace Reddio.Api.V1
             return await this._restClient.GetRecord(new GetRecordMessage(starkKey, sequenceId));
         }
 
-        public async Task<ResponseWrapper<GetRecordsResponse>> GetRecords(string starkKey)
+
+        public async Task<ResponseWrapper<GetRecordsResponse>> GetRecords(string starkKey, long? limit = null,
+            long? page = null, string? contractAddress = null)
         {
-            return await this._restClient.GetRecords(new GetRecordsMessage(starkKey));
+            return await _restClient.GetRecords(new GetRecordsMessage(
+                    starkKey,
+                    limit?.ToString(),
+                    page?.ToString(),
+                    contractAddress
+                )
+            );
         }
 
         public async Task<ResponseWrapper<GetRecordResponse>> WaitingTransferGetAccepted(string starkKey,
