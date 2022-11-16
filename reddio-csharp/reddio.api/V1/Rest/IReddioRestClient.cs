@@ -78,5 +78,8 @@ namespace Reddio.Api.V1.Rest
         /// <param name="getBalancesMessage"></param>
         /// <returns></returns>
         public Task<ResponseWrapper<GetBalancesResponse>> GetBalances(GetBalancesMessage getBalancesMessage);
+
+        public Task<ResponseWrapper<GetContractInfoResponse>> GetContractInfo(
+            GetContractInfoMessage getContractInfoMessage);
     }
 }

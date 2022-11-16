@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -64,8 +65,14 @@ namespace Reddio.Api.V1.Rest
 
         public async Task<ResponseWrapper<GetAssetIdResponse>> GetAssetId(GetAssetIdMessage getAssetIdMessage)
         {
+            var query = System.Web.HttpUtility.ParseQueryString(String.Empty);
+            query["type"] = getAssetIdMessage.Type;
+            query["contract_address"] = getAssetIdMessage.ContractAddress;
+            query["token_id"] = getAssetIdMessage.TokenId;
+            query["quantum"] = getAssetIdMessage.Quantum.ToString();
+
             var endpoint =
-                $"{_baseEndpoint}/v1/assetid?type={getAssetIdMessage.Type}&contract_address={getAssetIdMessage.ContractAddress}&token_id={getAssetIdMessage.TokenId}";
+                $"{_baseEndpoint}/v1/assetid?{query}";
             var client = HttpClientWithReddioUA();
             var response = await client.GetAsync(endpoint);
             var result = await ReadAsJsonAsync<ResponseWrapper<GetAssetIdResponse>>(response);
@@ -112,6 +119,7 @@ namespace Reddio.Api.V1.Rest
             {
                 query["contract_address"] = getRecordsMessage.ContractAddress;
             }
+
             var endpoint =
                 $"{_baseEndpoint}/v1/records?{query}";
             var client = HttpClientWithReddioUA();
@@ -129,6 +137,21 @@ namespace Reddio.Api.V1.Rest
             var response = await client.GetAsync(endpoint);
             response.EnsureSuccessStatusCode();
             var result = await ReadAsJsonAsync<ResponseWrapper<GetBalanceResponse>>(response);
+            return result!;
+        }
+
+        public async Task<ResponseWrapper<GetContractInfoResponse>> GetContractInfo(
+            GetContractInfoMessage getContractInfoMessage)
+        {
+            var query = System.Web.HttpUtility.ParseQueryString(String.Empty);
+            query["type"] = getContractInfoMessage.Type;
+            query["contract_address"] = getContractInfoMessage.ContractAddress;
+            var endpoint =
+                $"{_baseEndpoint}/v1/contract_info?{query}";
+            var client = HttpClientWithReddioUA();
+            var response = await client.GetAsync(endpoint);
+            response.EnsureSuccessStatusCode();
+            var result = await ReadAsJsonAsync<ResponseWrapper<GetContractInfoResponse>>(response);
             return result!;
         }
 

@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using Reddio.Api.V1.Rest;
@@ -16,9 +18,16 @@ namespace Reddio.Api.V1
             _restClient = restClient;
         }
 
-        public async Task<ResponseWrapper<TransferResponse>> Transfer(string starkKey, string privateKey, string amount,
-            string contractAddress, string tokenId, string type,
-            string receiver, long expirationTimeStamp = 4194303)
+        public async Task<ResponseWrapper<TransferResponse>> Transfer(
+            string starkKey,
+            string privateKey,
+            string amount,
+            string contractAddress,
+            string tokenId,
+            string type,
+            string receiver,
+            long expirationTimeStamp = 4194303
+        )
         {
             var assetId = await GetAssetId(contractAddress, tokenId, type);
             var (senderVaultId, receiverVaultId) = await GetVaultIds(assetId, starkKey, receiver);
@@ -26,8 +35,15 @@ namespace Reddio.Api.V1
             var getNonceResponse = await _restClient.GetNonce(new GetNonceMessage(starkKey));
             var nonce = getNonceResponse.Data.Nonce;
 
+            var contractInfo = await _restClient.GetContractInfo(new GetContractInfoMessage(type, contractAddress));
+            var resolvedAmount =
+                Convert.ToInt64(
+                    Double.Parse(amount)
+                    * Math.Pow(10, Double.Parse(contractInfo.Data.Decimals))
+                    / contractInfo.Data.Quantum
+                ).ToString();
             var signature = SignTransferMessage(privateKey,
-                amount,
+                resolvedAmount,
                 nonce,
                 senderVaultId,
                 assetId,
@@ -38,7 +54,7 @@ namespace Reddio.Api.V1
             var transferMessage = new TransferMessage(
                 assetId,
                 starkKey,
-                amount,
+                resolvedAmount,
                 nonce,
                 senderVaultId,
                 receiver,
@@ -112,7 +128,8 @@ namespace Reddio.Api.V1
 
         internal async Task<string> GetAssetId(string contractAddress, string tokenId, string type)
         {
-            var getAssetIdMessage = new GetAssetIdMessage(contractAddress, type, tokenId);
+            var contractInfo = await _restClient.GetContractInfo(new GetContractInfoMessage(type, contractAddress));
+            var getAssetIdMessage = new GetAssetIdMessage(contractAddress, type, tokenId, contractInfo.Data.Quantum);
             var getAssetIdResponse = await _restClient.GetAssetId(getAssetIdMessage);
             var assetId = getAssetIdResponse.Data.AssetId;
             return assetId;
