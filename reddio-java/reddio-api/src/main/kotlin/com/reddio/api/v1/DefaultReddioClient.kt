@@ -11,6 +11,7 @@ import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.math.pow
 import kotlin.time.toKotlinDuration
 
 class DefaultReddioClient(private val restClient: ReddioRestClient) : ReddioClient {
@@ -28,18 +29,31 @@ class DefaultReddioClient(private val restClient: ReddioRestClient) : ReddioClie
         return CompletableFuture.supplyAsync {
             runBlocking {
                 val assetId = getAssetId(contractAddress, tokenId, type)
+
+                val contractInfo = restClient.getContractInfo(GetContractInfoMessage.of(type, contractAddress)).await()
+                val resolvedMount =
+                    (amount.toDouble() * 10.0.pow(contractInfo.data.decimals.toDouble()) / contractInfo.data.quantum).toLong()
+                        .toString()
+
                 val vaultsIds = getVaultsIds(assetId, starkKey, receiver)
                 val senderVaultId = vaultsIds.senderVaultId
                 val receiverVaultId = vaultsIds.receiverVaultId
                 val nonce = restClient.getNonce(GetNonceMessage.of(starkKey)).await().getData().getNonce()
                 val signature = signTransferMessage(
-                    privateKey, amount, nonce, senderVaultId, assetId, receiverVaultId, receiver, expirationTimeStamp
+                    privateKey,
+                    resolvedMount,
+                    nonce,
+                    senderVaultId,
+                    assetId,
+                    receiverVaultId,
+                    receiver,
+                    expirationTimeStamp
                 )
                 restClient.transfer(
                     TransferMessage.of(
                         assetId,
                         starkKey,
-                        amount,
+                        resolvedMount,
                         nonce,
                         senderVaultId,
                         receiver,
@@ -112,20 +126,31 @@ class DefaultReddioClient(private val restClient: ReddioRestClient) : ReddioClie
     ): CompletableFuture<ResponseWrapper<WithdrawalToResponse>> {
         return CompletableFuture.supplyAsync {
             runBlocking {
+                val contractInfo = restClient.getContractInfo(GetContractInfoMessage.of(type, contractAddress)).await()
+                val resolvedMount =
+                    (amount.toDouble() * 10.0.pow(contractInfo.data.decimals.toDouble()) / contractInfo.data.quantum).toLong()
+                        .toString()
                 val assetId = getAssetId(contractAddress, tokenId, type)
                 val vaultsIds = getVaultsIds(assetId, starkKey, receiver)
                 val senderVaultId = vaultsIds.senderVaultId
                 val receiverVaultId = vaultsIds.receiverVaultId
                 val nonce = restClient.getNonce(GetNonceMessage.of(starkKey)).await().getData().getNonce()
                 val signature = signTransferMessage(
-                    privateKey, amount, nonce, senderVaultId, assetId, receiverVaultId, receiver, expirationTimeStamp
+                    privateKey,
+                    resolvedMount,
+                    nonce,
+                    senderVaultId,
+                    assetId,
+                    receiverVaultId,
+                    receiver,
+                    expirationTimeStamp
                 )
                 restClient.withdrawalTo(
                     WithdrawalToMessage.of(
                         contractAddress,
                         assetId,
                         starkKey,
-                        amount,
+                        resolvedMount,
                         tokenId,
                         nonce,
                         senderVaultId,
@@ -165,8 +190,12 @@ class DefaultReddioClient(private val restClient: ReddioRestClient) : ReddioClie
 
                 val vaultIds = orderInfoResponse.data.getVaultIds()
                 val quoteToken = orderInfoResponse.data.assetIds[1]
+                val contractInfo =
+                    restClient.getContractInfo(GetContractInfoMessage.of(tokenType, tokenAddress)).await()
                 val amountBuy =
-                    Convert.toWei((price.toDouble() * amount.toDouble()).toString(), Convert.Unit.MWEI).toLong().toString()
+                    (price.toDouble() * amount.toDouble() * 10.0.pow(contractInfo.data.decimals.toDouble()) / contractInfo.data.quantum)
+                        .toLong().toString()
+
                 val formatPrice = Convert.toWei(price, Convert.Unit.MWEI).toString()
 
                 val orderMessage = OrderMessage()
