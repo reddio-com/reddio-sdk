@@ -1,0 +1,47 @@
+name: Publish package to the Maven Central Repository
+on:
+  workflow_dispatch: {}
+  push:
+    tags:
+    - reddio-java/** 
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Maven Central Repository
+        uses: actions/setup-java@v3
+        with:
+          java-version: '8'
+          distribution: 'adopt'
+          server-id: ossrh
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+      - name: Download Latest Native Library
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          workflow: unity-plugin-zip.yaml
+          workflow_conclusion: success
+          path: artifacts
+      - name: Copy Native Library to Java Project
+        run: |
+          mkdir -p output/lib 
+          cp artifacts/libreddio-x86_64-pc-windows-msvc/reddio.dll output/lib/reddio.dll
+          cp artifacts/libreddio-x86_64-apple-darwin/libreddio.dylib output/lib/libreddio.dylib
+          cp artifacts/libreddio-x86_64-unknown-linux-gnu/libreddio.so output/lib/libreddio.so
+          ls -alh output/lib
+      - name: Publish package
+        working-directory: reddio-java
+        run: |
+          mvn -B clean verify deploy -DskipTests
+        env:
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+      - name: Upload Jars as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: reddio-java-sdk
+          path: |
+            reddio-java/**/*.jar
