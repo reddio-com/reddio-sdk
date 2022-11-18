@@ -2,10 +2,24 @@
 	<s:String x:Key="/Default/Environment/Highlighting/HighlightingSourceSnapshotLocation/@EntryValue">/home/strrl/.cache/JetBrains/Rider2022.2/resharper-host/temp/Rider/vAny/CoverageData/_crypto-csharp.-1419227475/Snapshot/snapshot.utdcvr</s:String>
 	
 	
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=e101af85_002Db94b_002D457f_002Dbb7c_002D3be9032f11b9/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="TestGetRecords" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
-  &lt;TestAncestor&gt;
-    &lt;TestId&gt;xUnit::94DEE188-2D3D-4107-872F-713AB912A6DD::net7.0::Reddio.Tests.Api.V1.Rest.ReddioRestClientTest.TestGetRecords&lt;/TestId&gt;
-  &lt;/TestAncestor&gt;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=e101af85_002Db94b_002D457f_002Dbb7c_002D3be9032f11b9/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="TestGetRecords" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;And&gt;
+    &lt;TestAncestor&gt;
+      &lt;TestId&gt;xUnit::94DEE188-2D3D-4107-872F-713AB912A6DD::net7.0::Reddio.Tests.Api.V1.Rest.ReddioRestClientTest.TestGetRecords&lt;/TestId&gt;
+      &lt;TestId&gt;xUnit::94DEE188-2D3D-4107-872F-713AB912A6DD::net7.0::Reddio.Tests.Api.V1.ReddioClientTests.TestGetAssetId&lt;/TestId&gt;
+      &lt;TestId&gt;xUnit::94DEE188-2D3D-4107-872F-713AB912A6DD::net7.0::Reddio.Tests.Api.V1.ReddioClientTests.TestGetAssetIdERC20&lt;/TestId&gt;
+      &lt;TestId&gt;xUnit::94DEE188-2D3D-4107-872F-713AB912A6DD::net7.0::Reddio.Tests.Api.V1.ReddioClientTests.TestOrder&lt;/TestId&gt;
+    &lt;/TestAncestor&gt;
+    &lt;Not&gt;
+      &lt;And&gt;
+        &lt;TestAncestor&gt;
+          &lt;TestId&gt;xUnit::94DEE188-2D3D-4107-872F-713AB912A6DD::net7.0::Reddio.Tests.Api.V1.ReddioClientTests.TestGetAssetIdERC20&lt;/TestId&gt;
+        &lt;/TestAncestor&gt;
+        &lt;Project Location="/home/strrl/playground/github/reddio-sdk/reddio-csharp/reddio.tests.api" Presentation="&amp;lt;reddio.tests.api&amp;gt;" /&gt;
+        &lt;Namespace&gt;Reddio.Tests.Api.V1&lt;/Namespace&gt;
+      &lt;/And&gt;
+    &lt;/Not&gt;
+  &lt;/And&gt;
 &lt;/SessionState&gt;</s:String>
 	
 	
