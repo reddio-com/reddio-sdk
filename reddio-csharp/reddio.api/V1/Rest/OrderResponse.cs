@@ -4,11 +4,11 @@ namespace Reddio.Api.V1.Rest
 {
     public class OrderResponse
     {
-        [JsonProperty("sequence_id")] public string SequenceID;
+        [JsonProperty("sequence_id")] public string SequenceId;
 
         public OrderResponse(string sequenceId)
         {
-            SequenceID = sequenceId;
+            SequenceId = sequenceId;
         }
 
         public OrderResponse()

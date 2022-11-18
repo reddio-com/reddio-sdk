@@ -157,12 +157,8 @@ namespace Reddio.Api.V1.Rest
 
         public async Task<ResponseWrapper<OrderInfoResponse>> OrderInfo(OrderInfoMessage orderInfoMessage)
         {
-            var query = HttpUtility.ParseQueryString(String.Empty);
-            query["stark_key"] = orderInfoMessage.StarkKey;
-            query["contrac1"] = orderInfoMessage.Contract1;
-            query["contrac2"] = orderInfoMessage.Contract2;
             var endpoint =
-                $"{_baseEndpoint}/v1/order/info?{query}";
+                $"{_baseEndpoint}/v1/order/info?stark_key={orderInfoMessage.StarkKey}&contract1={orderInfoMessage.Contract1}&contract2={orderInfoMessage.Contract2}";
             var client = HttpClientWithReddioUA();
             var response = await client.GetAsync(endpoint);
             response.EnsureSuccessStatusCode();
@@ -182,8 +178,15 @@ namespace Reddio.Api.V1.Rest
 
         public async Task<ResponseWrapper<GetBalancesResponse>> GetBalances(GetBalancesMessage getBalancesMessage)
         {
+            var query = HttpUtility.ParseQueryString(String.Empty);
+            query["stark_key"] = getBalancesMessage.StarkKey;
+            if (!String.IsNullOrEmpty(getBalancesMessage.ContractAddress))
+            {
+                query["contract_address"] = getBalancesMessage.ContractAddress;
+            }
+
             var endpoint =
-                $"{_baseEndpoint}/v1/balances?stark_key={getBalancesMessage.StarkKey}";
+                $"{_baseEndpoint}/v1/balances?{query}";
             var client = HttpClientWithReddioUA();
             var response = await client.GetAsync(endpoint);
             response.EnsureSuccessStatusCode();

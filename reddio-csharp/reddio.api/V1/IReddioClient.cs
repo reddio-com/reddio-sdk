@@ -41,5 +41,17 @@ namespace Reddio.Api.V1
 
         public Task<ResponseWrapper<GetBalanceResponse>> GetBalance(string starkKey, string assetId);
         public Task<ResponseWrapper<GetBalancesResponse>> GetBalances(string starkKey);
+
+        public Task<ResponseWrapper<OrderResponse>> Order(
+            string privateKey,
+            string starkKey,
+            string price,
+            string amount,
+            string tokenAddress,
+            string tokenId,
+            string marketplaceUuid,
+            string tokenType,
+            OrderType orderType
+        );
     }
 }

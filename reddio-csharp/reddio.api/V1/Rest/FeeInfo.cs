@@ -8,7 +8,7 @@ namespace Reddio.Api.V1.Rest
         {
             FeeLimit = feeLimit;
             TokenId = tokenId;
-            SourceVaultID = sourceVaultId;
+            SourceVaultId = sourceVaultId;
         }
 
         public FeeInfo()
@@ -17,6 +17,6 @@ namespace Reddio.Api.V1.Rest
 
         [JsonProperty("fee_limit")] public long FeeLimit;
         [JsonProperty("token_id")] public string TokenId;
-        [JsonProperty("source_vault_id")] public long SourceVaultID;
+        [JsonProperty("source_vault_id")] public long SourceVaultId;
     }
 }

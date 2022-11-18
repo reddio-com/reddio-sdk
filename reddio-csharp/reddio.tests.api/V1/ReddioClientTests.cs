@@ -126,4 +126,31 @@ public class ReddioClientTests
         Assert.Equal(5, result.Data.List.Count);
         _testOutputHelper.WriteLine(JsonSerializer.Serialize(result));
     }
+
+    // [Fact(Skip = "not reproducible test")]
+    [Fact]
+    public async void TestOrder()
+    {
+        IReddioClient client = ReddioClient.Testnet();
+        IReddioRestClient restClient = ReddioRestClient.Testnet();
+
+        var balances = await restClient.GetBalances(new GetBalancesMessage(
+            "0x6ecaebbe5b9486472d964217e5470380782823bb0d865240ba916d01636310a",
+            "0x941661Bd1134DC7cc3D107BF006B8631F6E65Ad5"
+        ));
+        Assert.Equal("OK", balances.Status);
+        var toSell = balances.Data.list[0];
+        var order = await client.Order(
+            "0x4d55b547af138c5b6200495d86ab6aed3e06c25fdd75b4b6a00e48515df2b3d",
+            "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
+            "0.013",
+            "1",
+            "0x941661Bd1134DC7cc3D107BF006B8631F6E65Ad5",
+            toSell.TokenId,
+            "11ed793a-cc11-4e44-9738-97165c4e14a7",
+            "ERC721",
+            OrderType.SELL
+        );
+        Assert.Equal("OK", order.Status);
+    }
 }

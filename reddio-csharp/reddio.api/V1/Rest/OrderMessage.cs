@@ -8,7 +8,7 @@ namespace Reddio.Api.V1.Rest
         public const long DIRECTION_BID = 1;
 
         public OrderMessage(string amount, string amountBuy, string amountSell, string tokenBuy, string tokenSell,
-            string baseToken, string quoteToken, string vaultIdBuy, string vaultIdSell, long expirationTimeStamp,
+            string baseToken, string quoteToken, string vaultIdBuy, string vaultIdSell, long expirationTimestamp,
             long nonce, Signature signature, string accountId, long direction, FeeInfo feeInfo, string price,
             string starkKey)
         {
@@ -21,10 +21,10 @@ namespace Reddio.Api.V1.Rest
             QuoteToken = quoteToken;
             VaultIdBuy = vaultIdBuy;
             VaultIdSell = vaultIdSell;
-            ExpirationTimeStamp = expirationTimeStamp;
+            ExpirationTimestamp = expirationTimestamp;
             Nonce = nonce;
             Signature = signature;
-            AccountID = accountId;
+            AccountId = accountId;
             Direction = direction;
             FeeInfo = feeInfo;
             Price = price;
@@ -44,10 +44,10 @@ namespace Reddio.Api.V1.Rest
         [JsonProperty("quote_token")] public string QuoteToken;
         [JsonProperty("vault_id_buy")] public string VaultIdBuy;
         [JsonProperty("vault_id_sell")] public string VaultIdSell;
-        [JsonProperty("expiration_timestamp")] public long ExpirationTimeStamp;
+        [JsonProperty("expiration_timestamp")] public long ExpirationTimestamp;
         [JsonProperty("nonce")] public long Nonce;
         [JsonProperty("signature")] public Signature Signature;
-        [JsonProperty("account_id")] public string AccountID;
+        [JsonProperty("account_id")] public string AccountId;
         [JsonProperty("direction")] public long Direction;
         [JsonProperty("fee_info")] public FeeInfo FeeInfo;
         [JsonProperty("price")] public string Price;

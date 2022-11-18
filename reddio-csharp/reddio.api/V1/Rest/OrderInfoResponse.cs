@@ -5,12 +5,12 @@ namespace Reddio.Api.V1.Rest
 {
     public class OrderInfoResponse
     {
-        public OrderInfoResponse(List<Contract> contracts, List<string> vaultIDs, List<string> assetIDs, string feeRate,
+        public OrderInfoResponse(List<Contract> contracts, List<string> vaultIds, List<string> assetIds, string feeRate,
             string baseToken, string feeToken, long lowerLimit, long nonce)
         {
             Contracts = contracts;
-            VaultIDs = vaultIDs;
-            AssetIDs = assetIDs;
+            VaultIds = vaultIds;
+            AssetIds = assetIds;
             FeeRate = feeRate;
             BaseToken = baseToken;
             FeeToken = feeToken;
@@ -28,7 +28,7 @@ namespace Reddio.Api.V1.Rest
         [JsonProperty("lower_limit")] public long LowerLimit { get; set; }
         [JsonProperty("nonce")] public long Nonce { get; set; }
         [JsonProperty("contracts")] public List<Contract> Contracts;
-        [JsonProperty("vault_ids")] public List<string> VaultIDs;
-        [JsonProperty("asset_ids")] public List<string> AssetIDs;
+        [JsonProperty("vault_ids")] public List<string> VaultIds;
+        [JsonProperty("asset_ids")] public List<string> AssetIds;
     }
 }
