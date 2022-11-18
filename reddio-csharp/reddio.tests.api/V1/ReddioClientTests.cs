@@ -27,6 +27,14 @@ public class ReddioClientTests
     }
 
     [Fact]
+    public async void TestGetAssetIdERC20()
+    {
+        var client = ReddioClient.Mainnet();
+        var assetId = await client.GetAssetId("0x288b2b6f8767661cc67f16412ed430e03e1915dc", "", "ERC20");
+        Assert.Equal("0x13d6fce9e73d9a5c7f6c65a3660b347ca994fe0a7b22e6a015e8d6bcc42990", assetId);
+    }
+
+    [Fact]
     public async void TestGetVaults()
     {
         var client = ReddioClient.Testnet();

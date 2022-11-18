@@ -1,9 +1,9 @@
 using System;
-using System.Diagnostics;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using Newtonsoft.Json;
 using reddio.api;
 
@@ -65,7 +65,7 @@ namespace Reddio.Api.V1.Rest
 
         public async Task<ResponseWrapper<GetAssetIdResponse>> GetAssetId(GetAssetIdMessage getAssetIdMessage)
         {
-            var query = System.Web.HttpUtility.ParseQueryString(String.Empty);
+            var query = HttpUtility.ParseQueryString(String.Empty);
             query["type"] = getAssetIdMessage.Type;
             query["contract_address"] = getAssetIdMessage.ContractAddress;
             query["token_id"] = getAssetIdMessage.TokenId;
@@ -103,7 +103,7 @@ namespace Reddio.Api.V1.Rest
 
         public async Task<ResponseWrapper<GetRecordsResponse>> GetRecords(GetRecordsMessage getRecordsMessage)
         {
-            var query = System.Web.HttpUtility.ParseQueryString(String.Empty);
+            var query = HttpUtility.ParseQueryString(String.Empty);
             query["stark_key"] = getRecordsMessage.StarkKey;
             if (getRecordsMessage.Limit != null)
             {
@@ -143,7 +143,7 @@ namespace Reddio.Api.V1.Rest
         public async Task<ResponseWrapper<GetContractInfoResponse>> GetContractInfo(
             GetContractInfoMessage getContractInfoMessage)
         {
-            var query = System.Web.HttpUtility.ParseQueryString(String.Empty);
+            var query = HttpUtility.ParseQueryString(String.Empty);
             query["type"] = getContractInfoMessage.Type;
             query["contract_address"] = getContractInfoMessage.ContractAddress;
             var endpoint =
@@ -152,6 +152,31 @@ namespace Reddio.Api.V1.Rest
             var response = await client.GetAsync(endpoint);
             response.EnsureSuccessStatusCode();
             var result = await ReadAsJsonAsync<ResponseWrapper<GetContractInfoResponse>>(response);
+            return result!;
+        }
+
+        public async Task<ResponseWrapper<OrderInfoResponse>> OrderInfo(OrderInfoMessage orderInfoMessage)
+        {
+            var query = HttpUtility.ParseQueryString(String.Empty);
+            query["stark_key"] = orderInfoMessage.StarkKey;
+            query["contrac1"] = orderInfoMessage.Contract1;
+            query["contrac2"] = orderInfoMessage.Contract2;
+            var endpoint =
+                $"{_baseEndpoint}/v1/order/info?{query}";
+            var client = HttpClientWithReddioUA();
+            var response = await client.GetAsync(endpoint);
+            response.EnsureSuccessStatusCode();
+            var result = await ReadAsJsonAsync<ResponseWrapper<OrderInfoResponse>>(response);
+            return result!;
+        }
+
+        public async Task<ResponseWrapper<OrderResponse>> Order(OrderMessage orderMessage)
+        {
+            var endpoint = $"{_baseEndpoint}/v1/order";
+            var client = HttpClientWithReddioUA();
+            var response = await client.PostAsync(endpoint, JsonStringContent(orderMessage));
+            response.EnsureSuccessStatusCode();
+            var result = await ReadAsJsonAsync<ResponseWrapper<OrderResponse>>(response);
             return result!;
         }
 
