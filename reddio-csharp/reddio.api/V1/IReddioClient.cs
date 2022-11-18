@@ -42,6 +42,7 @@ namespace Reddio.Api.V1
         public Task<ResponseWrapper<GetBalanceResponse>> GetBalance(string starkKey, string assetId);
         public Task<ResponseWrapper<GetBalancesResponse>> GetBalances(string starkKey);
 
+        [Obsolete]
         public Task<ResponseWrapper<OrderResponse>> Order(
             string privateKey,
             string starkKey,
@@ -52,6 +53,20 @@ namespace Reddio.Api.V1
             string marketplaceUuid,
             string tokenType,
             OrderType orderType
+        );
+
+        public Task<ResponseWrapper<OrderResponse>> Order(
+            string privateKey,
+            string starkKey,
+            string contractType,
+            string contractAddress,
+            string tokenId,
+            string price,
+            string amount,
+            OrderType orderType,
+            string baseTokenType = "ETH",
+            string baseTokenContract = "eth",
+            string marketplaceUuid = ""
         );
     }
 }
