@@ -190,12 +190,9 @@ class DefaultReddioClient(private val restClient: ReddioRestClient) : ReddioClie
 
                 val vaultIds = orderInfoResponse.data.getVaultIds()
                 val quoteToken = orderInfoResponse.data.assetIds[1]
-                val contractInfo =
-                    restClient.getContractInfo(GetContractInfoMessage.of(tokenType, tokenAddress)).await()
+                // hard coded format ETH on layer2 (price * (10 **decimals) / quantum)
                 val amountBuy =
-                    (price.toDouble() * amount.toDouble() * 10.0.pow(contractInfo.data.decimals.toDouble()) / contractInfo.data.quantum)
-                        .toLong().toString()
-
+                    Convert.toWei((price.toDouble() * amount.toDouble()).toString(), Convert.Unit.MWEI).toLong().toString()
                 val formatPrice = Convert.toWei(price, Convert.Unit.MWEI).toString()
 
                 val orderMessage = OrderMessage()
