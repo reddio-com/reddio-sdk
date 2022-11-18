@@ -137,7 +137,7 @@ namespace Reddio.Api.V1
 
             var vaultIds = orderInfo.Data.VaultIds;
             var quoteToken = orderInfo.Data.AssetIds[1];
-            var contractInfo = await _restClient.GetContractInfo(new GetContractInfoMessage(tokenType, tokenAddress));
+
             var amountBuy = Convert.ToInt64(
                 Double.Parse(price) * Double.Parse(amount) * Math.Pow(10, 6)
             ).ToString();
@@ -145,6 +145,92 @@ namespace Reddio.Api.V1
             // hard coded format ETH on layer2 (price * (10 **decimals) / quantum)
             var formatPrice = Convert.ToInt64(
                 Double.Parse(price) * Math.Pow(10, 6)
+            ).ToString();
+            var orderMessage = new OrderMessage();
+            orderMessage.Amount = amount;
+            orderMessage.BaseToken = orderInfo.Data.BaseToken;
+            orderMessage.QuoteToken = quoteToken;
+            orderMessage.Price = formatPrice;
+            orderMessage.StarkKey = starkKey;
+            orderMessage.ExpirationTimestamp = 4194303;
+            orderMessage.Nonce = orderInfo.Data.Nonce;
+            orderMessage.FeeInfo = new FeeInfo(
+                Convert.ToInt64(Double.Parse(orderInfo.Data.FeeRate) * Double.Parse(amountBuy)),
+                orderInfo.Data.FeeToken,
+                Convert.ToInt64(vaultIds[0])
+            );
+
+            if (orderType == OrderType.BUY)
+            {
+                orderMessage.Direction = OrderMessage.DIRECTION_BID;
+                orderMessage.TokenSell = orderInfo.Data.BaseToken;
+                orderMessage.TokenBuy = quoteToken;
+                orderMessage.AmountSell = amountBuy;
+                orderMessage.AmountBuy = amount;
+                orderMessage.VaultIdBuy = vaultIds[1];
+                orderMessage.VaultIdSell = vaultIds[0];
+            }
+            else
+            {
+                orderMessage.Direction = OrderMessage.DIRECTION_ASK;
+                orderMessage.TokenSell = quoteToken;
+                orderMessage.TokenBuy = orderInfo.Data.BaseToken;
+                orderMessage.AmountSell = amount;
+                orderMessage.AmountBuy = amountBuy;
+                orderMessage.VaultIdBuy = vaultIds[0];
+                orderMessage.VaultIdSell = vaultIds[1];
+            }
+
+            orderMessage.Signature = SignOrderMsgWithFee(
+                privateKey,
+                orderMessage.VaultIdSell,
+                orderMessage.VaultIdBuy,
+                orderMessage.AmountSell,
+                orderMessage.AmountBuy,
+                orderMessage.TokenSell,
+                orderMessage.TokenBuy,
+                orderMessage.Nonce,
+                orderMessage.ExpirationTimestamp,
+                orderMessage.FeeInfo.TokenId,
+                orderMessage.FeeInfo.SourceVaultId,
+                orderMessage.FeeInfo.FeeLimit
+            );
+            return await _restClient.Order(orderMessage);
+        }
+
+        public async Task<ResponseWrapper<OrderResponse>> Order(
+            string privateKey,
+            string starkKey,
+            string contractType,
+            string contractAddress,
+            string tokenId,
+            string price,
+            string amount,
+            OrderType orderType,
+            string baseTokenType = "ETH",
+            string baseTokenContract = "eth",
+            string marketplaceUuid = "")
+        {
+            var orderInfo = await _restClient.OrderInfo(
+                new OrderInfoMessage(starkKey, $"{baseTokenType}:{baseTokenContract}",
+                    $"{contractType}:{contractAddress}:{tokenId}"));
+
+            if (orderInfo.Status != "OK")
+            {
+                throw new Exception($"get order info, status is {orderInfo.Status}, error is {orderInfo.Error}");
+            }
+
+            var vaultIds = orderInfo.Data.VaultIds;
+            var quoteToken = orderInfo.Data.AssetIds[1];
+            var baseTokenContractInfo =
+                await _restClient.GetContractInfo(new GetContractInfoMessage(baseTokenType, baseTokenContract));
+            var formatPriceLong = Convert.ToInt64(
+                Double.Parse(price) * Math.Pow(10, Double.Parse(baseTokenContractInfo.Data.Decimals)) /
+                baseTokenContractInfo.Data.Quantum
+            );
+            var formatPrice = formatPriceLong.ToString();
+            var amountBuy = Convert.ToInt64(
+                Convert.ToDouble(formatPriceLong) * Double.Parse(amount)
             ).ToString();
             var orderMessage = new OrderMessage();
             orderMessage.Amount = amount;
