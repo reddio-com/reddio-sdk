@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 public class DefaultReddioClientTest {
     @Test
@@ -119,13 +120,15 @@ public class DefaultReddioClientTest {
         DefaultReddioClient client = DefaultReddioClient.testnet();
         DefaultReddioRestClient restClient = DefaultReddioRestClient.testnet();
         CompletableFuture<ResponseWrapper<GetBalancesResponse>> balancesFuture = restClient.getBalances(GetBalancesMessage.of(
-                "0x6ecaebbe5b9486472d964217e5470380782823bb0d865240ba916d01636310a",
+                "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
                 "0x941661Bd1134DC7cc3D107BF006B8631F6E65Ad5",
                 10L)
         );
         ResponseWrapper<GetBalancesResponse> balances = balancesFuture.get();
         Assert.assertEquals("OK", balances.status);
-        GetBalancesResponse.BalanceRecord toSell = balances.getData().getList().get(0);
+        GetBalancesResponse.BalanceRecord toSell = balances.getData().getList().stream().filter((it) ->
+                it.balanceAvailable > 0
+        ).collect(Collectors.toList()).get(0);
         CompletableFuture<ResponseWrapper<OrderResponse>> future = client.order(
                 "0x4d55b547af138c5b6200495d86ab6aed3e06c25fdd75b4b6a00e48515df2b3d",
                 "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
