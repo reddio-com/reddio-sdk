@@ -56,15 +56,19 @@ public interface ReddioRestClient {
     /**
      * Withdrawal to another Ethereum address for ERC-20/ETH and ERC-721
      * <p>
-     *     See API References: <a href="https://docs.reddio.com/api/layer2-apis.html#withdrawalto">https://docs.reddio.com/api/layer2-apis.html#withdrawalto</a>
+     * See API References: <a href="https://docs.reddio.com/api/layer2-apis.html#withdrawalto">https://docs.reddio.com/api/layer2-apis.html#withdrawalto</a>
      * </p>
+     *
      * @param withdrawalToMessage
      * @return
      */
     CompletableFuture<ResponseWrapper<WithdrawalToResponse>> withdrawalTo(WithdrawalToMessage withdrawalToMessage);
 
     CompletableFuture<ResponseWrapper<OrderResponse>> order(OrderMessage orderMessage);
+
     CompletableFuture<ResponseWrapper<OrderInfoResponse>> orderInfo(OrderInfoMessage orderInfoMessage);
+
+    CompletableFuture<ResponseWrapper<OrderListResponse>> orderList(OrderListMessage orderListMessage);
 
     CompletableFuture<ResponseWrapper<GetContractInfoResponse>> getContractInfo(GetContractInfoMessage getContractInfoMessage);
 
