@@ -194,6 +194,21 @@ namespace Reddio.Api.V1.Rest
             return result!;
         }
 
+        public async Task<ResponseWrapper<OrderListResponse>> OrderList(OrderListMessage orderListMessage)
+        {
+            var query = HttpUtility.ParseQueryString(String.Empty);
+            query["stark_key"] = orderListMessage.StarkKey;
+            query["contract_address"] = orderListMessage.ContractAddress;
+
+            var endpoint =
+                $"{_baseEndpoint}/v1/orders?{query}";
+            var client = HttpClientWithReddioUA();
+            var response = await client.GetAsync(endpoint);
+            response.EnsureSuccessStatusCode();
+            var result = await ReadAsJsonAsync<ResponseWrapper<OrderListResponse>>(response);
+            return result!;
+        }
+
         public static ReddioRestClient Mainnet()
         {
             return new ReddioRestClient(MainnetApiEndpoint);

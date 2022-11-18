@@ -40,7 +40,7 @@ public class ReddioRestClientTest
         Assert.Equal(1, response.Data.Quantum);
         Assert.Equal("0", response.Data.Decimals);
     }
-    
+
     [Fact]
     public async void TestGetContractInfoEth()
     {
@@ -51,5 +51,15 @@ public class ReddioRestClientTest
         Assert.Equal("OK", response.Status);
         Assert.Equal(1000000000000, response.Data.Quantum);
         Assert.Equal("18", response.Data.Decimals);
+    }
+
+    [Fact]
+    public async void TestOrderList()
+    {
+        var restClient = ReddioRestClient.Testnet();
+        var response = await restClient.OrderList(new OrderListMessage(
+            "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
+            "0x941661Bd1134DC7cc3D107BF006B8631F6E65Ad5"));
+        Assert.Equal("OK", response.Status);
     }
 }
