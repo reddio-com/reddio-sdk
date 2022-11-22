@@ -1,10 +1,12 @@
 package com.reddio.api.v1
 
+import com.reddio.ReddioException
 import com.reddio.abi.Deposits
 import com.reddio.api.v1.rest.*
 import com.reddio.crypto.CryptoService
 import com.reddio.gas.GasOption
 import com.reddio.gas.StaticGasLimitSuggestionPriceGasProvider
+import jdk.internal.joptsimple.internal.Strings
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
@@ -20,7 +22,9 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.time.toKotlinDuration
 
-class DefaultReddioClient(private val restClient: ReddioRestClient, private val chainId: Long) : ReddioClient {
+class DefaultReddioClient(
+    private val restClient: ReddioRestClient, private val chainId: Long, private val ethJSONRpcHTTPEndpoint: String
+) : ReddioClient {
 
     override fun transfer(
         starkKey: String,
@@ -165,7 +169,7 @@ class DefaultReddioClient(private val restClient: ReddioRestClient, private val 
                     )
                 ).await()
                 if (orderInfoResponse.status != "OK") {
-                    throw RuntimeException("get order info, status is " + orderInfoResponse.status + ", error is " + orderInfoResponse.error)
+                    throw ReddioException("get order info, status is " + orderInfoResponse.status + ", error is " + orderInfoResponse.error)
                 }
 
                 val vaultIds = orderInfoResponse.data.getVaultIds()
@@ -241,6 +245,8 @@ class DefaultReddioClient(private val restClient: ReddioRestClient, private val 
     internal suspend fun asyncDepositETH(
         privateKey: String, contractAddress: String, starkKey: String, quantizedAmount: String, gasOption: GasOption
     ): LogDeposit {
+
+        ensureEthJSONRpcEndpoint();
         val (assetId, assetType) = getAssetTypeAndId("ETH", "ETH", "")
 
         val vaultId =
@@ -251,13 +257,14 @@ class DefaultReddioClient(private val restClient: ReddioRestClient, private val 
         val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
             this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
         )
+        // FIXME: load contract from API /v1/starkex/contracts
         val deposits = Deposits.load(
             "0x8Eb82154f314EC687957CE1e9c1A5Dc3A3234DF9", web3j, Credentials.create(privateKey), gasProvider
         )
         val call = deposits.depositEth(
             BigInteger(starkKey.lowercase().replace("0x", ""), 16),
             BigInteger(assetType.lowercase().replace("0x", ""), 16),
-            BigInteger(vaultId.lowercase().replace("0x", ""), 16),
+            BigInteger(vaultId, 10),
             Convert.toWei(quantizedAmount, Convert.Unit.ETHER).toBigInteger()
         )
         val transactionReceipt = call.sendAsync().await()
@@ -280,14 +287,19 @@ class DefaultReddioClient(private val restClient: ReddioRestClient, private val 
             )
         }, {
             future.completeExceptionally(it)
-        }
-        )
+        })
 
         return try {
             val result = future.await()
             result
         } finally {
             subscription.dispose()
+        }
+    }
+
+    private fun ensureEthJSONRpcEndpoint() {
+        if (ethJSONRpcHTTPEndpoint.isEmpty()) {
+            throw ReddioException("eth json rpc endpoint is required for this operation")
         }
     }
 
@@ -379,12 +391,36 @@ class DefaultReddioClient(private val restClient: ReddioRestClient, private val 
         const val MAINNET_ID = 1L
         const val GOERLI_ID = 5L
 
-        @JvmStatic
-        fun mainnet(): DefaultReddioClient = DefaultReddioClient(DefaultReddioRestClient.mainnet(), MAINNET_ID)
+        class Builder(private val chainId: Long) {
+            private var ethJSONRpcHTTPEndpoint: String = "";
+
+            fun setEthJSONRpcHTTPEndpoint(ethJSONRpcHTTPEndpoint: String): Builder {
+                this.ethJSONRpcHTTPEndpoint = ethJSONRpcHTTPEndpoint
+                return this
+            }
+
+            fun build(): DefaultReddioClient {
+                val restClient = if (chainId == MAINNET_ID) {
+                    DefaultReddioRestClient.mainnet()
+                } else {
+                    DefaultReddioRestClient.testnet()
+                }
+                return DefaultReddioClient(restClient, chainId, ethJSONRpcHTTPEndpoint)
+            }
+        }
 
         @JvmStatic
-        fun testnet(): DefaultReddioClient = DefaultReddioClient(DefaultReddioRestClient.testnet(), GOERLI_ID)
+        fun builder(chainId: Long): Builder {
+            return Builder(chainId)
+        }
+
+        @JvmStatic
+        fun mainnet(): DefaultReddioClient = builder(MAINNET_ID).build()
+
+        @JvmStatic
+        fun testnet(): DefaultReddioClient = builder(GOERLI_ID).build()
 
         private data class VaultIds(val senderVaultId: String, val receiverVaultId: String)
     }
 }
+

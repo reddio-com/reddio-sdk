@@ -90,14 +90,8 @@ public class DefaultReddioClientTest {
     @Test
     @Ignore("not reproducible test")
     public void testDeposit() throws ExecutionException, InterruptedException, JsonProcessingException {
-        DefaultReddioClient client = DefaultReddioClient.testnet();
-        CompletableFuture<LogDeposit> future = client.depositETH(
-                "0x27832a8be401e504eaa3e66904f929f02f72cd7f697e3f8f0a1c3d4b8654ba9d",
-                "",
-                "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
-                "0.00017",
-                GasOption.Market
-        );
+        DefaultReddioClient client = DefaultReddioClient.builder(DefaultReddioClient.GOERLI_ID).setEthJSONRpcHTTPEndpoint("https://eth-goerli.g.alchemy.com/v2/yyabgQ1GlM0xxqDC4ZBbR1lBcBKQmnxT").build();
+        CompletableFuture<LogDeposit> future = client.depositETH("0x27832a8be401e504eaa3e66904f929f02f72cd7f697e3f8f0a1c3d4b8654ba9d", "", "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4", "0.00017", GasOption.Market);
         LogDeposit result = future.get();
         System.out.println(new ObjectMapper().writeValueAsString(result));
     }
