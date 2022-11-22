@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Reddio.Api.V1;
 using Reddio.Api.V1.Rest;
@@ -58,8 +60,28 @@ public class ReddioRestClientTest
     {
         var restClient = ReddioRestClient.Testnet();
         var response = await restClient.OrderList(new OrderListMessage(
-            "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
-            "0x941661Bd1134DC7cc3D107BF006B8631F6E65Ad5"));
+                "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
+                "0x941661Bd1134DC7cc3D107BF006B8631F6E65Ad5",
+                null
+            )
+        );
         Assert.Equal("OK", response.Status);
+    }
+
+    [Fact]
+    public async void TestOrderListWithTokenIds()
+    {
+        var restClient = ReddioRestClient.Testnet();
+        var response = await restClient.OrderList(new OrderListMessage(
+                "",
+                "0x941661bd1134dc7cc3d107bf006b8631f6e65ad5",
+                new[] { "165", "152" }
+            )
+        );
+        Assert.Equal("OK", response.Status);
+        var tokenIdSet = new HashSet<string>(response.Data.List.Select(x => x.TokenId));
+        Assert.Equal(2, tokenIdSet.Count);
+        Assert.Contains("165", tokenIdSet);
+        Assert.Contains("152", tokenIdSet);
     }
 }

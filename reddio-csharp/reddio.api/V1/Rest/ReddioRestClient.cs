@@ -199,6 +199,10 @@ namespace Reddio.Api.V1.Rest
             var query = HttpUtility.ParseQueryString(String.Empty);
             query["stark_key"] = orderListMessage.StarkKey;
             query["contract_address"] = orderListMessage.ContractAddress;
+            if (orderListMessage.TokenIds != null && orderListMessage.TokenIds.Length > 0)
+            {
+                query["token_ids"] = String.Join(",", orderListMessage.TokenIds);
+            }
 
             var endpoint =
                 $"{_baseEndpoint}/v1/orders?{query}";

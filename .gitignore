@@ -6,3 +6,6 @@ output/
 
 reddio-csharp/**/[Bb]in/
 reddio-csharp/**/[Oo]bj/
+
+.idea/
+.vscode/
