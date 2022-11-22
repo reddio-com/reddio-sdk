@@ -50,9 +50,24 @@ public interface ReddioClient {
 
     CompletableFuture<LogDeposit> depositETH(
             String privateKey,
-            String contractAddress,
             String starkKey,
-            String quantizedAmount,
+            String amount,
             GasOption gasOption
-            );
+    );
+
+    CompletableFuture<LogDeposit> depositERC20(
+            String privateKey,
+            String tokenAddress,
+            String starkKey,
+            String amount,
+            GasOption gasOption
+    );
+
+    CompletableFuture<LogDepositWithToken> depositERC721(
+            String privateKey,
+            String tokenAddress,
+            String tokenId,
+            String starkKey,
+            GasOption gasOption
+    );
 }
