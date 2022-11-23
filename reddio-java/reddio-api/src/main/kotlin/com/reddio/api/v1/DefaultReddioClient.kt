@@ -318,7 +318,7 @@ class DefaultReddioClient(
     }
 
     internal suspend fun asyncDepositETH(
-        privateKey: String, starkKey: String, quantizedAmount: String, web3j: Web3j, gasProvider: ContractGasProvider
+        privateKey: String, starkKey: String, amount: String, web3j: Web3j, gasProvider: ContractGasProvider
     ): LogDeposit {
         ensureEthJSONRpcEndpoint();
         val (assetId, assetType) = getAssetTypeAndId("ETH", "ETH", "")
@@ -328,12 +328,17 @@ class DefaultReddioClient(
         val deposits = Deposits.load(
             "0x8Eb82154f314EC687957CE1e9c1A5Dc3A3234DF9", web3j, Credentials.create(privateKey), gasProvider
         )
+        val contractInfo = restClient.getContractInfo(GetContractInfoMessage.of("ETH", "ETH")).await()
+        val quantizedAmount =
+            (amount.toDouble() * 10.0.pow(contractInfo.data.decimals.toDouble()) / contractInfo.data.quantum).toLong()
+                .toString()
         val call = deposits.depositEth(
             BigInteger(starkKey.lowercase().replace("0x", ""), 16),
             BigInteger(assetType.lowercase().replace("0x", ""), 16),
             BigInteger(vaultId, 10),
-            Convert.toWei(quantizedAmount, Convert.Unit.ETHER).toBigInteger()
-        )
+            BigInteger(quantizedAmount, 10)
+        );
+
         call.send();
         val event = EthNextEventSubscriber.create(deposits::logDepositEventFlowable, web3j).subscribeNextEvent()
         return LogDeposit.of(
@@ -341,8 +346,8 @@ class DefaultReddioClient(
             event.starkKey.toString(16),
             event.vaultId.toString(10),
             event.assetType.toString(16),
-            event.nonQuantizedAmount.toString(16),
-            event.quantizedAmount.toString(16)
+            event.nonQuantizedAmount.toString(10),
+            event.quantizedAmount.toString(10)
         )
     }
 
@@ -382,8 +387,8 @@ class DefaultReddioClient(
             event.starkKey.toString(16),
             event.vaultId.toString(10),
             event.assetType.toString(16),
-            event.nonQuantizedAmount.toString(16),
-            event.quantizedAmount.toString(16)
+            event.nonQuantizedAmount.toString(10),
+            event.quantizedAmount.toString(10)
         )
     }
 
