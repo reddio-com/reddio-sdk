@@ -280,9 +280,11 @@ class DefaultReddioClient(
 
         val transactionReceipt = call.send()
         val future = CompletableFuture<ApprovalEventResponse>()
-
+        val currentBlock = web3j.ethBlockNumber().sendAsync().await()
+        val from = DefaultBlockParameterNumber(currentBlock.blockNumber.subtract(BigInteger("10")))
+        val to = DefaultBlockParameterNumber(currentBlock.blockNumber.add(BigInteger("5")))
         val subscription = erc20Contract.approvalEventFlowable(
-            DefaultBlockParameterName.LATEST, DefaultBlockParameterName.PENDING
+            from, to
         ).subscribe({ future.complete(it) }, { future.completeExceptionally(it) })
 
         return try {

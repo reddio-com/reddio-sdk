@@ -108,7 +108,7 @@ public class DefaultReddioClientTest {
                 "0x27832a8be401e504eaa3e66904f929f02f72cd7f697e3f8f0a1c3d4b8654ba9d",
                 "0x57f3560b6793dcc2cb274c39e8b8eba1dd18a086",
                 "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
-                "0.029",
+                "0.013",
                 GasOption.Market
         );
         LogDeposit result = future.get();
