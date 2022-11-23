@@ -10,10 +10,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
 import org.web3j.contracts.eip20.generated.ERC20
-import org.web3j.contracts.eip20.generated.ERC20.ApprovalEventResponse
+import org.web3j.contracts.eip721.generated.ERC721
 import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
-import org.web3j.protocol.core.DefaultBlockParameterName
 import org.web3j.protocol.core.DefaultBlockParameterNumber
 import org.web3j.protocol.http.HttpService
 import org.web3j.tx.gas.ContractGasProvider
@@ -266,7 +265,7 @@ class DefaultReddioClient(
         privateKey: String,
         gasProvider: ContractGasProvider,
         amount: String,
-    ): ApprovalEventResponse {
+    ): ERC20.ApprovalEventResponse {
         val web3j = Web3j.build(HttpService(this.ethJSONRpcHTTPEndpoint))
 
         val contractInfo = restClient.getContractInfo(GetContractInfoMessage.of("ERC20", erc20ContractAddress)).await()
@@ -275,11 +274,12 @@ class DefaultReddioClient(
         val erc20Contract = ERC20.load(erc20ContractAddress, web3j, Credentials.create(privateKey), gasProvider)
         val call = erc20Contract.approve(
             // FIXME: load contract from API /v1/starkex/contracts
-            "0x8eb82154f314ec687957ce1e9c1a5dc3a3234df9", BigInteger(amountAfterDecimal, 10)
+            "0x8eb82154f314ec687957ce1e9c1a5dc3a3234df9",
+            BigInteger(amountAfterDecimal, 10),
         )
 
         val transactionReceipt = call.send()
-        val future = CompletableFuture<ApprovalEventResponse>()
+        val future = CompletableFuture<ERC20.ApprovalEventResponse>()
         val currentBlock = web3j.ethBlockNumber().sendAsync().await()
         val from = DefaultBlockParameterNumber(currentBlock.blockNumber.subtract(BigInteger("10")))
         val to = DefaultBlockParameterNumber(currentBlock.blockNumber.add(BigInteger("5")))
@@ -294,11 +294,49 @@ class DefaultReddioClient(
         }
     }
 
+    private suspend fun asyncERC721Approve(
+        erc721ContractAddress: String,
+        privateKey: String,
+        gasProvider: ContractGasProvider,
+        tokenId: String,
+    ): ERC721.ApprovalEventResponse {
+        val web3j = Web3j.build(HttpService(this.ethJSONRpcHTTPEndpoint))
+        val erc721Contract = ERC721.load(erc721ContractAddress, web3j, Credentials.create(privateKey), gasProvider)
+        val call = erc721Contract.approve(
+            // FIXME: load contract from API /v1/starkex/contracts
+            "0x8eb82154f314ec687957ce1e9c1a5dc3a3234df9",
+            BigInteger(tokenId, 10),
+            BigInteger.ZERO,
+        )
+
+        val transactionReceipt = call.send()
+        val future = CompletableFuture<ERC721.ApprovalEventResponse>()
+        val currentBlock = web3j.ethBlockNumber().sendAsync().await()
+        val from = DefaultBlockParameterNumber(currentBlock.blockNumber.subtract(BigInteger("10")))
+        val to = DefaultBlockParameterNumber(currentBlock.blockNumber.add(BigInteger("5")))
+        val subscription = erc721Contract.approvalEventFlowable(
+            from, to
+        ).subscribe({ future.complete(it) }, { future.completeExceptionally(it) })
+
+        return try {
+            future.await()
+        } finally {
+            subscription.dispose()
+        }
+    }
+
     override fun depositERC721(
         privateKey: String, tokenAddress: String, tokenId: String, starkKey: String, gasOption: GasOption
     ): CompletableFuture<LogDepositWithToken> {
+        val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
+            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+        )
+
         return CompletableFuture.supplyAsync {
             runBlocking {
+                asyncERC721Approve(
+                    tokenAddress, privateKey, gasProvider, tokenId
+                );
                 asyncDepositERC721(privateKey, tokenAddress, tokenId, starkKey, gasOption)
             }
         }
