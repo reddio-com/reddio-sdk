@@ -3,10 +3,10 @@ package com.reddio.api.v1
 import com.reddio.ReddioException
 import com.reddio.abi.Deposits
 import com.reddio.api.v1.rest.*
+import com.reddio.contract.EthNextEventSubscriber
 import com.reddio.crypto.CryptoService
 import com.reddio.gas.GasOption
 import com.reddio.gas.StaticGasLimitSuggestionPriceGasProvider
-import io.reactivex.Flowable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
@@ -14,7 +14,6 @@ import org.web3j.contracts.eip20.generated.ERC20
 import org.web3j.contracts.eip721.generated.ERC721
 import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
-import org.web3j.protocol.core.DefaultBlockParameterNumber
 import org.web3j.protocol.http.HttpService
 import org.web3j.tx.gas.ContractGasProvider
 import org.web3j.utils.Convert
@@ -281,22 +280,8 @@ class DefaultReddioClient(
             "0x8eb82154f314ec687957ce1e9c1a5dc3a3234df9",
             BigInteger(amountAfterDecimal, 10),
         )
-
         call.send()
-        val currentBlock = web3j.ethBlockNumber().send()
-        val from = DefaultBlockParameterNumber(currentBlock.blockNumber.subtract(BigInteger("10")))
-        val to = DefaultBlockParameterNumber(currentBlock.blockNumber.add(BigInteger("5")))
-        return subscribeNextEvent(erc20Contract.approvalEventFlowable(from, to))
-    }
-
-    private suspend fun <T> subscribeNextEvent(flowable: Flowable<T>): T {
-        val future = CompletableFuture<T>()
-        val subscription = flowable.subscribe({ future.complete(it) }, { future.completeExceptionally(it) })
-        return try {
-            future.await()
-        } finally {
-            subscription.dispose()
-        }
+        return EthNextEventSubscriber.create(erc20Contract::approvalEventFlowable, web3j).subscribeNextEvent()
     }
 
     private suspend fun asyncERC721Approve(
@@ -314,10 +299,7 @@ class DefaultReddioClient(
             BigInteger.ZERO,
         )
         call.send()
-        val currentBlock = web3j.ethBlockNumber().send()
-        val from = DefaultBlockParameterNumber(currentBlock.blockNumber.subtract(BigInteger("10")))
-        val to = DefaultBlockParameterNumber(currentBlock.blockNumber.add(BigInteger("5")))
-        return subscribeNextEvent(erc721Contract.approvalEventFlowable(from, to))
+        return EthNextEventSubscriber.create(erc721Contract::approvalEventFlowable, web3j).subscribeNextEvent()
     }
 
     override fun depositERC721(
@@ -336,11 +318,7 @@ class DefaultReddioClient(
     }
 
     internal suspend fun asyncDepositETH(
-        privateKey: String,
-        starkKey: String,
-        quantizedAmount: String,
-        web3j: Web3j,
-        gasProvider: ContractGasProvider
+        privateKey: String, starkKey: String, quantizedAmount: String, web3j: Web3j, gasProvider: ContractGasProvider
     ): LogDeposit {
         ensureEthJSONRpcEndpoint();
         val (assetId, assetType) = getAssetTypeAndId("ETH", "ETH", "")
@@ -357,11 +335,7 @@ class DefaultReddioClient(
             Convert.toWei(quantizedAmount, Convert.Unit.ETHER).toBigInteger()
         )
         call.send();
-        val currentBlock = web3j.ethBlockNumber().send()
-        val from = DefaultBlockParameterNumber(currentBlock.blockNumber.subtract(BigInteger("10")))
-        val to = DefaultBlockParameterNumber(currentBlock.blockNumber.add(BigInteger("5")))
-
-        val event = subscribeNextEvent(deposits.logDepositEventFlowable(from, to))
+        val event = EthNextEventSubscriber.create(deposits::logDepositEventFlowable, web3j).subscribeNextEvent()
         return LogDeposit.of(
             event.depositorEthKey,
             event.starkKey.toString(16),
@@ -402,11 +376,7 @@ class DefaultReddioClient(
             BigInteger(quantizedAmount, 10),
         )
         call.send()
-        val currentBlock = web3j.ethBlockNumber().send()
-        val from = DefaultBlockParameterNumber(currentBlock.blockNumber.subtract(BigInteger("10")))
-        val to = DefaultBlockParameterNumber(currentBlock.blockNumber.add(BigInteger("5")))
-
-        val event = subscribeNextEvent(deposits.logDepositEventFlowable(from, to))
+        val event = EthNextEventSubscriber.create(deposits::logDepositEventFlowable, web3j).subscribeNextEvent()
         return LogDeposit.of(
             event.depositorEthKey,
             event.starkKey.toString(16),
@@ -442,11 +412,8 @@ class DefaultReddioClient(
             BigInteger(tokenId, 10),
         )
         call.send()
-        val currentBlock = web3j.ethBlockNumber().send()
-        val from = DefaultBlockParameterNumber(currentBlock.blockNumber.subtract(BigInteger("10")))
-        val to = DefaultBlockParameterNumber(currentBlock.blockNumber.add(BigInteger("5")))
-
-        val event = subscribeNextEvent(deposits.logDepositWithTokenIdEventFlowable(from, to))
+        val event =
+            EthNextEventSubscriber.create(deposits::logDepositWithTokenIdEventFlowable, web3j).subscribeNextEvent()
         return LogDepositWithToken.of(
             event.depositorEthKey,
             event.starkKey.toString(16),
