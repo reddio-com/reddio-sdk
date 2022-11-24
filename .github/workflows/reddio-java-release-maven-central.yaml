@@ -41,7 +41,7 @@ jobs:
       - name: Publish package
         working-directory: reddio-java
         run: |
-          mvn -B clean verify gpg:sign deploy -DskipTests -Dgpg.keyname=$GPG_KEYNAME -Dgpg.passphrase=$GPG_PASSPHRASE
+          mvn -B clean verify gpg:sign deploy -DskipTests -Dgpg.keyname=$GPG_KEYNAME -Dgpg.passphrase=$GPG_PASSPHRASE -Dgpg.skip=false
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
