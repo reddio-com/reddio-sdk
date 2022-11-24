@@ -61,11 +61,7 @@ public class DefaultReddioRestClient implements ReddioRestClient {
 
     @Override
     public CompletableFuture<ResponseWrapper<GetAssetIdResponse>> getAssetId(GetAssetIdMessage getAssetIdMessage) {
-        String endpoint = baseEndpoint +
-                "/v1/assetid?type=" + getAssetIdMessage.getType() +
-                "&contract_address=" + getAssetIdMessage.getContractAddress() +
-                "&token_id=" + getAssetIdMessage.getTokenId() +
-                "&quantum=" + getAssetIdMessage.getQuantum();
+        String endpoint = baseEndpoint + "/v1/assetid?type=" + getAssetIdMessage.getType() + "&contract_address=" + getAssetIdMessage.getContractAddress() + "&token_id=" + getAssetIdMessage.getTokenId() + "&quantum=" + getAssetIdMessage.getQuantum();
         Request request = new Request.Builder().url(endpoint).get().build();
         Call call = this.httpClient.newCall(request);
         return asFuture(call, new TypeReference<ResponseWrapper<GetAssetIdResponse>>() {
@@ -136,6 +132,15 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         });
     }
 
+    @Override
+    public CompletableFuture<ResponseWrapper<OrderListResponse>> orderList(OrderListMessage orderListMessage) {
+        String endpoint = baseEndpoint + "/v1/orders?stark_key=" + orderListMessage.getStarkKey() + "&contract_address=" + orderListMessage.getContractAddress();
+
+        Request request = new Request.Builder().url(endpoint).get().build();
+        Call call = this.httpClient.newCall(request);
+        return asFuture(call, new TypeReference<ResponseWrapper<OrderListResponse>>() {
+        });
+    }
 
     @Override
     public CompletableFuture<ResponseWrapper<GetContractInfoResponse>> getContractInfo(GetContractInfoMessage getContractInfoMessage) {

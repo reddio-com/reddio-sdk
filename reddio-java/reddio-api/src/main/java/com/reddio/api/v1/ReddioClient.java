@@ -36,6 +36,7 @@ public interface ReddioClient {
             long expirationTimeStamp
     );
 
+    @Deprecated
     CompletableFuture<ResponseWrapper<OrderResponse>> order(
             String privateKey,
             String starkKey,
@@ -45,6 +46,31 @@ public interface ReddioClient {
             String tokenId,
             String marketplaceUuid,
             String tokenType,
+            OrderType orderType
+    );
+
+    CompletableFuture<ResponseWrapper<OrderResponse>> order(
+            String privateKey,
+            String starkKey,
+            String contractType,
+            String contractAddress,
+            String tokenId,
+            String price,
+            String amount,
+            OrderType orderType,
+            String baseTokenType,
+            String baseTokenContract,
+            String marketplaceUuid
+    );
+
+    CompletableFuture<ResponseWrapper<OrderResponse>> orderWithEth(
+            String privateKey,
+            String starkKey,
+            String contractType,
+            String contractAddress,
+            String tokenId,
+            String price,
+            String amount,
             OrderType orderType
     );
 

@@ -37,7 +37,7 @@
         <dependency>
             <groupId>com.reddio</groupId>
             <artifactId>reddio-crypto</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <version>${revision}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

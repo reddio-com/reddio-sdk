@@ -8,11 +8,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "of")
-public class OrderInfoMessage {
+public class OrderListMessage {
     @JsonProperty("stark_key")
     public String starkKey;
-    @JsonProperty("contract1")
-    public String contract1;
-    @JsonProperty("contract2")
-    public String contract2;
+    @JsonProperty("contract_address")
+    public String contractAddress;
 }

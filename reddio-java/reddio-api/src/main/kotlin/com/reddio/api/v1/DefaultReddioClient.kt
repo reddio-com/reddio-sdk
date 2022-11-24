@@ -42,18 +42,31 @@ class DefaultReddioClient(
         return CompletableFuture.supplyAsync {
             runBlocking {
                 val assetId = getAssetId(contractAddress, tokenId, type)
+
+                val contractInfo = restClient.getContractInfo(GetContractInfoMessage.of(type, contractAddress)).await()
+                val resolvedMount =
+                    (amount.toDouble() * 10.0.pow(contractInfo.data.decimals.toDouble()) / contractInfo.data.quantum).toLong()
+                        .toString()
+
                 val vaultsIds = getVaultsIds(assetId, starkKey, receiver)
                 val senderVaultId = vaultsIds.senderVaultId
                 val receiverVaultId = vaultsIds.receiverVaultId
                 val nonce = restClient.getNonce(GetNonceMessage.of(starkKey)).await().getData().getNonce()
                 val signature = signTransferMessage(
-                    privateKey, amount, nonce, senderVaultId, assetId, receiverVaultId, receiver, expirationTimeStamp
+                    privateKey,
+                    resolvedMount,
+                    nonce,
+                    senderVaultId,
+                    assetId,
+                    receiverVaultId,
+                    receiver,
+                    expirationTimeStamp
                 )
                 restClient.transfer(
                     TransferMessage.of(
                         assetId,
                         starkKey,
-                        amount,
+                        resolvedMount,
                         nonce,
                         senderVaultId,
                         receiver,
@@ -126,20 +139,31 @@ class DefaultReddioClient(
     ): CompletableFuture<ResponseWrapper<WithdrawalToResponse>> {
         return CompletableFuture.supplyAsync {
             runBlocking {
+                val contractInfo = restClient.getContractInfo(GetContractInfoMessage.of(type, contractAddress)).await()
+                val resolvedMount =
+                    (amount.toDouble() * 10.0.pow(contractInfo.data.decimals.toDouble()) / contractInfo.data.quantum).toLong()
+                        .toString()
                 val assetId = getAssetId(contractAddress, tokenId, type)
                 val vaultsIds = getVaultsIds(assetId, starkKey, receiver)
                 val senderVaultId = vaultsIds.senderVaultId
                 val receiverVaultId = vaultsIds.receiverVaultId
                 val nonce = restClient.getNonce(GetNonceMessage.of(starkKey)).await().getData().getNonce()
                 val signature = signTransferMessage(
-                    privateKey, amount, nonce, senderVaultId, assetId, receiverVaultId, receiver, expirationTimeStamp
+                    privateKey,
+                    resolvedMount,
+                    nonce,
+                    senderVaultId,
+                    assetId,
+                    receiverVaultId,
+                    receiver,
+                    expirationTimeStamp
                 )
                 restClient.withdrawalTo(
                     WithdrawalToMessage.of(
                         contractAddress,
                         assetId,
                         starkKey,
-                        amount,
+                        resolvedMount,
                         tokenId,
                         nonce,
                         senderVaultId,
@@ -177,6 +201,7 @@ class DefaultReddioClient(
 
                 val vaultIds = orderInfoResponse.data.getVaultIds()
                 val quoteToken = orderInfoResponse.data.assetIds[1]
+                // hard coded format ETH on layer2 (price * (10 **decimals) / quantum)
                 val amountBuy =
                     Convert.toWei((price.toDouble() * amount.toDouble()).toString(), Convert.Unit.MWEI).toLong()
                         .toString()
@@ -229,6 +254,110 @@ class DefaultReddioClient(
                 restClient.order(orderMessage).await()
             }
         }
+    }
+
+    override fun order(
+        privateKey: String,
+        starkKey: String,
+        contractType: String,
+        contractAddress: String,
+        tokenId: String,
+        price: String,
+        amount: String,
+        orderType: OrderType,
+        baseTokenType: String,
+        baseTokenContract: String,
+        marketplaceUuid: String
+    ): CompletableFuture<ResponseWrapper<OrderResponse>> {
+        return CompletableFuture.supplyAsync {
+            runBlocking {
+                val orderInfoResponse = restClient.orderInfo(
+                    OrderInfoMessage.of(
+                        starkKey,
+                        String.format("%s:%s", baseTokenType, baseTokenContract),
+                        String.format("%s:%s:%s", contractType, contractAddress, tokenId)
+                    )
+                ).await()
+
+                if (orderInfoResponse.status != "OK") {
+                    throw RuntimeException("get order info, status is " + orderInfoResponse.status + ", error is " + orderInfoResponse.error)
+                }
+
+                val vaultIds = orderInfoResponse.data.getVaultIds()
+                val quoteToken = orderInfoResponse.data.assetIds[1]
+                val contractInfo =
+                    restClient.getContractInfo(GetContractInfoMessage.of(baseTokenType, baseTokenContract)).await()
+
+
+                val formatPriceLong =
+                    (price.toDouble() * 10.0.pow(contractInfo.data.decimals.toDouble()) / contractInfo.data.quantum).toLong()
+                val formatPrice = formatPriceLong.toString()
+
+                val amountBuy = (formatPriceLong.toDouble() * amount.toDouble()).toLong().toString()
+
+                val orderMessage = OrderMessage()
+                orderMessage.amount = amount;
+                orderMessage.baseToken = orderInfoResponse.data.getBaseToken()
+                orderMessage.quoteToken = quoteToken
+                orderMessage.price = formatPrice
+                orderMessage.starkKey = starkKey
+                orderMessage.expirationTimestamp = 4194303;
+                orderMessage.nonce = orderInfoResponse.data.nonce;
+                orderMessage.feeInfo = FeeInfo.of(
+                    (orderInfoResponse.data.feeRate.toDouble() * amountBuy.toDouble()).toLong(),
+                    orderInfoResponse.data.feeToken,
+                    vaultIds[0].toLong()
+                )
+                if (orderType == OrderType.BUY) {
+                    orderMessage.direction = OrderMessage.DIRECTION_BID
+                    orderMessage.tokenSell = orderInfoResponse.data.baseToken
+                    orderMessage.tokenBuy = quoteToken
+                    orderMessage.amountSell = amountBuy
+                    orderMessage.amountBuy = amount
+                    orderMessage.vaultIdBuy = vaultIds[1]
+                    orderMessage.vaultIdSell = vaultIds[0]
+                } else {
+                    orderMessage.direction = OrderMessage.DIRECTION_ASK
+                    orderMessage.tokenSell = quoteToken
+                    orderMessage.tokenBuy = orderInfoResponse.data.baseToken
+                    orderMessage.amountSell = amount
+                    orderMessage.amountBuy = amountBuy
+                    orderMessage.vaultIdBuy = vaultIds[0]
+                    orderMessage.vaultIdSell = vaultIds[1]
+                }
+                orderMessage.signature = signOrderMsgWithFee(
+                    privateKey,
+                    orderMessage.vaultIdSell,
+                    orderMessage.vaultIdBuy,
+                    orderMessage.amountSell,
+                    orderMessage.amountBuy,
+                    orderMessage.tokenSell,
+                    orderMessage.tokenBuy,
+                    orderMessage.nonce,
+                    orderMessage.expirationTimestamp,
+                    orderMessage.feeInfo.tokenId,
+                    orderMessage.feeInfo.sourceVaultId,
+                    orderMessage.feeInfo.feeLimit
+                )
+                restClient.order(orderMessage).await()
+            }
+        }
+
+    }
+
+    override fun orderWithEth(
+        privateKey: String,
+        starkKey: String,
+        contractType: String,
+        contractAddress: String,
+        tokenId: String,
+        price: String,
+        amount: String,
+        orderType: OrderType
+    ): CompletableFuture<ResponseWrapper<OrderResponse>> {
+        return order(
+            privateKey, starkKey, contractType, contractAddress, tokenId, price, amount, orderType, "ETH", "eth", ""
+        )
     }
 
     override fun depositETH(

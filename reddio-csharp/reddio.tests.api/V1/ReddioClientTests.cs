@@ -27,6 +27,14 @@ public class ReddioClientTests
     }
 
     [Fact]
+    public async void TestGetAssetIdERC20()
+    {
+        var client = ReddioClient.Mainnet();
+        var assetId = await client.GetAssetId("0x288b2b6f8767661cc67f16412ed430e03e1915dc", "", "ERC20");
+        Assert.Equal("0x13d6fce9e73d9a5c7f6c65a3660b347ca994fe0a7b22e6a015e8d6bcc42990", assetId);
+    }
+
+    [Fact]
     public async void TestGetVaults()
     {
         var client = ReddioClient.Testnet();
@@ -56,7 +64,7 @@ public class ReddioClientTests
     }
 
     [Fact]
-    public async void TestTransfer()
+    public async void TestTransferNFT()
     {
         var client = ReddioClient.Testnet();
         var result = await client.Transfer(
@@ -70,7 +78,23 @@ public class ReddioClientTests
         );
         Assert.Equal("OK", result.Status);
         _testOutputHelper.WriteLine(JsonSerializer.Serialize(result));
+    }
 
+    [Fact]
+    public async void TestTrasnferERC20()
+    {
+        var client = ReddioClient.Testnet();
+        var result = await client.Transfer(
+            "0x1ccc27877014bc1a81919fc855ebbd1b874603283c9ea93397d970b0704e581",
+            "0xf0b94c9485dfb212b5e7882670657ef8aca14ffd8d5dedc918fd9237ccd724",
+            "0.0013",
+            "0x57f3560b6793dcc2cb274c39e8b8eba1dd18a086",
+            "",
+            "ERC20",
+            "0x7865bc66b610d6196a7cbeb9bf066c64984f6f06b5ed3b6f5788bd9a6cb099c"
+        );
+        Assert.Equal("OK", result.Status);
+        _testOutputHelper.WriteLine(JsonSerializer.Serialize(result));
     }
 
     [Fact]
@@ -84,5 +108,76 @@ public class ReddioClientTests
         Assert.Single(result.Data);
         Assert.Equal(SequenceRecord.SequenceStatusAccepted, result.Data[0].Status);
         _testOutputHelper.WriteLine(JsonSerializer.Serialize(result));
+    }
+
+    [Fact]
+    public async void TestGetRecords()
+    {
+        var client = ReddioClient.Testnet();
+        var result = await client.GetRecords("0x6736f7449da3bf44bf0f7bdd6463818e1ef272641d43021e8bca17b32ec2df0");
+        _testOutputHelper.WriteLine(JsonSerializer.Serialize(result));
+    }
+
+    [Fact]
+    public async void TestGetRecordsPagination()
+    {
+        var client = ReddioClient.Testnet();
+        var result = await client.GetRecords("0x6736f7449da3bf44bf0f7bdd6463818e1ef272641d43021e8bca17b32ec2df0", 0);
+        Assert.Equal(5, result.Data.List.Count);
+        _testOutputHelper.WriteLine(JsonSerializer.Serialize(result));
+    }
+
+    // [Fact(Skip = "not reproducible test")]
+    [Fact]
+    public async void TestOrder()
+    {
+        IReddioClient client = ReddioClient.Testnet();
+        IReddioRestClient restClient = ReddioRestClient.Testnet();
+
+        var balances = await restClient.GetBalances(new GetBalancesMessage(
+            "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
+            "0x941661Bd1134DC7cc3D107BF006B8631F6E65Ad5"
+        ));
+        Assert.Equal("OK", balances.Status);
+        var toSell = balances.Data.list.Find((it) => it.BalanceAvailable > 0)!;
+        var order = await client.Order(
+            "0x4d55b547af138c5b6200495d86ab6aed3e06c25fdd75b4b6a00e48515df2b3d",
+            "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
+            "0.013",
+            "1",
+            "0x941661Bd1134DC7cc3D107BF006B8631F6E65Ad5",
+            toSell.TokenId,
+            "11ed793a-cc11-4e44-9738-97165c4e14a7",
+            "ERC721",
+            OrderType.SELL
+        );
+        Assert.Equal("OK", order.Status);
+    }
+
+    [Fact]
+    public async void TestOrderWithERC20()
+    {
+        IReddioClient client = ReddioClient.Testnet();
+        IReddioRestClient restClient = ReddioRestClient.Testnet();
+
+        var balances = await restClient.GetBalances(new GetBalancesMessage(
+            "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
+            "0x941661Bd1134DC7cc3D107BF006B8631F6E65Ad5"
+        ));
+        Assert.Equal("OK", balances.Status);
+        var toSell = balances.Data.list.Find((it) => it.BalanceAvailable > 0)!;
+        var order = await client.Order(
+            "0x4d55b547af138c5b6200495d86ab6aed3e06c25fdd75b4b6a00e48515df2b3d",
+            "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
+            "ERC721",
+            "0x941661Bd1134DC7cc3D107BF006B8631F6E65Ad5",
+            toSell.TokenId,
+            "0.013",
+            "1",
+            OrderType.SELL,
+            "ERC20",
+            "0x57f3560b6793dcc2cb274c39e8b8eba1dd18a086"
+        );
+        Assert.Equal("OK", order.Status);
     }
 }

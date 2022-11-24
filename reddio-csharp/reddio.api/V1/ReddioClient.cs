@@ -16,9 +16,16 @@ namespace Reddio.Api.V1
             _restClient = restClient;
         }
 
-        public async Task<ResponseWrapper<TransferResponse>> Transfer(string starkKey, string privateKey, string amount,
-            string contractAddress, string tokenId, string type,
-            string receiver, long expirationTimeStamp = 4194303)
+        public async Task<ResponseWrapper<TransferResponse>> Transfer(
+            string starkKey,
+            string privateKey,
+            string amount,
+            string contractAddress,
+            string tokenId,
+            string type,
+            string receiver,
+            long expirationTimeStamp = 4194303
+        )
         {
             var assetId = await GetAssetId(contractAddress, tokenId, type);
             var (senderVaultId, receiverVaultId) = await GetVaultIds(assetId, starkKey, receiver);
@@ -26,8 +33,14 @@ namespace Reddio.Api.V1
             var getNonceResponse = await _restClient.GetNonce(new GetNonceMessage(starkKey));
             var nonce = getNonceResponse.Data.Nonce;
 
+            var contractInfo = await _restClient.GetContractInfo(new GetContractInfoMessage(type, contractAddress));
+            var resolvedAmount =
+                Convert.ToInt64(
+                    Double.Parse(amount) * Math.Pow(10, Double.Parse(contractInfo.Data.Decimals)) /
+                    contractInfo.Data.Quantum
+                ).ToString();
             var signature = SignTransferMessage(privateKey,
-                amount,
+                resolvedAmount,
                 nonce,
                 senderVaultId,
                 assetId,
@@ -38,7 +51,7 @@ namespace Reddio.Api.V1
             var transferMessage = new TransferMessage(
                 assetId,
                 starkKey,
-                amount,
+                resolvedAmount,
                 nonce,
                 senderVaultId,
                 receiver,
@@ -52,6 +65,19 @@ namespace Reddio.Api.V1
         public async Task<ResponseWrapper<GetRecordResponse>> GetRecord(string starkKey, long sequenceId)
         {
             return await this._restClient.GetRecord(new GetRecordMessage(starkKey, sequenceId));
+        }
+
+
+        public async Task<ResponseWrapper<GetRecordsResponse>> GetRecords(string starkKey, long? limit = null,
+            long? page = null, string? contractAddress = null)
+        {
+            return await _restClient.GetRecords(new GetRecordsMessage(
+                    starkKey,
+                    limit?.ToString(),
+                    page?.ToString(),
+                    contractAddress
+                )
+            );
         }
 
         public async Task<ResponseWrapper<GetRecordResponse>> WaitingTransferGetAccepted(string starkKey,
@@ -97,9 +123,171 @@ namespace Reddio.Api.V1
             return await _restClient.GetBalances(new GetBalancesMessage(starkKey));
         }
 
+        public async Task<ResponseWrapper<OrderResponse>> Order(string privateKey, string starkKey, string price,
+            string amount, string tokenAddress, string tokenId,
+            string marketplaceUuid, string tokenType, OrderType orderType)
+        {
+            var orderInfo = await _restClient.OrderInfo(
+                new OrderInfoMessage(starkKey, "ETH:ETH", $"{tokenType}:{tokenAddress}:{tokenId}"));
+
+            if (orderInfo.Status != "OK")
+            {
+                throw new Exception($"get order info, status is {orderInfo.Status}, error is {orderInfo.Error}");
+            }
+
+            var vaultIds = orderInfo.Data.VaultIds;
+            var quoteToken = orderInfo.Data.AssetIds[1];
+
+            var amountBuy = Convert.ToInt64(
+                Double.Parse(price) * Double.Parse(amount) * Math.Pow(10, 6)
+            ).ToString();
+
+            // hard coded format ETH on layer2 (price * (10 **decimals) / quantum)
+            var formatPrice = Convert.ToInt64(
+                Double.Parse(price) * Math.Pow(10, 6)
+            ).ToString();
+            var orderMessage = new OrderMessage();
+            orderMessage.Amount = amount;
+            orderMessage.BaseToken = orderInfo.Data.BaseToken;
+            orderMessage.QuoteToken = quoteToken;
+            orderMessage.Price = formatPrice;
+            orderMessage.StarkKey = starkKey;
+            orderMessage.ExpirationTimestamp = 4194303;
+            orderMessage.Nonce = orderInfo.Data.Nonce;
+            orderMessage.FeeInfo = new FeeInfo(
+                Convert.ToInt64(Double.Parse(orderInfo.Data.FeeRate) * Double.Parse(amountBuy)),
+                orderInfo.Data.FeeToken,
+                Convert.ToInt64(vaultIds[0])
+            );
+
+            if (orderType == OrderType.BUY)
+            {
+                orderMessage.Direction = OrderMessage.DIRECTION_BID;
+                orderMessage.TokenSell = orderInfo.Data.BaseToken;
+                orderMessage.TokenBuy = quoteToken;
+                orderMessage.AmountSell = amountBuy;
+                orderMessage.AmountBuy = amount;
+                orderMessage.VaultIdBuy = vaultIds[1];
+                orderMessage.VaultIdSell = vaultIds[0];
+            }
+            else
+            {
+                orderMessage.Direction = OrderMessage.DIRECTION_ASK;
+                orderMessage.TokenSell = quoteToken;
+                orderMessage.TokenBuy = orderInfo.Data.BaseToken;
+                orderMessage.AmountSell = amount;
+                orderMessage.AmountBuy = amountBuy;
+                orderMessage.VaultIdBuy = vaultIds[0];
+                orderMessage.VaultIdSell = vaultIds[1];
+            }
+
+            orderMessage.Signature = SignOrderMsgWithFee(
+                privateKey,
+                orderMessage.VaultIdSell,
+                orderMessage.VaultIdBuy,
+                orderMessage.AmountSell,
+                orderMessage.AmountBuy,
+                orderMessage.TokenSell,
+                orderMessage.TokenBuy,
+                orderMessage.Nonce,
+                orderMessage.ExpirationTimestamp,
+                orderMessage.FeeInfo.TokenId,
+                orderMessage.FeeInfo.SourceVaultId,
+                orderMessage.FeeInfo.FeeLimit
+            );
+            return await _restClient.Order(orderMessage);
+        }
+
+        public async Task<ResponseWrapper<OrderResponse>> Order(
+            string privateKey,
+            string starkKey,
+            string contractType,
+            string contractAddress,
+            string tokenId,
+            string price,
+            string amount,
+            OrderType orderType,
+            string baseTokenType = "ETH",
+            string baseTokenContract = "eth",
+            string marketplaceUuid = "")
+        {
+            var orderInfo = await _restClient.OrderInfo(
+                new OrderInfoMessage(starkKey, $"{baseTokenType}:{baseTokenContract}",
+                    $"{contractType}:{contractAddress}:{tokenId}"));
+
+            if (orderInfo.Status != "OK")
+            {
+                throw new Exception($"get order info, status is {orderInfo.Status}, error is {orderInfo.Error}");
+            }
+
+            var vaultIds = orderInfo.Data.VaultIds;
+            var quoteToken = orderInfo.Data.AssetIds[1];
+            var baseTokenContractInfo =
+                await _restClient.GetContractInfo(new GetContractInfoMessage(baseTokenType, baseTokenContract));
+            var formatPriceLong = Convert.ToInt64(
+                Double.Parse(price) * Math.Pow(10, Double.Parse(baseTokenContractInfo.Data.Decimals)) /
+                baseTokenContractInfo.Data.Quantum
+            );
+            var formatPrice = formatPriceLong.ToString();
+            var amountBuy = Convert.ToInt64(
+                Convert.ToDouble(formatPriceLong) * Double.Parse(amount)
+            ).ToString();
+            var orderMessage = new OrderMessage();
+            orderMessage.Amount = amount;
+            orderMessage.BaseToken = orderInfo.Data.BaseToken;
+            orderMessage.QuoteToken = quoteToken;
+            orderMessage.Price = formatPrice;
+            orderMessage.StarkKey = starkKey;
+            orderMessage.ExpirationTimestamp = 4194303;
+            orderMessage.Nonce = orderInfo.Data.Nonce;
+            orderMessage.FeeInfo = new FeeInfo(
+                Convert.ToInt64(Double.Parse(orderInfo.Data.FeeRate) * Double.Parse(amountBuy)),
+                orderInfo.Data.FeeToken,
+                Convert.ToInt64(vaultIds[0])
+            );
+
+            if (orderType == OrderType.BUY)
+            {
+                orderMessage.Direction = OrderMessage.DIRECTION_BID;
+                orderMessage.TokenSell = orderInfo.Data.BaseToken;
+                orderMessage.TokenBuy = quoteToken;
+                orderMessage.AmountSell = amountBuy;
+                orderMessage.AmountBuy = amount;
+                orderMessage.VaultIdBuy = vaultIds[1];
+                orderMessage.VaultIdSell = vaultIds[0];
+            }
+            else
+            {
+                orderMessage.Direction = OrderMessage.DIRECTION_ASK;
+                orderMessage.TokenSell = quoteToken;
+                orderMessage.TokenBuy = orderInfo.Data.BaseToken;
+                orderMessage.AmountSell = amount;
+                orderMessage.AmountBuy = amountBuy;
+                orderMessage.VaultIdBuy = vaultIds[0];
+                orderMessage.VaultIdSell = vaultIds[1];
+            }
+
+            orderMessage.Signature = SignOrderMsgWithFee(
+                privateKey,
+                orderMessage.VaultIdSell,
+                orderMessage.VaultIdBuy,
+                orderMessage.AmountSell,
+                orderMessage.AmountBuy,
+                orderMessage.TokenSell,
+                orderMessage.TokenBuy,
+                orderMessage.Nonce,
+                orderMessage.ExpirationTimestamp,
+                orderMessage.FeeInfo.TokenId,
+                orderMessage.FeeInfo.SourceVaultId,
+                orderMessage.FeeInfo.FeeLimit
+            );
+            return await _restClient.Order(orderMessage);
+        }
+
         internal async Task<string> GetAssetId(string contractAddress, string tokenId, string type)
         {
-            var getAssetIdMessage = new GetAssetIdMessage(contractAddress, type, tokenId);
+            var contractInfo = await _restClient.GetContractInfo(new GetContractInfoMessage(type, contractAddress));
+            var getAssetIdMessage = new GetAssetIdMessage(contractAddress, type, tokenId, contractInfo.Data.Quantum);
             var getAssetIdResponse = await _restClient.GetAssetId(getAssetIdMessage);
             var assetId = getAssetIdResponse.Data.AssetId;
             return assetId;
@@ -133,6 +321,44 @@ namespace Reddio.Api.V1
             var result = new Signature($"0x{r.ToString("x")}", $"0x{s.ToString("x")}");
             return result;
         }
+
+        internal Signature SignOrderMsgWithFee(
+            string privateKey,
+            string vaultIdSell,
+            string vaultIdBuy,
+            string amountSell,
+            string amountBuy,
+            string tokenSell,
+            string tokenBuy,
+            long nonce,
+            long expirationTimestamp,
+            string feeToken,
+            long feeSourceVaultId,
+            long feeLimit
+        )
+        {
+            var hash = CryptoService.GetLimitOrderMsgHashWithFee(
+                Int64.Parse(vaultIdSell),
+                Int64.Parse(vaultIdBuy),
+                Int64.Parse(amountSell),
+                Int64.Parse(amountBuy),
+                CryptoService.ParsePositive(tokenSell.ToLower().Replace("0x", "")),
+                CryptoService.ParsePositive(tokenBuy.ToLower().Replace("0x", "")),
+                nonce,
+                expirationTimestamp,
+                CryptoService.ParsePositive(feeToken.ToLower().Replace("0x", "")),
+                feeSourceVaultId,
+                feeLimit
+            );
+            var (r, s) = CryptoService.Sign(
+                CryptoService.ParsePositive(privateKey.ToLower().Replace("0x", "")),
+                hash,
+                null
+            );
+            var result = new Signature($"0x{r.ToString("x")}", $"0x{s.ToString("x")}");
+            return result;
+        }
+
 
         internal async Task<(string, string)> GetVaultIds(string assetId, string starkKey, string receiver)
         {
