@@ -1,10 +1,21 @@
 package com.reddio.api.v1
 
+import com.reddio.ReddioException
+import com.reddio.abi.Deposits
 import com.reddio.api.v1.rest.*
+import com.reddio.contract.EthNextEventSubscriber
 import com.reddio.crypto.CryptoService
+import com.reddio.gas.GasOption
+import com.reddio.gas.StaticGasLimitSuggestionPriceGasProvider
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
+import org.web3j.contracts.eip20.generated.ERC20
+import org.web3j.contracts.eip721.generated.ERC721
+import org.web3j.crypto.Credentials
+import org.web3j.protocol.Web3j
+import org.web3j.protocol.http.HttpService
+import org.web3j.tx.gas.ContractGasProvider
 import org.web3j.utils.Convert
 import java.math.BigInteger
 import java.time.Duration
@@ -14,7 +25,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.pow
 import kotlin.time.toKotlinDuration
 
-class DefaultReddioClient(private val restClient: ReddioRestClient) : ReddioClient {
+class DefaultReddioClient(
+    private val restClient: ReddioRestClient, private val chainId: Long, private val ethJSONRpcHTTPEndpoint: String
+) : ReddioClient {
 
     override fun transfer(
         starkKey: String,
@@ -183,7 +196,7 @@ class DefaultReddioClient(private val restClient: ReddioRestClient) : ReddioClie
                     )
                 ).await()
                 if (orderInfoResponse.status != "OK") {
-                    throw RuntimeException("get order info, status is " + orderInfoResponse.status + ", error is " + orderInfoResponse.error)
+                    throw ReddioException("get order info, status is " + orderInfoResponse.status + ", error is " + orderInfoResponse.error)
                 }
 
                 val vaultIds = orderInfoResponse.data.getVaultIds()
@@ -347,6 +360,212 @@ class DefaultReddioClient(private val restClient: ReddioRestClient) : ReddioClie
         )
     }
 
+    override fun depositETH(
+        privateKey: String,
+        starkKey: String,
+        quantizedAmount: String,
+        gasOption: GasOption,
+    ): CompletableFuture<LogDeposit> {
+        val web3j = Web3j.build(HttpService(this.ethJSONRpcHTTPEndpoint))
+        val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
+            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+        )
+        return CompletableFuture.supplyAsync {
+            runBlocking {
+                asyncDepositETH(privateKey, starkKey, quantizedAmount, web3j, gasProvider)
+            }
+        }
+    }
+
+    override fun depositERC20(
+        privateKey: String, tokenAddress: String, starkKey: String, amount: String, gasOption: GasOption
+    ): CompletableFuture<LogDeposit> {
+        val web3j = Web3j.build(HttpService(this.ethJSONRpcHTTPEndpoint))
+        val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
+            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+        )
+        return CompletableFuture.supplyAsync {
+            runBlocking {
+                asyncERC20Approve(privateKey, tokenAddress, amount, web3j, gasProvider)
+                asyncDepositERC20(privateKey, tokenAddress, starkKey, amount, web3j, gasProvider)
+            }
+        }
+    }
+
+    private suspend fun asyncERC20Approve(
+        privateKey: String,
+        erc20ContractAddress: String,
+        amount: String,
+        web3j: Web3j,
+        gasProvider: ContractGasProvider,
+    ): ERC20.ApprovalEventResponse {
+
+        val contractInfo = restClient.getContractInfo(GetContractInfoMessage.of("ERC20", erc20ContractAddress)).await()
+        val amountAfterDecimal =
+            (amount.toDouble() * 10.0.pow(contractInfo.data.decimals.toDouble())).toLong().toString()
+        val erc20Contract = ERC20.load(erc20ContractAddress, web3j, Credentials.create(privateKey), gasProvider)
+        val call = erc20Contract.approve(
+            // FIXME: load contract from API /v1/starkex/contracts
+            "0x8eb82154f314ec687957ce1e9c1a5dc3a3234df9",
+            BigInteger(amountAfterDecimal, 10),
+        )
+        call.send()
+        return EthNextEventSubscriber.create(erc20Contract::approvalEventFlowable, web3j).subscribeNextEvent()
+    }
+
+    private suspend fun asyncERC721Approve(
+        erc721ContractAddress: String,
+        privateKey: String,
+        gasProvider: ContractGasProvider,
+        tokenId: String,
+    ): ERC721.ApprovalEventResponse {
+        val web3j = Web3j.build(HttpService(this.ethJSONRpcHTTPEndpoint))
+        val erc721Contract = ERC721.load(erc721ContractAddress, web3j, Credentials.create(privateKey), gasProvider)
+        val call = erc721Contract.approve(
+            // FIXME: load contract from API /v1/starkex/contracts
+            "0x8eb82154f314ec687957ce1e9c1a5dc3a3234df9",
+            BigInteger(tokenId, 10),
+            BigInteger.ZERO,
+        )
+        call.send()
+        return EthNextEventSubscriber.create(erc721Contract::approvalEventFlowable, web3j).subscribeNextEvent()
+    }
+
+    override fun depositERC721(
+        privateKey: String, tokenAddress: String, tokenId: String, starkKey: String, gasOption: GasOption
+    ): CompletableFuture<LogDepositWithToken> {
+        val web3j = Web3j.build(HttpService(this.ethJSONRpcHTTPEndpoint))
+        val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
+            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+        )
+        return CompletableFuture.supplyAsync {
+            runBlocking {
+                asyncERC721Approve(tokenAddress, privateKey, gasProvider, tokenId);
+                asyncDepositERC721(privateKey, tokenAddress, tokenId, starkKey, web3j, gasProvider)
+            }
+        }
+    }
+
+    internal suspend fun asyncDepositETH(
+        privateKey: String, starkKey: String, amount: String, web3j: Web3j, gasProvider: ContractGasProvider
+    ): LogDeposit {
+        ensureEthJSONRpcEndpoint();
+        val (assetId, assetType) = getAssetTypeAndId("ETH", "ETH", "")
+        val vaultId =
+            restClient.getVaultId(GetVaultIdMessage.of(assetId, listOf(starkKey))).await().getData().vaultIds[0]
+        // FIXME: load contract from API /v1/starkex/contracts
+        val deposits = Deposits.load(
+            "0x8Eb82154f314EC687957CE1e9c1A5Dc3A3234DF9", web3j, Credentials.create(privateKey), gasProvider
+        )
+        val contractInfo = restClient.getContractInfo(GetContractInfoMessage.of("ETH", "ETH")).await()
+        val quantizedAmount =
+            (amount.toDouble() * 10.0.pow(contractInfo.data.decimals.toDouble()) / contractInfo.data.quantum).toLong()
+                .toString()
+        val call = deposits.depositEth(
+            BigInteger(starkKey.lowercase().replace("0x", ""), 16),
+            BigInteger(assetType.lowercase().replace("0x", ""), 16),
+            BigInteger(vaultId, 10),
+            BigInteger(quantizedAmount, 10)
+        );
+
+        call.send();
+        val event = EthNextEventSubscriber.create(deposits::logDepositEventFlowable, web3j).subscribeNextEvent()
+        return LogDeposit.of(
+            event.depositorEthKey,
+            event.starkKey.toString(16),
+            event.vaultId.toString(10),
+            event.assetType.toString(16),
+            event.nonQuantizedAmount.toString(10),
+            event.quantizedAmount.toString(10)
+        )
+    }
+
+    internal suspend fun asyncDepositERC20(
+        privateKey: String,
+        tokenAddress: String,
+        starkKey: String,
+        amount: String,
+        web3j: Web3j,
+        gasProvider: ContractGasProvider
+    ): LogDeposit {
+        ensureEthJSONRpcEndpoint();
+        val (assetId, assetType) = getAssetTypeAndId("ERC20", tokenAddress, "")
+
+        val vaultId =
+            restClient.getVaultId(GetVaultIdMessage.of(assetId, listOf(starkKey))).await().getData().vaultIds[0]
+        val contractInfo = restClient.getContractInfo(GetContractInfoMessage.of("ERC20", tokenAddress)).await()
+        val quantizedAmount =
+            (amount.toDouble() * 10.0.pow(contractInfo.data.decimals.toDouble()) / contractInfo.data.quantum).toLong()
+                .toString()
+
+        // FIXME: load contract from API /v1/starkex/contracts
+        val deposits = Deposits.load(
+            "0x8Eb82154f314EC687957CE1e9c1A5Dc3A3234DF9", web3j, Credentials.create(privateKey), gasProvider
+        )
+
+        val call = deposits.depositERC20(
+            BigInteger(starkKey.lowercase().replace("0x", ""), 16),
+            BigInteger(assetType.lowercase().replace("0x", ""), 16),
+            BigInteger(vaultId, 10),
+            BigInteger(quantizedAmount, 10),
+        )
+        call.send()
+        val event = EthNextEventSubscriber.create(deposits::logDepositEventFlowable, web3j).subscribeNextEvent()
+        return LogDeposit.of(
+            event.depositorEthKey,
+            event.starkKey.toString(16),
+            event.vaultId.toString(10),
+            event.assetType.toString(16),
+            event.nonQuantizedAmount.toString(10),
+            event.quantizedAmount.toString(10)
+        )
+    }
+
+    internal suspend fun asyncDepositERC721(
+        privateKey: String,
+        tokenAddress: String,
+        tokenId: String,
+        starkKey: String,
+        web3j: Web3j,
+        gasProvider: ContractGasProvider,
+    ): LogDepositWithToken {
+        ensureEthJSONRpcEndpoint();
+        val (assetId, assetType) = getAssetTypeAndId("ERC721", tokenAddress, tokenId)
+
+        val vaultId =
+            restClient.getVaultId(GetVaultIdMessage.of(assetId, listOf(starkKey))).await().getData().vaultIds[0]
+
+        // FIXME: load contract from API /v1/starkex/contracts
+        val deposits = Deposits.load(
+            "0x8Eb82154f314EC687957CE1e9c1A5Dc3A3234DF9", web3j, Credentials.create(privateKey), gasProvider
+        )
+        val call = deposits.depositNft(
+            BigInteger(starkKey.lowercase().replace("0x", ""), 16),
+            BigInteger(assetType.lowercase().replace("0x", ""), 16),
+            BigInteger(vaultId, 10),
+            BigInteger(tokenId, 10),
+        )
+        call.send()
+        val event =
+            EthNextEventSubscriber.create(deposits::logDepositWithTokenIdEventFlowable, web3j).subscribeNextEvent()
+        return LogDepositWithToken.of(
+            event.depositorEthKey,
+            event.starkKey.toString(16),
+            event.vaultId.toString(10),
+            event.assetType.toString(16),
+            event.tokenId.toString(10),
+            event.assetId.toString(16),
+            event.nonQuantizedAmount.toString(16),
+            event.quantizedAmount.toString(16)
+        )
+    }
+
+    private fun ensureEthJSONRpcEndpoint() {
+        if (ethJSONRpcHTTPEndpoint.isEmpty()) {
+            throw ReddioException("eth json rpc endpoint is required for this operation")
+        }
+    }
+
     private suspend fun getAssetId(
         contractAddress: String,
         tokenId: String,
@@ -357,6 +576,17 @@ class DefaultReddioClient(private val restClient: ReddioRestClient) : ReddioClie
         val result =
             restClient.getAssetId(GetAssetIdMessage.of(contractAddress, type, tokenId, contractInfo.quantum)).await()
         return result.getData().getAssetId()
+    }
+
+    private suspend fun getAssetTypeAndId(
+        type: String,
+        tokenAddress: String,
+        tokenId: String,
+    ): AssetIdAndAssetType {
+        val contractInfo = restClient.getContractInfo(GetContractInfoMessage.of(type, tokenAddress)).await().getData()
+        val result =
+            restClient.getAssetId(GetAssetIdMessage.of(tokenAddress, type, tokenId, contractInfo.quantum)).await()
+        return AssetIdAndAssetType(result.getData().getAssetId(), contractInfo.getAssetType())
     }
 
     private suspend fun getVaultsIds(assetId: String, starkKey: String, receiver: String): VaultIds {
@@ -421,12 +651,39 @@ class DefaultReddioClient(private val restClient: ReddioRestClient) : ReddioClie
     }
 
     companion object {
-        @JvmStatic
-        fun mainnet(): DefaultReddioClient = DefaultReddioClient(DefaultReddioRestClient.mainnet())
+        const val MAINNET_ID = 1L
+        const val GOERLI_ID = 5L
+
+        class Builder(private val chainId: Long) {
+            private var ethJSONRpcHTTPEndpoint: String = "";
+
+            fun setEthJSONRpcHTTPEndpoint(ethJSONRpcHTTPEndpoint: String): Builder {
+                this.ethJSONRpcHTTPEndpoint = ethJSONRpcHTTPEndpoint
+                return this
+            }
+
+            fun build(): DefaultReddioClient {
+                val restClient = if (chainId == MAINNET_ID) {
+                    DefaultReddioRestClient.mainnet()
+                } else {
+                    DefaultReddioRestClient.testnet()
+                }
+                return DefaultReddioClient(restClient, chainId, ethJSONRpcHTTPEndpoint)
+            }
+        }
 
         @JvmStatic
-        fun testnet(): DefaultReddioClient = DefaultReddioClient(DefaultReddioRestClient.testnet())
+        fun builder(chainId: Long): Builder {
+            return Builder(chainId)
+        }
+
+        @JvmStatic
+        fun mainnet(): DefaultReddioClient = builder(MAINNET_ID).build()
+
+        @JvmStatic
+        fun testnet(): DefaultReddioClient = builder(GOERLI_ID).build()
 
         private data class VaultIds(val senderVaultId: String, val receiverVaultId: String)
     }
 }
+

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.reddio.ReddioException;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,7 +40,7 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         try {
             jsonString = objectMapper.writeValueAsString(transferMessage);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new ReddioException(e);
         }
 
         Request request = new Request.Builder().url(endpoint).post(RequestBody.create(jsonString, JSON)).build();
@@ -93,7 +94,7 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         try {
             jsonString = objectMapper.writeValueAsString(withdrawalToMessage);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new ReddioException(e);
         }
 
         Request request = new Request.Builder().url(endpoint).post(RequestBody.create(jsonString, JSON)).build();
@@ -111,7 +112,7 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         try {
             jsonString = objectMapper.writeValueAsString(orderMessage);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new ReddioException(e);
         }
 
         Request request = new Request.Builder().url(endpoint).post(RequestBody.create(jsonString, JSON)).build();
