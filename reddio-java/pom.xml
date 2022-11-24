@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.reddio</groupId>
@@ -15,12 +16,47 @@
     <name>reddio-java</name>
     <packaging>pom</packaging>
     <url>https://www.reddio.com/</url>
+    <description>Java SDK for Reddio.</description>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:git:git://github.com/reddio-com/reddio-sdk.git</connection>
+        <developerConnection>scm:git:ssh://github.com:reddio-com/reddio-sdk.git</developerConnection>
+        <url>https:///github.com/reddio-com/reddio-sdk/tree/main</url>
+    </scm>
+
+    <developers>
+        <developer>
+            <name>Hexilee</name>
+            <email>i@hexilee.me</email>
+            <organization>Reddio</organization>
+            <organizationUrl>https://www.reddio.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>yangkeao</name>
+            <email>yangkeao@chunibyo.icu</email>
+            <organization>Reddio</organization>
+            <organizationUrl>https://www.reddio.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>STRRL</name>
+            <email>im@strrl.dev</email>
+            <organization>Reddio</organization>
+            <organizationUrl>https://www.reddio.com</organizationUrl>
+        </developer>
+    </developers>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <revision>0.0.5</revision>
+        <revision>0.0.6-SNAPSHOT</revision>
     </properties>
 
     <dependencies>
