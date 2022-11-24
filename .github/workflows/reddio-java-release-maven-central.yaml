@@ -32,13 +32,21 @@ jobs:
           cp artifacts/libreddio-x86_64-apple-darwin/libreddio.dylib output/lib/libreddio.dylib
           cp artifacts/libreddio-x86_64-unknown-linux-gnu/libreddio.so output/lib/libreddio.so
           ls -alh output/lib
+      - name: Import GPG key
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@v5
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
       - name: Publish package
         working-directory: reddio-java
         run: |
-          mvn -B clean verify deploy -DskipTests
+          mvn -B clean verify gpg:sign deploy -DskipTests -Dgpg.keyname=$GPG_KEYNAME -Dgpg.passphrase=$GPG_PASSPHRASE
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+          GPG_KEYNAME: ${{ secrets.GPG_KEYNAME }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       - name: Upload Jars as Artifact
         uses: actions/upload-artifact@v3
         with:
