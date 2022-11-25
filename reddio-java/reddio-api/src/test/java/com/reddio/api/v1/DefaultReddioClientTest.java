@@ -125,48 +125,4 @@ public class DefaultReddioClientTest {
         System.out.println(new ObjectMapper().writeValueAsString(result));
         Assert.assertEquals("OK", result.status);
     }
-    // it requires a local node listen on localhost:8545, for example:
-    // geth --http.api personal,db,eth,net,web3 --rpc.allow-unprotected-txs --http --goerli
-    @Test
-    @Ignore("not reproducible test")
-    public void testDepositETH() throws ExecutionException, InterruptedException, JsonProcessingException {
-        DefaultReddioClient client = DefaultReddioClient.builder(DefaultReddioClient.GOERLI_ID).setEthJSONRpcHTTPEndpoint("https://eth-goerli.g.alchemy.com/v2/yyabgQ1GlM0xxqDC4ZBbR1lBcBKQmnxT").build();
-        CompletableFuture<LogDeposit> future = client.depositETH(
-                "0x27832a8be401e504eaa3e66904f929f02f72cd7f697e3f8f0a1c3d4b8654ba9d",
-                "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
-                "0.00019",
-                GasOption.Market);
-        LogDeposit result = future.get();
-        System.out.println(new ObjectMapper().writeValueAsString(result));
-    }
-
-    @Test
-    @Ignore("not reproducible test")
-    public void testDepositERC20() throws ExecutionException, InterruptedException, JsonProcessingException {
-        DefaultReddioClient client = DefaultReddioClient.builder(DefaultReddioClient.GOERLI_ID).setEthJSONRpcHTTPEndpoint("https://eth-goerli.g.alchemy.com/v2/yyabgQ1GlM0xxqDC4ZBbR1lBcBKQmnxT").build();
-        CompletableFuture<LogDeposit> future = client.depositERC20(
-                "0x27832a8be401e504eaa3e66904f929f02f72cd7f697e3f8f0a1c3d4b8654ba9d",
-                "0x57f3560b6793dcc2cb274c39e8b8eba1dd18a086",
-                "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
-                "0.013",
-                GasOption.Market
-        );
-        LogDeposit result = future.get();
-        System.out.println(new ObjectMapper().writeValueAsString(result));
-    }
-
-    @Test
-    @Ignore("not reproducible test")
-    public void testDepositERC721() throws ExecutionException, InterruptedException, JsonProcessingException {
-        DefaultReddioClient client = DefaultReddioClient.builder(DefaultReddioClient.GOERLI_ID).setEthJSONRpcHTTPEndpoint("https://eth-goerli.g.alchemy.com/v2/yyabgQ1GlM0xxqDC4ZBbR1lBcBKQmnxT").build();
-        CompletableFuture<LogDepositWithToken> future = client.depositERC721(
-                "0x27832a8be401e504eaa3e66904f929f02f72cd7f697e3f8f0a1c3d4b8654ba9d",
-                "0x941661Bd1134DC7cc3D107BF006B8631F6E65Ad5",
-                "1205",
-                "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
-                GasOption.Market
-        );
-        LogDepositWithToken result = future.get();
-        System.out.println(new ObjectMapper().writeValueAsString(result));
-    }
 }

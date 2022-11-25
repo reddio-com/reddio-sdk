@@ -1,34 +1,24 @@
 package com.reddio.api.v1
 
-import com.reddio.ReddioException
-import com.reddio.abi.Deposits
 import com.reddio.api.v1.rest.*
-import com.reddio.contract.EthNextEventSubscriber
-import com.reddio.gas.GasOption
-import com.reddio.gas.StaticGasLimitSuggestionPriceGasProvider
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
-import org.web3j.contracts.eip20.generated.ERC20
-import org.web3j.contracts.eip721.generated.ERC721
 import org.web3j.crypto.Credentials
-import org.web3j.protocol.Web3j
+import org.web3j.protocol.Web3jService
 import org.web3j.protocol.http.HttpService
-import org.web3j.tx.gas.ContractGasProvider
 import org.web3j.utils.Convert
-import java.math.BigInteger
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.math.pow
 import kotlin.time.toKotlinDuration
 
 class DefaultReddioClient(
-    private val restClient: ReddioRestClient, private val chainId: Long, ethJSONRpcHTTPEndpoint: String
+    private val restClient: ReddioRestClient,
 ) : ReddioClient {
 
-    private val web3j = Web3j.build(HttpService(ethJSONRpcHTTPEndpoint))
+    private val quantizedHelper = QuantizedHelper(restClient);
 
     override fun transfer(
         starkKey: String,
@@ -44,7 +34,7 @@ class DefaultReddioClient(
             runBlocking {
                 val assetId = getAssetId(contractAddress, tokenId, type)
 
-                val quantizedAmount = quantizedAmount(amount, type, contractAddress).toString()
+                val quantizedAmount = quantizedHelper.quantizedAmount(amount, type, contractAddress).toString()
                 val vaultsIds = getVaultsIds(assetId, starkKey, receiver)
                 val senderVaultId = vaultsIds.senderVaultId
                 val receiverVaultId = vaultsIds.receiverVaultId
@@ -129,7 +119,7 @@ class DefaultReddioClient(
     ): CompletableFuture<ResponseWrapper<WithdrawalToResponse>> {
         return CompletableFuture.supplyAsync {
             runBlocking {
-                val quantizedAmount = quantizedAmount(amount, type, contractAddress).toString()
+                val quantizedAmount = quantizedHelper.quantizedAmount(amount, type, contractAddress).toString()
                 val assetId = getAssetId(contractAddress, tokenId, type)
                 val vaultsIds = getVaultsIds(assetId, starkKey, receiver)
                 val senderVaultId = vaultsIds.senderVaultId
@@ -258,7 +248,7 @@ class DefaultReddioClient(
 
                 val vaultIds = orderInfoResponse.data.getVaultIds()
                 val quoteToken = orderInfoResponse.data.assetIds[1]
-                val quantizedPrice = quantizedAmount(price, baseTokenType, baseTokenContract)
+                val quantizedPrice = quantizedHelper.quantizedAmount(price, baseTokenType, baseTokenContract)
                 val formatPrice = quantizedPrice.toString()
                 val amountBuy = (quantizedPrice.toDouble() * amount.toDouble()).toLong().toString()
 
@@ -326,225 +316,6 @@ class DefaultReddioClient(
         )
     }
 
-    override fun depositETH(
-        privateKey: String,
-        starkKey: String,
-        quantizedAmount: String,
-        gasOption: GasOption,
-    ): CompletableFuture<LogDeposit> {
-        val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
-            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
-        )
-        return CompletableFuture.supplyAsync {
-            runBlocking {
-                asyncDepositETH(privateKey, starkKey, quantizedAmount, web3j, gasProvider)
-            }
-        }
-    }
-
-    override fun depositERC20(
-        privateKey: String, tokenAddress: String, starkKey: String, amount: String, gasOption: GasOption
-    ): CompletableFuture<LogDeposit> {
-        val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
-            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
-        )
-        return CompletableFuture.supplyAsync {
-            runBlocking {
-                asyncERC20Approve(privateKey, tokenAddress, amount, web3j, gasProvider)
-                asyncDepositERC20(privateKey, tokenAddress, starkKey, amount, web3j, gasProvider)
-            }
-        }
-    }
-
-    private suspend fun asyncERC20Approve(
-        privateKey: String,
-        erc20ContractAddress: String,
-        amount: String,
-        web3j: Web3j,
-        gasProvider: ContractGasProvider,
-    ): ERC20.ApprovalEventResponse {
-
-        val nonQuantizedAmount = this.nonQuantizedAmount(amount, "ERC20", erc20ContractAddress)
-        val erc20Contract = ERC20.load(erc20ContractAddress, web3j, Credentials.create(privateKey), gasProvider)
-        val call = erc20Contract.approve(
-            this.reddioStarexContractAddress(),
-            nonQuantizedAmount.toBigInteger(),
-        )
-        call.send()
-        return EthNextEventSubscriber.create(erc20Contract::approvalEventFlowable, web3j).subscribeNextEvent()
-    }
-
-    private suspend fun asyncERC721Approve(
-        erc721ContractAddress: String,
-        privateKey: String,
-        gasProvider: ContractGasProvider,
-        tokenId: String,
-    ): ERC721.ApprovalEventResponse {
-        val erc721Contract = ERC721.load(erc721ContractAddress, web3j, Credentials.create(privateKey), gasProvider)
-        val call = erc721Contract.approve(
-            this.reddioStarexContractAddress(),
-            BigInteger(tokenId, 10),
-            BigInteger.ZERO,
-        )
-        call.send()
-        return EthNextEventSubscriber.create(erc721Contract::approvalEventFlowable, web3j).subscribeNextEvent()
-    }
-
-    override fun depositERC721(
-        privateKey: String, tokenAddress: String, tokenId: String, starkKey: String, gasOption: GasOption
-    ): CompletableFuture<LogDepositWithToken> {
-        val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
-            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
-        )
-        return CompletableFuture.supplyAsync {
-            runBlocking {
-                asyncERC721Approve(tokenAddress, privateKey, gasProvider, tokenId);
-                asyncDepositERC721(privateKey, tokenAddress, tokenId, starkKey, web3j, gasProvider)
-            }
-        }
-    }
-
-    internal suspend fun asyncDepositETH(
-        privateKey: String, starkKey: String, amount: String, web3j: Web3j, gasProvider: ContractGasProvider
-    ): LogDeposit {
-        val (assetId, assetType) = getAssetTypeAndId("ETH", "ETH", "")
-        val vaultId =
-            restClient.getVaultId(GetVaultIdMessage.of(assetId, listOf(starkKey))).await().getData().vaultIds[0]
-        val deposits = Deposits.load(
-            this.reddioStarexContractAddress(), web3j, Credentials.create(privateKey), gasProvider
-        )
-
-        val quantizedAmount = this.quantizedAmount(amount, "ETH", "ETH")
-        val call = deposits.depositEth(
-            BigInteger(starkKey.lowercase().replace("0x", ""), 16),
-            BigInteger(assetType.lowercase().replace("0x", ""), 16),
-            BigInteger(vaultId, 10),
-            quantizedAmount.toBigInteger(),
-        );
-
-        call.send();
-        val event = EthNextEventSubscriber.create(deposits::logDepositEventFlowable, web3j).subscribeNextEvent()
-        return LogDeposit.of(
-            event.depositorEthKey,
-            event.starkKey.toString(16),
-            event.vaultId.toString(10),
-            event.assetType.toString(16),
-            event.nonQuantizedAmount.toString(10),
-            event.quantizedAmount.toString(10)
-        )
-    }
-
-    internal suspend fun asyncDepositERC20(
-        privateKey: String,
-        tokenAddress: String,
-        starkKey: String,
-        amount: String,
-        web3j: Web3j,
-        gasProvider: ContractGasProvider
-    ): LogDeposit {
-        val (assetId, assetType) = getAssetTypeAndId("ERC20", tokenAddress, "")
-
-        val quantizedAmount = quantizedAmount(amount, "ERC20", tokenAddress)
-        val vaultId =
-            restClient.getVaultId(GetVaultIdMessage.of(assetId, listOf(starkKey))).await().getData().vaultIds[0]
-        val deposits = Deposits.load(
-            this.reddioStarexContractAddress(), web3j, Credentials.create(privateKey), gasProvider
-        )
-
-        val call = deposits.depositERC20(
-            BigInteger(starkKey.lowercase().replace("0x", ""), 16),
-            BigInteger(assetType.lowercase().replace("0x", ""), 16),
-            BigInteger(vaultId, 10),
-            quantizedAmount.toBigInteger(),
-        )
-        call.send()
-        val event = EthNextEventSubscriber.create(deposits::logDepositEventFlowable, web3j).subscribeNextEvent()
-        return LogDeposit.of(
-            event.depositorEthKey,
-            event.starkKey.toString(16),
-            event.vaultId.toString(10),
-            event.assetType.toString(16),
-            event.nonQuantizedAmount.toString(10),
-            event.quantizedAmount.toString(10)
-        )
-    }
-
-    internal suspend fun asyncDepositERC721(
-        privateKey: String,
-        tokenAddress: String,
-        tokenId: String,
-        starkKey: String,
-        web3j: Web3j,
-        gasProvider: ContractGasProvider,
-    ): LogDepositWithToken {
-        val (assetId, assetType) = getAssetTypeAndId("ERC721", tokenAddress, tokenId)
-
-        val vaultId =
-            restClient.getVaultId(GetVaultIdMessage.of(assetId, listOf(starkKey))).await().getData().vaultIds[0]
-
-        val deposits = Deposits.load(
-            this.reddioStarexContractAddress(), web3j, Credentials.create(privateKey), gasProvider
-        )
-        val call = deposits.depositNft(
-            BigInteger(starkKey.lowercase().replace("0x", ""), 16),
-            BigInteger(assetType.lowercase().replace("0x", ""), 16),
-            BigInteger(vaultId, 10),
-            BigInteger(tokenId, 10),
-        )
-        call.send()
-        val event =
-            EthNextEventSubscriber.create(deposits::logDepositWithTokenIdEventFlowable, web3j).subscribeNextEvent()
-        return LogDepositWithToken.of(
-            event.depositorEthKey,
-            event.starkKey.toString(16),
-            event.vaultId.toString(10),
-            event.assetType.toString(16),
-            event.tokenId.toString(10),
-            event.assetId.toString(16),
-            event.nonQuantizedAmount.toString(10),
-            event.quantizedAmount.toString(10)
-        )
-    }
-
-    /**
-     * quantizedAmount = (amount * 10^decimals) / quantum
-     *
-     * @param amount amount to be converted, for example, use 0.0013 here for converting 0.0013 eth
-     * @param type token type, available values: ETH, ERC20
-     * @param contractAddress, use literal ETH for ETH, and hash address for ERC20
-     */
-    private suspend fun quantizedAmount(
-        amount: String, type: String, contractAddress: String
-    ): Long {
-        val contractInfo = restClient.getContractInfo(GetContractInfoMessage.of(type, contractAddress)).await()
-        val quantizedAmount =
-            (amount.toDouble() * 10.0.pow(contractInfo.data.decimals.toDouble()) / contractInfo.data.quantum).toLong()
-        return quantizedAmount
-    }
-
-    /**
-     * nonQuantizedAmount = amount * 10^decimals
-     *
-     * @param amount amount to be converted, for example, use 0.0013 here for converting 0.0013 eth
-     * @param type token type, available values: ETH, ERC20
-     * @param contractAddress, use literal ETH for ETH, and hash address for ERC20
-     */
-    private suspend fun nonQuantizedAmount(
-        amount: String, type: String, contractAddress: String
-    ): Long {
-        val contractInfo = restClient.getContractInfo(GetContractInfoMessage.of(type, contractAddress)).await()
-        val nonQuantizedAmount = (amount.toDouble() * 10.0.pow(contractInfo.data.decimals.toDouble())).toLong()
-        return nonQuantizedAmount
-    }
-
-    private suspend fun reddioStarexContractAddress(): String {
-        val starexContractsResponseResponseWrapper = this.restClient.starexContracts().await()
-        if (this.chainId == MAINNET_ID) {
-            return starexContractsResponseResponseWrapper.data.mainnet
-        }
-        return starexContractsResponseResponseWrapper.data.testnet
-    }
-
     private suspend fun getAssetId(
         contractAddress: String,
         tokenId: String,
@@ -557,54 +328,18 @@ class DefaultReddioClient(
         return result.getData().getAssetId()
     }
 
-    private suspend fun getAssetTypeAndId(
-        type: String,
-        tokenAddress: String,
-        tokenId: String,
-    ): AssetIdAndAssetType {
-        val contractInfo = restClient.getContractInfo(GetContractInfoMessage.of(type, tokenAddress)).await().getData()
-        val result =
-            restClient.getAssetId(GetAssetIdMessage.of(tokenAddress, type, tokenId, contractInfo.quantum)).await()
-        return AssetIdAndAssetType(result.getData().getAssetId(), contractInfo.getAssetType())
-    }
-
     private suspend fun getVaultsIds(assetId: String, starkKey: String, receiver: String): VaultIds {
         val result = restClient.getVaultId(GetVaultIdMessage.of(assetId, listOf(starkKey, receiver))).await()
         return VaultIds(result.getData().vaultIds[0], result.getData().vaultIds[1])
     }
 
     companion object {
-        const val MAINNET_ID = 1L
-        const val GOERLI_ID = 5L
-
-        class Builder(private val chainId: Long) {
-            private var ethJSONRpcHTTPEndpoint: String = "";
-
-            fun setEthJSONRpcHTTPEndpoint(ethJSONRpcHTTPEndpoint: String): Builder {
-                this.ethJSONRpcHTTPEndpoint = ethJSONRpcHTTPEndpoint
-                return this
-            }
-
-            fun build(): DefaultReddioClient {
-                val restClient = if (chainId == MAINNET_ID) {
-                    DefaultReddioRestClient.mainnet()
-                } else {
-                    DefaultReddioRestClient.testnet()
-                }
-                return DefaultReddioClient(restClient, chainId, ethJSONRpcHTTPEndpoint)
-            }
-        }
 
         @JvmStatic
-        fun builder(chainId: Long): Builder {
-            return Builder(chainId)
-        }
+        fun mainnet(): DefaultReddioClient = DefaultReddioClient(DefaultReddioRestClient.mainnet())
 
         @JvmStatic
-        fun mainnet(): DefaultReddioClient = builder(MAINNET_ID).build()
-
-        @JvmStatic
-        fun testnet(): DefaultReddioClient = builder(GOERLI_ID).build()
+        fun testnet(): DefaultReddioClient = DefaultReddioClient(DefaultReddioRestClient.testnet())
 
         private data class VaultIds(val senderVaultId: String, val receiverVaultId: String)
     }
