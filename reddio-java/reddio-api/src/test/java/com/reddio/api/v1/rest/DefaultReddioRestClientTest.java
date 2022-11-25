@@ -1,5 +1,7 @@
 package com.reddio.api.v1.rest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import junit.framework.TestCase;
 import org.junit.Assert;
 
@@ -20,5 +22,15 @@ public class DefaultReddioRestClientTest extends TestCase {
                 "0x941661Bd1134DC7cc3D107BF006B8631F6E65Ad5"));
         ResponseWrapper<OrderListResponse> result = future.get();
         Assert.assertEquals("OK", result.status);
+    }
+
+    public void testStarexContract() throws JsonProcessingException, ExecutionException, InterruptedException {
+        DefaultReddioRestClient client = DefaultReddioRestClient.testnet();
+        CompletableFuture<ResponseWrapper<StarexContractsResponse>> future = client.starexContracts();
+        ResponseWrapper<StarexContractsResponse> result = future.get();
+        Assert.assertEquals("OK", result.status);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonContent = objectMapper.writeValueAsString(result);
+        System.out.println(jsonContent);
     }
 }

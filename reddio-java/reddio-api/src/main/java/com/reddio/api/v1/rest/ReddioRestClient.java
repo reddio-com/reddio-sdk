@@ -73,4 +73,11 @@ public interface ReddioRestClient {
     CompletableFuture<ResponseWrapper<GetContractInfoResponse>> getContractInfo(GetContractInfoMessage getContractInfoMessage);
 
     CompletableFuture<ResponseWrapper<GetBalancesResponse>> getBalances(GetBalancesMessage getBalancesMessage);
+
+    /**
+     * Retrieve the starkex contract address for reddio
+     *
+     * @return
+     */
+    CompletableFuture<ResponseWrapper<StarexContractsResponse>> starexContracts();
 }
