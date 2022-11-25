@@ -161,12 +161,22 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         });
     }
 
+    @Override
+    public CompletableFuture<ResponseWrapper<StarexContractsResponse>> starexContracts() {
+        String endpoint = baseEndpoint + "/v1/starkex/contracts";
+        Request request = new Request.Builder().url(endpoint).get().build();
+        Call call = this.httpClient.newCall(request);
+        return asFuture(call, new TypeReference<ResponseWrapper<StarexContractsResponse>>() {
+        });
+    }
+
     private static <T> CompletableFuture<T> asFuture(Call call, TypeReference<T> typeReference) {
         CompletableFuture<T> future = new CompletableFuture<>();
         // notice: the HTTP request would execute in the background after call.enqueue(), not after the future.get().
         call.enqueue(new ToCompletableFutureCallback<>(future, typeReference));
         return future;
     }
+
 
     private static class ToCompletableFutureCallback<T> implements Callback {
         private final CompletableFuture<T> future;

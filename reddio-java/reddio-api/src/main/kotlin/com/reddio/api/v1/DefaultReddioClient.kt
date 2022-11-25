@@ -405,8 +405,7 @@ class DefaultReddioClient(
             (amount.toDouble() * 10.0.pow(contractInfo.data.decimals.toDouble())).toLong().toString()
         val erc20Contract = ERC20.load(erc20ContractAddress, web3j, Credentials.create(privateKey), gasProvider)
         val call = erc20Contract.approve(
-            // FIXME: load contract from API /v1/starkex/contracts
-            "0x8eb82154f314ec687957ce1e9c1a5dc3a3234df9",
+            this.reddioStarexContractAddress(),
             BigInteger(amountAfterDecimal, 10),
         )
         call.send()
@@ -422,8 +421,7 @@ class DefaultReddioClient(
         val web3j = Web3j.build(HttpService(this.ethJSONRpcHTTPEndpoint))
         val erc721Contract = ERC721.load(erc721ContractAddress, web3j, Credentials.create(privateKey), gasProvider)
         val call = erc721Contract.approve(
-            // FIXME: load contract from API /v1/starkex/contracts
-            "0x8eb82154f314ec687957ce1e9c1a5dc3a3234df9",
+            this.reddioStarexContractAddress(),
             BigInteger(tokenId, 10),
             BigInteger.ZERO,
         )
@@ -453,9 +451,8 @@ class DefaultReddioClient(
         val (assetId, assetType) = getAssetTypeAndId("ETH", "ETH", "")
         val vaultId =
             restClient.getVaultId(GetVaultIdMessage.of(assetId, listOf(starkKey))).await().getData().vaultIds[0]
-        // FIXME: load contract from API /v1/starkex/contracts
         val deposits = Deposits.load(
-            "0x8Eb82154f314EC687957CE1e9c1A5Dc3A3234DF9", web3j, Credentials.create(privateKey), gasProvider
+            this.reddioStarexContractAddress(), web3j, Credentials.create(privateKey), gasProvider
         )
         val contractInfo = restClient.getContractInfo(GetContractInfoMessage.of("ETH", "ETH")).await()
         val quantizedAmount =
@@ -498,9 +495,8 @@ class DefaultReddioClient(
             (amount.toDouble() * 10.0.pow(contractInfo.data.decimals.toDouble()) / contractInfo.data.quantum).toLong()
                 .toString()
 
-        // FIXME: load contract from API /v1/starkex/contracts
         val deposits = Deposits.load(
-            "0x8Eb82154f314EC687957CE1e9c1A5Dc3A3234DF9", web3j, Credentials.create(privateKey), gasProvider
+            this.reddioStarexContractAddress(), web3j, Credentials.create(privateKey), gasProvider
         )
 
         val call = deposits.depositERC20(
@@ -535,9 +531,8 @@ class DefaultReddioClient(
         val vaultId =
             restClient.getVaultId(GetVaultIdMessage.of(assetId, listOf(starkKey))).await().getData().vaultIds[0]
 
-        // FIXME: load contract from API /v1/starkex/contracts
         val deposits = Deposits.load(
-            "0x8Eb82154f314EC687957CE1e9c1A5Dc3A3234DF9", web3j, Credentials.create(privateKey), gasProvider
+            this.reddioStarexContractAddress(), web3j, Credentials.create(privateKey), gasProvider
         )
         val call = deposits.depositNft(
             BigInteger(starkKey.lowercase().replace("0x", ""), 16),
@@ -558,6 +553,14 @@ class DefaultReddioClient(
             event.nonQuantizedAmount.toString(16),
             event.quantizedAmount.toString(16)
         )
+    }
+
+    private suspend fun reddioStarexContractAddress(): String {
+        val starexContractsResponseResponseWrapper = this.restClient.starexContracts().await()
+        if (this.chainId == MAINNET_ID) {
+            return starexContractsResponseResponseWrapper.data.mainnet
+        }
+        return starexContractsResponseResponseWrapper.data.testnet
     }
 
     private fun ensureEthJSONRpcEndpoint() {
