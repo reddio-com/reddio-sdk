@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 
 public class DefaultReddioRestClient implements ReddioRestClient {
@@ -200,17 +201,33 @@ public class DefaultReddioRestClient implements ReddioRestClient {
     }
 
     public static final class ReddioUAInterceptor implements Interceptor {
+
+        public ReddioUAInterceptor(String version) {
+            this.version = version;
+        }
+
+        private String version;
+
         @Override
         public Response intercept(Chain chain) throws IOException {
             Request originalRequest = chain.request();
             Request requestWithUserAgent = originalRequest.newBuilder()
-                    // TODO(@STRRL): use the release version
-                    .header("User-Agent", "reddio-client-java/0.0.2").build();
+                    .header("User-Agent", String.format("reddio-client-java/%s", this.version)).build();
             return chain.proceed(requestWithUserAgent);
         }
 
+        private static String getVersion() {
+            Properties properties = new Properties();
+            try {
+                properties.load(Objects.requireNonNull(ReddioUAInterceptor.class.getResourceAsStream("/version.properties")));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            return properties.getProperty("version");
+        }
+
         public static ReddioUAInterceptor create() {
-            return new ReddioUAInterceptor();
+            return new ReddioUAInterceptor(getVersion());
         }
     }
 
