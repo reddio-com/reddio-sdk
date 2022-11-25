@@ -45,18 +45,14 @@ class DefaultReddioClient(
             runBlocking {
                 val assetId = getAssetId(contractAddress, tokenId, type)
 
-                val contractInfo = restClient.getContractInfo(GetContractInfoMessage.of(type, contractAddress)).await()
-                val resolvedMount =
-                    (amount.toDouble() * 10.0.pow(contractInfo.data.decimals.toDouble()) / contractInfo.data.quantum).toLong()
-                        .toString()
-
+                val quantizedAmount = quantizedAmount(amount, type, contractAddress).toString()
                 val vaultsIds = getVaultsIds(assetId, starkKey, receiver)
                 val senderVaultId = vaultsIds.senderVaultId
                 val receiverVaultId = vaultsIds.receiverVaultId
                 val nonce = restClient.getNonce(GetNonceMessage.of(starkKey)).await().getData().getNonce()
                 val signature = signTransferMessage(
                     privateKey,
-                    resolvedMount,
+                    quantizedAmount,
                     nonce,
                     senderVaultId,
                     assetId,
@@ -68,7 +64,7 @@ class DefaultReddioClient(
                     TransferMessage.of(
                         assetId,
                         starkKey,
-                        resolvedMount,
+                        quantizedAmount,
                         nonce,
                         senderVaultId,
                         receiver,
@@ -141,10 +137,7 @@ class DefaultReddioClient(
     ): CompletableFuture<ResponseWrapper<WithdrawalToResponse>> {
         return CompletableFuture.supplyAsync {
             runBlocking {
-                val contractInfo = restClient.getContractInfo(GetContractInfoMessage.of(type, contractAddress)).await()
-                val resolvedMount =
-                    (amount.toDouble() * 10.0.pow(contractInfo.data.decimals.toDouble()) / contractInfo.data.quantum).toLong()
-                        .toString()
+                val quantizedAmount = quantizedAmount(amount, type, contractAddress).toString()
                 val assetId = getAssetId(contractAddress, tokenId, type)
                 val vaultsIds = getVaultsIds(assetId, starkKey, receiver)
                 val senderVaultId = vaultsIds.senderVaultId
@@ -152,7 +145,7 @@ class DefaultReddioClient(
                 val nonce = restClient.getNonce(GetNonceMessage.of(starkKey)).await().getData().getNonce()
                 val signature = signTransferMessage(
                     privateKey,
-                    resolvedMount,
+                    quantizedAmount,
                     nonce,
                     senderVaultId,
                     assetId,
@@ -165,7 +158,7 @@ class DefaultReddioClient(
                         contractAddress,
                         assetId,
                         starkKey,
-                        resolvedMount,
+                        quantizedAmount,
                         tokenId,
                         nonce,
                         senderVaultId,
@@ -287,15 +280,9 @@ class DefaultReddioClient(
 
                 val vaultIds = orderInfoResponse.data.getVaultIds()
                 val quoteToken = orderInfoResponse.data.assetIds[1]
-                val contractInfo =
-                    restClient.getContractInfo(GetContractInfoMessage.of(baseTokenType, baseTokenContract)).await()
-
-
-                val formatPriceLong =
-                    (price.toDouble() * 10.0.pow(contractInfo.data.decimals.toDouble()) / contractInfo.data.quantum).toLong()
-                val formatPrice = formatPriceLong.toString()
-
-                val amountBuy = (formatPriceLong.toDouble() * amount.toDouble()).toLong().toString()
+                val quantizedPrice = quantizedAmount(price, baseTokenType, baseTokenContract)
+                val formatPrice = quantizedPrice.toString()
+                val amountBuy = (quantizedPrice.toDouble() * amount.toDouble()).toLong().toString()
 
                 val orderMessage = OrderMessage()
                 orderMessage.amount = amount;
@@ -400,13 +387,11 @@ class DefaultReddioClient(
         gasProvider: ContractGasProvider,
     ): ERC20.ApprovalEventResponse {
 
-        val contractInfo = restClient.getContractInfo(GetContractInfoMessage.of("ERC20", erc20ContractAddress)).await()
-        val amountAfterDecimal =
-            (amount.toDouble() * 10.0.pow(contractInfo.data.decimals.toDouble())).toLong().toString()
+        val nonQuantizedAmount = this.nonQuantizedAmount(amount, "ERC20", erc20ContractAddress)
         val erc20Contract = ERC20.load(erc20ContractAddress, web3j, Credentials.create(privateKey), gasProvider)
         val call = erc20Contract.approve(
             this.reddioStarexContractAddress(),
-            BigInteger(amountAfterDecimal, 10),
+            nonQuantizedAmount.toBigInteger(),
         )
         call.send()
         return EthNextEventSubscriber.create(erc20Contract::approvalEventFlowable, web3j).subscribeNextEvent()
@@ -451,15 +436,13 @@ class DefaultReddioClient(
         val deposits = Deposits.load(
             this.reddioStarexContractAddress(), web3j, Credentials.create(privateKey), gasProvider
         )
-        val contractInfo = restClient.getContractInfo(GetContractInfoMessage.of("ETH", "ETH")).await()
-        val quantizedAmount =
-            (amount.toDouble() * 10.0.pow(contractInfo.data.decimals.toDouble()) / contractInfo.data.quantum).toLong()
-                .toString()
+
+        val quantizedAmount = this.quantizedAmount(amount, "ETH", "ETH")
         val call = deposits.depositEth(
             BigInteger(starkKey.lowercase().replace("0x", ""), 16),
             BigInteger(assetType.lowercase().replace("0x", ""), 16),
             BigInteger(vaultId, 10),
-            BigInteger(quantizedAmount, 10)
+            quantizedAmount.toBigInteger(),
         );
 
         call.send();
@@ -484,13 +467,9 @@ class DefaultReddioClient(
     ): LogDeposit {
         val (assetId, assetType) = getAssetTypeAndId("ERC20", tokenAddress, "")
 
+        val quantizedAmount = quantizedAmount(amount, "ERC20", tokenAddress)
         val vaultId =
             restClient.getVaultId(GetVaultIdMessage.of(assetId, listOf(starkKey))).await().getData().vaultIds[0]
-        val contractInfo = restClient.getContractInfo(GetContractInfoMessage.of("ERC20", tokenAddress)).await()
-        val quantizedAmount =
-            (amount.toDouble() * 10.0.pow(contractInfo.data.decimals.toDouble()) / contractInfo.data.quantum).toLong()
-                .toString()
-
         val deposits = Deposits.load(
             this.reddioStarexContractAddress(), web3j, Credentials.create(privateKey), gasProvider
         )
@@ -499,7 +478,7 @@ class DefaultReddioClient(
             BigInteger(starkKey.lowercase().replace("0x", ""), 16),
             BigInteger(assetType.lowercase().replace("0x", ""), 16),
             BigInteger(vaultId, 10),
-            BigInteger(quantizedAmount, 10),
+            quantizedAmount.toBigInteger(),
         )
         call.send()
         val event = EthNextEventSubscriber.create(deposits::logDepositEventFlowable, web3j).subscribeNextEvent()
@@ -548,6 +527,42 @@ class DefaultReddioClient(
             event.nonQuantizedAmount.toString(16),
             event.quantizedAmount.toString(16)
         )
+    }
+
+    /**
+     * quantizedAmount = (amount * 10^decimals) / quantum
+     *
+     * @param amount amount to be converted, for example, use 0.0013 here for converting 0.0013 eth
+     * @param type token type, available values: ETH, ERC20
+     * @param contractAddress, use literal ETH for ETH, and hash address for ERC20
+     */
+    private suspend fun quantizedAmount(
+        amount: String,
+        type: String,
+        contractAddress: String
+    ): Long {
+        val contractInfo = restClient.getContractInfo(GetContractInfoMessage.of(type, contractAddress)).await()
+        val quantizedAmount =
+            (amount.toDouble() * 10.0.pow(contractInfo.data.decimals.toDouble()) / contractInfo.data.quantum).toLong()
+        return quantizedAmount
+    }
+
+    /**
+     * nonQuantizedAmount = amount * 10^decimals
+     *
+     * @param amount amount to be converted, for example, use 0.0013 here for converting 0.0013 eth
+     * @param type token type, available values: ETH, ERC20
+     * @param contractAddress, use literal ETH for ETH, and hash address for ERC20
+     */
+    private suspend fun nonQuantizedAmount(
+        amount: String,
+        type: String,
+        contractAddress: String
+    ): Long {
+        val contractInfo = restClient.getContractInfo(GetContractInfoMessage.of(type, contractAddress)).await()
+        val nonQuantizedAmount =
+            (amount.toDouble() * 10.0.pow(contractInfo.data.decimals.toDouble())).toLong()
+        return nonQuantizedAmount
     }
 
     private suspend fun reddioStarexContractAddress(): String {
