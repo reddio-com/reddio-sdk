@@ -26,8 +26,10 @@ import kotlin.math.pow
 import kotlin.time.toKotlinDuration
 
 class DefaultReddioClient(
-    private val restClient: ReddioRestClient, private val chainId: Long, private val ethJSONRpcHTTPEndpoint: String
+    private val restClient: ReddioRestClient, private val chainId: Long, ethJSONRpcHTTPEndpoint: String
 ) : ReddioClient {
+
+    private val web3j = Web3j.build(HttpService(ethJSONRpcHTTPEndpoint))
 
     override fun transfer(
         starkKey: String,
@@ -366,7 +368,6 @@ class DefaultReddioClient(
         quantizedAmount: String,
         gasOption: GasOption,
     ): CompletableFuture<LogDeposit> {
-        val web3j = Web3j.build(HttpService(this.ethJSONRpcHTTPEndpoint))
         val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
             this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
         )
@@ -380,7 +381,6 @@ class DefaultReddioClient(
     override fun depositERC20(
         privateKey: String, tokenAddress: String, starkKey: String, amount: String, gasOption: GasOption
     ): CompletableFuture<LogDeposit> {
-        val web3j = Web3j.build(HttpService(this.ethJSONRpcHTTPEndpoint))
         val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
             this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
         )
@@ -418,7 +418,6 @@ class DefaultReddioClient(
         gasProvider: ContractGasProvider,
         tokenId: String,
     ): ERC721.ApprovalEventResponse {
-        val web3j = Web3j.build(HttpService(this.ethJSONRpcHTTPEndpoint))
         val erc721Contract = ERC721.load(erc721ContractAddress, web3j, Credentials.create(privateKey), gasProvider)
         val call = erc721Contract.approve(
             this.reddioStarexContractAddress(),
@@ -432,7 +431,6 @@ class DefaultReddioClient(
     override fun depositERC721(
         privateKey: String, tokenAddress: String, tokenId: String, starkKey: String, gasOption: GasOption
     ): CompletableFuture<LogDepositWithToken> {
-        val web3j = Web3j.build(HttpService(this.ethJSONRpcHTTPEndpoint))
         val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
             this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
         )
@@ -447,7 +445,6 @@ class DefaultReddioClient(
     internal suspend fun asyncDepositETH(
         privateKey: String, starkKey: String, amount: String, web3j: Web3j, gasProvider: ContractGasProvider
     ): LogDeposit {
-        ensureEthJSONRpcEndpoint();
         val (assetId, assetType) = getAssetTypeAndId("ETH", "ETH", "")
         val vaultId =
             restClient.getVaultId(GetVaultIdMessage.of(assetId, listOf(starkKey))).await().getData().vaultIds[0]
@@ -485,7 +482,6 @@ class DefaultReddioClient(
         web3j: Web3j,
         gasProvider: ContractGasProvider
     ): LogDeposit {
-        ensureEthJSONRpcEndpoint();
         val (assetId, assetType) = getAssetTypeAndId("ERC20", tokenAddress, "")
 
         val vaultId =
@@ -525,7 +521,6 @@ class DefaultReddioClient(
         web3j: Web3j,
         gasProvider: ContractGasProvider,
     ): LogDepositWithToken {
-        ensureEthJSONRpcEndpoint();
         val (assetId, assetType) = getAssetTypeAndId("ERC721", tokenAddress, tokenId)
 
         val vaultId =
@@ -561,12 +556,6 @@ class DefaultReddioClient(
             return starexContractsResponseResponseWrapper.data.mainnet
         }
         return starexContractsResponseResponseWrapper.data.testnet
-    }
-
-    private fun ensureEthJSONRpcEndpoint() {
-        if (ethJSONRpcHTTPEndpoint.isEmpty()) {
-            throw ReddioException("eth json rpc endpoint is required for this operation")
-        }
     }
 
     private suspend fun getAssetId(
