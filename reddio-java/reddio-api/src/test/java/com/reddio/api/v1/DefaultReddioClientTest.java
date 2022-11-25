@@ -44,8 +44,7 @@ public class DefaultReddioClientTest {
         DefaultReddioClient client = DefaultReddioClient.testnet();
         ReddioClient.WithStarkExSigner clientWithSigner = client.withStarkExSigner("0x4d55b547af138c5b6200495d86ab6aed3e06c25fdd75b4b6a00e48515df2b3d");
         CompletableFuture<ResponseWrapper<WithdrawalToResponse>> future = clientWithSigner.withdrawal("0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
-                // 13x10^-6, 0.000013 ETH
-                "13",
+                "0.00013",
                 "ETH",
                 "",
                 "ETH",
