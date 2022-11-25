@@ -222,18 +222,18 @@ public class DefaultReddioRestClient implements ReddioRestClient {
             return chain.proceed(requestWithUserAgent);
         }
 
-        private static String getVersion() {
+        private static String geMavenProjecttVersion() {
             Properties properties = new Properties();
             try {
                 properties.load(Objects.requireNonNull(ReddioUAInterceptor.class.getResourceAsStream("/version.properties")));
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("get maven project version from resource /version.properties",e);
             }
             return properties.getProperty("version");
         }
 
         public static ReddioUAInterceptor create() {
-            return new ReddioUAInterceptor(getVersion());
+            return new ReddioUAInterceptor(geMavenProjecttVersion());
         }
     }
 
