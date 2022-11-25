@@ -4,7 +4,6 @@ import com.reddio.ReddioException
 import com.reddio.abi.Deposits
 import com.reddio.api.v1.rest.*
 import com.reddio.contract.EthNextEventSubscriber
-import com.reddio.crypto.CryptoService
 import com.reddio.gas.GasOption
 import com.reddio.gas.StaticGasLimitSuggestionPriceGasProvider
 import kotlinx.coroutines.delay
@@ -50,15 +49,8 @@ class DefaultReddioClient(
                 val senderVaultId = vaultsIds.senderVaultId
                 val receiverVaultId = vaultsIds.receiverVaultId
                 val nonce = restClient.getNonce(GetNonceMessage.of(starkKey)).await().getData().getNonce()
-                val signature = signTransferMessage(
-                    privateKey,
-                    quantizedAmount,
-                    nonce,
-                    senderVaultId,
-                    assetId,
-                    receiverVaultId,
-                    receiver,
-                    expirationTimeStamp
+                val signature = Signer.buildWithPrivateKey(privateKey).signTransferMessage(
+                    quantizedAmount, nonce, senderVaultId, assetId, receiverVaultId, receiver, expirationTimeStamp
                 )
                 restClient.transfer(
                     TransferMessage.of(
@@ -143,15 +135,8 @@ class DefaultReddioClient(
                 val senderVaultId = vaultsIds.senderVaultId
                 val receiverVaultId = vaultsIds.receiverVaultId
                 val nonce = restClient.getNonce(GetNonceMessage.of(starkKey)).await().getData().getNonce()
-                val signature = signTransferMessage(
-                    privateKey,
-                    quantizedAmount,
-                    nonce,
-                    senderVaultId,
-                    assetId,
-                    receiverVaultId,
-                    receiver,
-                    expirationTimeStamp
+                val signature = Signer.buildWithPrivateKey(privateKey).signTransferMessage(
+                    quantizedAmount, nonce, senderVaultId, assetId, receiverVaultId, receiver, expirationTimeStamp
                 )
                 restClient.withdrawalTo(
                     WithdrawalToMessage.of(
@@ -232,8 +217,7 @@ class DefaultReddioClient(
                     orderMessage.vaultIdBuy = vaultIds[0]
                     orderMessage.vaultIdSell = vaultIds[1]
                 }
-                orderMessage.signature = signOrderMsgWithFee(
-                    privateKey,
+                orderMessage.signature = Signer.buildWithPrivateKey(privateKey).signOrderMsgWithFee(
                     orderMessage.vaultIdSell,
                     orderMessage.vaultIdBuy,
                     orderMessage.amountSell,
@@ -314,8 +298,7 @@ class DefaultReddioClient(
                     orderMessage.vaultIdBuy = vaultIds[0]
                     orderMessage.vaultIdSell = vaultIds[1]
                 }
-                orderMessage.signature = signOrderMsgWithFee(
-                    privateKey,
+                orderMessage.signature = Signer.buildWithPrivateKey(privateKey).signOrderMsgWithFee(
                     orderMessage.vaultIdSell,
                     orderMessage.vaultIdBuy,
                     orderMessage.amountSell,
@@ -524,8 +507,8 @@ class DefaultReddioClient(
             event.assetType.toString(16),
             event.tokenId.toString(10),
             event.assetId.toString(16),
-            event.nonQuantizedAmount.toString(16),
-            event.quantizedAmount.toString(16)
+            event.nonQuantizedAmount.toString(10),
+            event.quantizedAmount.toString(10)
         )
     }
 
@@ -537,9 +520,7 @@ class DefaultReddioClient(
      * @param contractAddress, use literal ETH for ETH, and hash address for ERC20
      */
     private suspend fun quantizedAmount(
-        amount: String,
-        type: String,
-        contractAddress: String
+        amount: String, type: String, contractAddress: String
     ): Long {
         val contractInfo = restClient.getContractInfo(GetContractInfoMessage.of(type, contractAddress)).await()
         val quantizedAmount =
@@ -555,13 +536,10 @@ class DefaultReddioClient(
      * @param contractAddress, use literal ETH for ETH, and hash address for ERC20
      */
     private suspend fun nonQuantizedAmount(
-        amount: String,
-        type: String,
-        contractAddress: String
+        amount: String, type: String, contractAddress: String
     ): Long {
         val contractInfo = restClient.getContractInfo(GetContractInfoMessage.of(type, contractAddress)).await()
-        val nonQuantizedAmount =
-            (amount.toDouble() * 10.0.pow(contractInfo.data.decimals.toDouble())).toLong()
+        val nonQuantizedAmount = (amount.toDouble() * 10.0.pow(contractInfo.data.decimals.toDouble())).toLong()
         return nonQuantizedAmount
     }
 
@@ -599,62 +577,6 @@ class DefaultReddioClient(
     private suspend fun getVaultsIds(assetId: String, starkKey: String, receiver: String): VaultIds {
         val result = restClient.getVaultId(GetVaultIdMessage.of(assetId, listOf(starkKey, receiver))).await()
         return VaultIds(result.getData().vaultIds[0], result.getData().vaultIds[1])
-    }
-
-    internal fun signTransferMessage(
-        privateKey: String,
-        amount: String,
-        nonce: Long,
-        senderVaultId: String,
-        token: String,
-        receiverVaultId: String,
-        receiverPublicKey: String,
-        expirationTimestamp: Long = 4194303L,
-    ): Signature {
-        val result = CryptoService.sign(
-            BigInteger(privateKey.lowercase().replace("0x", ""), 16), CryptoService.getTransferMsgHash(
-                amount.toLong(),
-                nonce,
-                senderVaultId.toLong(),
-                BigInteger(token.lowercase().replace("0x", ""), 16),
-                receiverVaultId.toLong(),
-                BigInteger(receiverPublicKey.lowercase().replace("0x", ""), 16),
-                expirationTimestamp,
-                null
-            ), null
-        )
-        return Signature.of("0x${result.r}", "0x${result.s}")
-    }
-
-    internal fun signOrderMsgWithFee(
-        privateKey: String,
-        vaultIdSell: String,
-        vaultIdBuy: String,
-        amountSell: String,
-        amountBuy: String,
-        tokenSell: String,
-        tokenBuy: String,
-        nonce: Long,
-        expirationTimestamp: Long = 4194303L,
-        feeToken: String,
-        feeSourceVaultId: Long,
-        feeLimit: Long,
-    ): Signature {
-        val hash = CryptoService.getLimitOrderMsgHashWithFee(
-            vaultIdSell.toLong(),
-            vaultIdBuy.toLong(),
-            amountSell.toLong(),
-            amountBuy.toLong(),
-            BigInteger(tokenSell.lowercase().replace("0x", ""), 16),
-            BigInteger(tokenBuy.lowercase().replace("0x", ""), 16),
-            nonce,
-            expirationTimestamp,
-            BigInteger(feeToken.lowercase().replace("0x", ""), 16),
-            feeSourceVaultId,
-            feeLimit
-        )
-        val result = CryptoService.sign(BigInteger(privateKey.lowercase().replace("0x", ""), 16), hash, null);
-        return Signature.of("0x${result.r}", "0x${result.s}")
     }
 
     companion object {
