@@ -175,9 +175,6 @@ class DefaultReddioClient(
                         starkKey, "ETH:ETH", String.format("%s:%s:%s", tokenType, tokenAddress, tokenId)
                     )
                 ).await()
-                if (orderInfoResponse.status != "OK") {
-                    throw ReddioException("get order info, status is " + orderInfoResponse.status + ", error is " + orderInfoResponse.error)
-                }
 
                 val vaultIds = orderInfoResponse.data.getVaultIds()
                 val quoteToken = orderInfoResponse.data.assetIds[1]
@@ -258,9 +255,6 @@ class DefaultReddioClient(
                     )
                 ).await()
 
-                if (orderInfoResponse.status != "OK") {
-                    throw RuntimeException("get order info, status is " + orderInfoResponse.status + ", error is " + orderInfoResponse.error)
-                }
 
                 val vaultIds = orderInfoResponse.data.getVaultIds()
                 val quoteToken = orderInfoResponse.data.assetIds[1]
