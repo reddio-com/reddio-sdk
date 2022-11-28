@@ -89,5 +89,7 @@ namespace Reddio.Api.V1.Rest
         public Task<ResponseWrapper<OrderResponse>> Order(OrderMessage orderMessage);
 
         public Task<ResponseWrapper<OrderListResponse>> OrderList(OrderListMessage orderListMessage);
+
+        public Task<ResponseWrapper<CollectionResponse>> Collection(CollectionMessage collectionMessage);
     }
 }

@@ -84,4 +84,21 @@ public class ReddioRestClientTest
         Assert.Contains("165", tokenIdSet);
         Assert.Contains("152", tokenIdSet);
     }
+
+    [Fact]
+    public async void TestCollectionsWithTokenIds()
+    {
+        var restClient = ReddioRestClient.Testnet();
+        var response = await restClient.Collection(new CollectionMessage(
+                "",
+                "0x649ed8b1fa032ccae619ad37742b08123001f8a5",
+                new[] { "84", "75" }
+            )
+        );
+        Assert.Equal("OK", response.Status);
+        var tokenIdSet = new HashSet<string>(response.Data.List.Select(x => x.TokenId));
+        Assert.Equal(2, tokenIdSet.Count);
+        Assert.Contains("84", tokenIdSet);
+        Assert.Contains("75", tokenIdSet);
+    }
 }
