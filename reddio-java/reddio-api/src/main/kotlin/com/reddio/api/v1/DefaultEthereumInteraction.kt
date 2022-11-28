@@ -1,6 +1,7 @@
 package com.reddio.api.v1
 
 import com.reddio.abi.Deposits
+import com.reddio.abi.Withdrawals
 import com.reddio.api.v1.rest.GetAssetIdMessage
 import com.reddio.api.v1.rest.GetContractInfoMessage
 import com.reddio.api.v1.rest.GetVaultIdMessage
@@ -15,8 +16,10 @@ import org.web3j.contracts.eip721.generated.ERC721
 import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.Web3jService
+import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.protocol.http.HttpService
 import org.web3j.tx.gas.ContractGasProvider
+import org.web3j.utils.Numeric
 import java.math.BigInteger
 import java.util.concurrent.CompletableFuture
 
@@ -40,7 +43,7 @@ class DefaultEthereumInteraction(
         )
         return CompletableFuture.supplyAsync {
             runBlocking {
-                asyncDepositETH(starkKey, quantizedAmount, web3j, gasProvider)
+                asyncDepositETH(starkKey, quantizedAmount, gasProvider)
             }
         }
     }
@@ -54,7 +57,7 @@ class DefaultEthereumInteraction(
         return CompletableFuture.supplyAsync {
             runBlocking {
                 asyncERC20Approve(tokenAddress, amount, web3j, gasProvider)
-                asyncDepositERC20(tokenAddress, starkKey, amount, web3j, gasProvider)
+                asyncDepositERC20(tokenAddress, starkKey, amount, gasProvider)
             }
         }
     }
@@ -100,13 +103,13 @@ class DefaultEthereumInteraction(
         return CompletableFuture.supplyAsync {
             runBlocking {
                 asyncERC721Approve(tokenAddress, gasProvider, tokenId);
-                asyncDepositERC721(tokenAddress, tokenId, starkKey, web3j, gasProvider)
+                asyncDepositERC721(tokenAddress, tokenId, starkKey, gasProvider)
             }
         }
     }
 
     internal suspend fun asyncDepositETH(
-        starkKey: String, amount: String, web3j: Web3j, gasProvider: ContractGasProvider
+        starkKey: String, amount: String, gasProvider: ContractGasProvider
     ): LogDeposit {
         val (assetId, assetType) = getAssetTypeAndId("ETH", "ETH", "")
         val vaultId =
@@ -139,7 +142,6 @@ class DefaultEthereumInteraction(
         tokenAddress: String,
         starkKey: String,
         amount: String,
-        web3j: Web3j,
         gasProvider: ContractGasProvider
     ): LogDeposit {
         val (assetId, assetType) = getAssetTypeAndId("ERC20", tokenAddress, "")
@@ -173,7 +175,6 @@ class DefaultEthereumInteraction(
         tokenAddress: String,
         tokenId: String,
         starkKey: String,
-        web3j: Web3j,
         gasProvider: ContractGasProvider,
     ): LogDepositWithToken {
         val (assetId, assetType) = getAssetTypeAndId("ERC721", tokenAddress, tokenId)
@@ -205,6 +206,94 @@ class DefaultEthereumInteraction(
         )
     }
 
+
+    override fun withdrawETHOrERC20(
+        ethAddress: String,
+        assetType: String,
+        gasOption: GasOption
+    ): CompletableFuture<TransactionReceipt> {
+        val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
+            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+        )
+        return CompletableFuture.supplyAsync {
+            runBlocking {
+                asyncWithdrawal(ethAddress, assetType, gasProvider)
+            }
+        }
+    }
+
+    override fun withdrawalERC721(
+        ethAddress: String,
+        assetType: String,
+        tokenId: String,
+        gasOption: GasOption
+    ): CompletableFuture<TransactionReceipt> {
+        val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
+            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+        )
+        return CompletableFuture.supplyAsync {
+            runBlocking {
+                asyncWithdrawalERC721(ethAddress, assetType, tokenId, gasProvider)
+            }
+        }
+    }
+
+    override fun withdrawalERC721M(
+        ethAddress: String,
+        assetType: String,
+        tokenId: String,
+        gasOption: GasOption
+    ): CompletableFuture<TransactionReceipt> {
+        val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
+            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+        )
+        return CompletableFuture.supplyAsync {
+            runBlocking {
+                asyncWithdrawalERC721M(ethAddress, assetType, tokenId, gasProvider)
+            }
+        }
+    }
+
+    internal suspend fun asyncWithdrawal(
+        ethAddress: String,
+        assetType: String,
+        gasProvider: ContractGasProvider,
+    ): TransactionReceipt {
+        val withdrawals = Withdrawals.load(this.reddioStarexContractAddress(), web3j, credentials, gasProvider)
+        return withdrawals.withdraw(
+            BigInteger(ethAddress.lowercase().replace("0x", ""), 16),
+            BigInteger(assetType.lowercase().replace("0x", ""), 16),
+        ).sendAsync().await()
+    }
+
+    internal suspend fun asyncWithdrawalERC721(
+        ethAddress: String,
+        assetType: String,
+        tokenId: String,
+        gasProvider: ContractGasProvider,
+    ): TransactionReceipt {
+        val withdrawals = Withdrawals.load(this.reddioStarexContractAddress(), web3j, credentials, gasProvider)
+        return withdrawals.withdrawNft(
+            BigInteger(ethAddress.lowercase().replace("0x", ""), 16),
+            BigInteger(assetType.lowercase().replace("0x", ""), 16),
+            BigInteger(tokenId, 10),
+        ).sendAsync().await()
+    }
+
+    internal suspend fun asyncWithdrawalERC721M(
+        ethAddress: String,
+        assetType: String,
+        tokenId: String,
+        gasProvider: ContractGasProvider,
+    ): TransactionReceipt {
+        val withdrawals = Withdrawals.load(this.reddioStarexContractAddress(), web3j, credentials, gasProvider)
+
+        return withdrawals.withdrawAndMint(
+            BigInteger(ethAddress.lowercase().replace("0x", ""), 16),
+            BigInteger(assetType.lowercase().replace("0x", ""), 16),
+            Numeric.hexStringToByteArray(BigInteger(tokenId, 10).toString(16)),
+        ).sendAsync().await()
+    }
 
     private suspend fun getAssetTypeAndId(
         type: String,
