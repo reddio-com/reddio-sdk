@@ -213,6 +213,25 @@ namespace Reddio.Api.V1.Rest
             return result!;
         }
 
+        public async Task<ResponseWrapper<CollectionResponse>> Collection(CollectionMessage collectionMessage)
+        {
+            var query = HttpUtility.ParseQueryString(String.Empty);
+            query["stark_key"] = collectionMessage.StarkKey;
+            query["contract_address"] = collectionMessage.ContractAddress;
+            if (collectionMessage.TokenIds != null && collectionMessage.TokenIds.Length > 0)
+            {
+                query["token_ids"] = String.Join(",", collectionMessage.TokenIds);
+            }
+
+            var endpoint =
+                $"{_baseEndpoint}/v1/orders?{query}";
+            var client = HttpClientWithReddioUA();
+            var response = await client.GetAsync(endpoint);
+            response.EnsureSuccessStatusCode();
+            var result = await ReadAsJsonAsync<ResponseWrapper<CollectionResponse>>(response);
+            return result!;
+        }
+
         public static ReddioRestClient Mainnet()
         {
             return new ReddioRestClient(MainnetApiEndpoint);
