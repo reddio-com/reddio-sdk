@@ -11,8 +11,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-import static com.reddio.api.v1.DefaultEthereumInteractionTest.RDD20_CONTRACT_ADDRESS;
-import static com.reddio.api.v1.DefaultEthereumInteractionTest.REDDIO721_CONTRACT_ADDRESS;
+import static com.reddio.api.v1.DefaultEthereumInteractionTest.*;
 
 public class DefaultReddioClientTest {
     @Test
@@ -75,7 +74,7 @@ public class DefaultReddioClientTest {
     public void testWithdrawalNTFERC721M() throws ExecutionException, InterruptedException, JsonProcessingException {
         DefaultReddioClient client = DefaultReddioClient.testnet();
         ReddioClient.WithStarkExSigner clientWithSigner = client.withStarkExSigner("0x4d55b547af138c5b6200495d86ab6aed3e06c25fdd75b4b6a00e48515df2b3d");
-        CompletableFuture<ResponseWrapper<WithdrawalToResponse>> future = clientWithSigner.withdrawal("0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4", "1", "0xe3d2a2ca17a8dedb740b6c259b4eeeaaf81c9fb6", "3", "ERC721M", "0x76f2Fc7ed90039d986e3eb4DB294f05E160c8F03", 4194303L);
+        CompletableFuture<ResponseWrapper<WithdrawalToResponse>> future = clientWithSigner.withdrawal("0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4", "1", REDDIO721M_CONTRACT_ADDRESS, "7", "ERC721M", "0x76f2Fc7ed90039d986e3eb4DB294f05E160c8F03", 4194303L);
         ResponseWrapper<WithdrawalToResponse> result = future.get();
         Assert.assertEquals("OK", result.status);
         System.out.println(new ObjectMapper().writeValueAsString(result));

@@ -18,6 +18,7 @@ public class DefaultEthereumInteractionTest {
 
     public static final String RDD20_CONTRACT_ADDRESS = "0x57f3560b6793dcc2cb274c39e8b8eba1dd18a086";
     public static final String REDDIO721_CONTRACT_ADDRESS = "0x941661Bd1134DC7cc3D107BF006B8631F6E65Ad5";
+    public static final String REDDIO721M_CONTRACT_ADDRESS = "0xa5864abaab46d01412d154cd8836e62d201be436";
 
     @Test
     @Ignore("not reproducible test")
@@ -146,14 +147,14 @@ public class DefaultEthereumInteractionTest {
                 "0x27832a8be401e504eaa3e66904f929f02f72cd7f697e3f8f0a1c3d4b8654ba9d"
         );
         ResponseWrapper<GetContractInfoResponse> contractInfo = restClient.getContractInfo(GetContractInfoMessage.of(
-                "ERC721",
-                REDDIO721_CONTRACT_ADDRESS
+                "ERC721M",
+                "0xe3d2a2ca17a8dedb740b6c259b4eeeaaf81c9fb6"
         )).get();
         String assetType = contractInfo.getData().getAssetType();
         TransactionReceipt txn = ethereumInteraction.withdrawalERC721M(
                 "0x76f2Fc7ed90039d986e3eb4DB294f05E160c8F03",
                 assetType,
-                "1022",
+                "3",
                 GasOption.Market).get();
         System.out.println(txn.getTransactionHash());
     }
