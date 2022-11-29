@@ -8,7 +8,10 @@ import org.junit.Assert;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import static com.reddio.api.v1.DefaultEthereumInteractionTest.REDDIO721_CONTRACT_ADDRESS;
+
 public class DefaultReddioRestClientTest extends TestCase {
+
     public void testGetRecord() throws ExecutionException, InterruptedException {
         DefaultReddioRestClient client = DefaultReddioRestClient.testnet();
         ResponseWrapper<GetRecordResponse> response = client.getRecord(
@@ -19,7 +22,7 @@ public class DefaultReddioRestClientTest extends TestCase {
     public void testOrderList() throws ExecutionException, InterruptedException {
         DefaultReddioRestClient client = DefaultReddioRestClient.testnet();
         CompletableFuture<ResponseWrapper<OrderListResponse>> future = client.orderList(OrderListMessage.of("0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
-                "0x941661Bd1134DC7cc3D107BF006B8631F6E65Ad5"));
+                REDDIO721_CONTRACT_ADDRESS));
         ResponseWrapper<OrderListResponse> result = future.get();
         Assert.assertEquals("OK", result.status);
     }
