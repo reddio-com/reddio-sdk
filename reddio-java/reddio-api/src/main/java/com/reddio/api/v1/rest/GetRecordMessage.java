@@ -12,5 +12,5 @@ public class GetRecordMessage {
     @JsonProperty("stark_key")
     public String starkKey;
     @JsonProperty("sequence_id")
-    public long sequenceId;
+    public Long sequenceId;
 }
