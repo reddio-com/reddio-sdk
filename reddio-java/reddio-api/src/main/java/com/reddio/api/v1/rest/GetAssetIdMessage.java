@@ -17,5 +17,5 @@ public class GetAssetIdMessage {
     @JsonProperty("token_id")
     public String tokenId;
     @JsonProperty("quantum")
-    public Long quantum = 1L;
+    public Long quantum;
 }

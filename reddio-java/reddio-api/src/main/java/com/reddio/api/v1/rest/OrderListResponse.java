@@ -11,7 +11,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "of")
 public class OrderListResponse {
+    @JsonProperty("total")
     public Long total;
+    @JsonProperty("list")
     public List<Order> list;
 
     @Data
@@ -31,31 +33,13 @@ public class OrderListResponse {
         @JsonProperty("un_filled")
         public String unFilled;
         @JsonProperty("symbol")
-        public Symbol symbol;
+        public String symbol;
         @JsonProperty("fee_rate")
         public String FeeRate;
         @JsonProperty("token_id")
         public String TokenId;
         @JsonProperty("display_price")
         public String DisplayPrice;
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor(staticName = "of")
-    public static class Symbol {
-        @JsonProperty("base_token_asset_id")
-        public String baseTokenAssetId;
-        @JsonProperty("quote_token_asset_id")
-        public String quoteTokenAssetId;
-        @JsonProperty("base_token_contract_addr")
-        public String baseTokenContractAddr;
-        @JsonProperty("quote_token_contract_addr")
-        public String quoteTokenContractAddr;
-        @JsonProperty("base_token_name")
-        public String baseTokenName;
-        @JsonProperty("quote_token_name")
-        public String quoteTokenName;
     }
 }
 

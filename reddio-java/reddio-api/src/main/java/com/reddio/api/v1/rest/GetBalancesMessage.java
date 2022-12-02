@@ -15,4 +15,6 @@ public class GetBalancesMessage {
     public String contractAddress;
     @JsonProperty("limit")
     public Long limit;
+    @JsonProperty("page")
+    public Long page;
 }

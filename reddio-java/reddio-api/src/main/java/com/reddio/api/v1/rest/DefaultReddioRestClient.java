@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 public class DefaultReddioRestClient implements ReddioRestClient {
     public static final String MAINNET_API_ENDPOINT = "https://api.reddio.com";
@@ -135,12 +136,38 @@ public class DefaultReddioRestClient implements ReddioRestClient {
 
     @Override
     public CompletableFuture<ResponseWrapper<OrderListResponse>> orderList(OrderListMessage orderListMessage) {
-        String endpoint = baseEndpoint + "/v1/orders?stark_key=" + orderListMessage.getStarkKey() + "&contract_address=" + orderListMessage.getContractAddress();
+        final HttpUrl.Builder builder = Objects.requireNonNull(HttpUrl.parse(baseEndpoint + "/v1/balances")).newBuilder();
+        if (orderListMessage.getStarkKey() != null) {
+            builder.addQueryParameter("stark_key", orderListMessage.getStarkKey());
+        }
+        if (orderListMessage.getContractAddress() != null) {
+            builder.addQueryParameter("contract_address", orderListMessage.getContractAddress());
+        }
+        if (orderListMessage.getDirection() != null) {
+            builder.addQueryParameter("direction", orderListMessage.getDirection().toString());
+        }
+        if (orderListMessage.getTokenIds() != null && !orderListMessage.getTokenIds().isEmpty()) {
+            builder.addQueryParameter("token_ids", orderListMessage.getTokenIds().stream().map(Object::toString).collect(Collectors.joining(",")));
+        }
+        if (orderListMessage.getLimit() != null) {
+            builder.addQueryParameter("limit", orderListMessage.getLimit().toString());
+        }
+        if (orderListMessage.getPage() != null) {
+            builder.addQueryParameter("page", orderListMessage.getPage().toString());
+        }
+
+        final HttpUrl endpoint = builder.build();
 
         Request request = new Request.Builder().url(endpoint).get().build();
         Call call = this.httpClient.newCall(request);
-        return asFuture(call, new TypeReference<ResponseWrapper<OrderListResponse>>() {
-        }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint));
+        return
+
+                asFuture(call, new TypeReference<ResponseWrapper<OrderListResponse>>() {
+                }).
+
+                        thenApply(it ->
+
+                                ensureSuccess(it, "endpoint", endpoint.toString()));
     }
 
     @Override
@@ -155,11 +182,22 @@ public class DefaultReddioRestClient implements ReddioRestClient {
 
     @Override
     public CompletableFuture<ResponseWrapper<GetBalancesResponse>> getBalances(GetBalancesMessage getBalancesMessage) {
-        String endpoint = baseEndpoint + "/v1/balances?stark_key=" + getBalancesMessage.getStarkKey() + "&contract_address=" + getBalancesMessage.contractAddress;
+        final HttpUrl.Builder builder = Objects.requireNonNull(HttpUrl.parse(baseEndpoint + "/v1/balances")).newBuilder();
+        builder.addQueryParameter("stark_key", Objects.requireNonNull(getBalancesMessage.starkKey));
+        if (getBalancesMessage.getContractAddress() != null) {
+            builder.addQueryParameter("contract_address", getBalancesMessage.contractAddress);
+        }
+        if (getBalancesMessage.getLimit() != null) {
+            builder.addQueryParameter("limit", getBalancesMessage.limit.toString());
+        }
+        if (getBalancesMessage.getPage() != null) {
+            builder.addQueryParameter("page", getBalancesMessage.page.toString());
+        }
+        final HttpUrl endpoint = builder.build();
         Request request = new Request.Builder().url(endpoint).get().build();
         Call call = this.httpClient.newCall(request);
         return asFuture(call, new TypeReference<ResponseWrapper<GetBalancesResponse>>() {
-        }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint));
+        }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint.toString()));
     }
 
     @Override
@@ -227,7 +265,7 @@ public class DefaultReddioRestClient implements ReddioRestClient {
             try {
                 properties.load(Objects.requireNonNull(ReddioUAInterceptor.class.getResourceAsStream("/version.properties")));
             } catch (IOException e) {
-                throw new RuntimeException("get maven project version from resource /version.properties",e);
+                throw new RuntimeException("get maven project version from resource /version.properties", e);
             }
             return properties.getProperty("version");
         }
@@ -235,6 +273,7 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         public static ReddioUAInterceptor create() {
             return new ReddioUAInterceptor(geMavenProjecttVersion());
         }
+
     }
 
     public static DefaultReddioRestClient mainnet() {

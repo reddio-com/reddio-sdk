@@ -15,14 +15,16 @@ public class DefaultReddioRestClientTest extends TestCase {
     public void testGetRecord() throws ExecutionException, InterruptedException {
         DefaultReddioRestClient client = DefaultReddioRestClient.testnet();
         ResponseWrapper<GetRecordResponse> response = client.getRecord(
-                GetRecordMessage.of("0x6736f7449da3bf44bf0f7bdd6463818e1ef272641d43021e8bca17b32ec2df0", 300523)).get();
+                GetRecordMessage.of("0x6736f7449da3bf44bf0f7bdd6463818e1ef272641d43021e8bca17b32ec2df0", 300523L)).get();
         Assert.assertEquals(GetRecordResponse.SequenceRecord.SEQUENCE_STATUS_ACCEPTED, response.data.get(0).status);
     }
 
     public void testOrderList() throws ExecutionException, InterruptedException {
         DefaultReddioRestClient client = DefaultReddioRestClient.testnet();
-        CompletableFuture<ResponseWrapper<OrderListResponse>> future = client.orderList(OrderListMessage.of("0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
-                REDDIO721_CONTRACT_ADDRESS));
+        CompletableFuture<ResponseWrapper<OrderListResponse>> future = client.orderList(OrderListMessage.of(
+                "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
+                REDDIO721_CONTRACT_ADDRESS
+                , null, null, null, null));
         ResponseWrapper<OrderListResponse> result = future.get();
         Assert.assertEquals("OK", result.status);
     }
