@@ -163,11 +163,7 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         return
 
                 asFuture(call, new TypeReference<ResponseWrapper<OrderListResponse>>() {
-                }).
-
-                        thenApply(it ->
-
-                                ensureSuccess(it, "endpoint", endpoint.toString()));
+                }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint.toString()));
     }
 
     @Override
@@ -255,8 +251,7 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         @Override
         public Response intercept(Chain chain) throws IOException {
             Request originalRequest = chain.request();
-            Request requestWithUserAgent = originalRequest.newBuilder()
-                    .header("User-Agent", String.format("reddio-client-java/%s", this.version)).build();
+            Request requestWithUserAgent = originalRequest.newBuilder().header("User-Agent", String.format("reddio-client-java/%s", this.version)).build();
             return chain.proceed(requestWithUserAgent);
         }
 
