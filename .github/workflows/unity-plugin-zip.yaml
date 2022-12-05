@@ -198,6 +198,7 @@ jobs:
           # Script
           cp -r reddio-csharp/reddio.crypto unity/Plugins/reddio-sdk-unity/reddio.crypto
           cp -r reddio-csharp/reddio.api unity/Plugins/reddio-sdk-unity/reddio.api
+          cp -r reddio-unity/Assets/Plugins/reddio-sdk-unity/reddio.unity unity/Plugins/reddio-sdk-unity/reddio.unity
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
