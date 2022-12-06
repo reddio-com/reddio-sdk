@@ -42,6 +42,8 @@ public class GetRecordResponse extends ArrayList<GetRecordResponse.SequenceRecor
         public String starkKey;
         @JsonProperty("status")
         public int status;
+        @JsonProperty("resp")
+        public String resp;
         @JsonProperty("time")
         public long time;
         @JsonProperty("to")
