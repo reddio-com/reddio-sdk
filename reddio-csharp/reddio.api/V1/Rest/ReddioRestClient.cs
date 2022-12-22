@@ -37,6 +37,13 @@ namespace Reddio.Api.V1.Rest
             return content;
         }
 
+        private static void EnsureResponse<T>(ResponseWrapper<T> r, string url)
+        {
+            if ("OK" != r.Status)
+            {
+                throw new Exception($"Request failed, url: {url}, status: {r.Status}, error: {r.Error}");
+            }
+        }
         private static async Task<T> ReadAsJsonAsync<T>(HttpResponseMessage response)
         {
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -50,6 +57,7 @@ namespace Reddio.Api.V1.Rest
             var response = await client.PostAsync(endpoint, JsonStringContent(transferMessage));
             response.EnsureSuccessStatusCode();
             var result = await ReadAsJsonAsync<ResponseWrapper<TransferResponse>>(response);
+            EnsureResponse(result, endpoint);
             return result!;
         }
 
@@ -60,6 +68,7 @@ namespace Reddio.Api.V1.Rest
             var response = await client.GetAsync(endpoint);
             response.EnsureSuccessStatusCode();
             var result = await ReadAsJsonAsync<ResponseWrapper<GetNonceResponse>>(response);
+            EnsureResponse(result, endpoint);
             return result!;
         }
 
@@ -76,6 +85,7 @@ namespace Reddio.Api.V1.Rest
             var client = HttpClientWithReddioUA();
             var response = await client.GetAsync(endpoint);
             var result = await ReadAsJsonAsync<ResponseWrapper<GetAssetIdResponse>>(response);
+            EnsureResponse(result, endpoint);
             return result!;
         }
 
@@ -87,6 +97,7 @@ namespace Reddio.Api.V1.Rest
             var response = await client.GetAsync(endpoint);
             response.EnsureSuccessStatusCode();
             var result = await ReadAsJsonAsync<ResponseWrapper<GetVaultIdResponse>>(response);
+            EnsureResponse(result, endpoint);
             return result!;
         }
 
@@ -98,6 +109,7 @@ namespace Reddio.Api.V1.Rest
             var response = await client.GetAsync(endpoint);
             response.EnsureSuccessStatusCode();
             var result = await ReadAsJsonAsync<ResponseWrapper<GetRecordResponse>>(response);
+            EnsureResponse(result, endpoint);
             return result!;
         }
 
@@ -126,6 +138,7 @@ namespace Reddio.Api.V1.Rest
             var response = await client.GetAsync(endpoint);
             response.EnsureSuccessStatusCode();
             var result = await ReadAsJsonAsync<ResponseWrapper<GetRecordsResponse>>(response);
+            EnsureResponse(result, endpoint);
             return result!;
         }
 
@@ -137,6 +150,7 @@ namespace Reddio.Api.V1.Rest
             var response = await client.GetAsync(endpoint);
             response.EnsureSuccessStatusCode();
             var result = await ReadAsJsonAsync<ResponseWrapper<GetBalanceResponse>>(response);
+            EnsureResponse(result, endpoint);
             return result!;
         }
 
@@ -152,6 +166,7 @@ namespace Reddio.Api.V1.Rest
             var response = await client.GetAsync(endpoint);
             response.EnsureSuccessStatusCode();
             var result = await ReadAsJsonAsync<ResponseWrapper<GetContractInfoResponse>>(response);
+            EnsureResponse(result, endpoint);
             return result!;
         }
 
@@ -163,6 +178,7 @@ namespace Reddio.Api.V1.Rest
             var response = await client.GetAsync(endpoint);
             response.EnsureSuccessStatusCode();
             var result = await ReadAsJsonAsync<ResponseWrapper<OrderInfoResponse>>(response);
+            EnsureResponse(result, endpoint);
             return result!;
         }
 
@@ -173,6 +189,7 @@ namespace Reddio.Api.V1.Rest
             var response = await client.PostAsync(endpoint, JsonStringContent(orderMessage));
             response.EnsureSuccessStatusCode();
             var result = await ReadAsJsonAsync<ResponseWrapper<OrderResponse>>(response);
+            EnsureResponse(result, endpoint);
             return result!;
         }
 
@@ -191,6 +208,7 @@ namespace Reddio.Api.V1.Rest
             var response = await client.GetAsync(endpoint);
             response.EnsureSuccessStatusCode();
             var result = await ReadAsJsonAsync<ResponseWrapper<GetBalancesResponse>>(response);
+            EnsureResponse(result, endpoint);
             return result!;
         }
 
@@ -210,6 +228,7 @@ namespace Reddio.Api.V1.Rest
             var response = await client.GetAsync(endpoint);
             response.EnsureSuccessStatusCode();
             var result = await ReadAsJsonAsync<ResponseWrapper<OrderListResponse>>(response);
+            EnsureResponse(result, endpoint);
             return result!;
         }
 
@@ -229,6 +248,7 @@ namespace Reddio.Api.V1.Rest
             var response = await client.GetAsync(endpoint);
             response.EnsureSuccessStatusCode();
             var result = await ReadAsJsonAsync<ResponseWrapper<CollectionResponse>>(response);
+            EnsureResponse(result, endpoint);
             return result!;
         }
 

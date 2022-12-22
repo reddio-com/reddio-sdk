@@ -43,7 +43,16 @@ namespace reddio.api.V2.Rest
             var response = await client.GetAsync(uri.ToString());
             response.EnsureSuccessStatusCode();
             var result = await ReadAsJsonAsync<ResponseWrapper<GetBalanceResponse>>(response);
+            EnsureResponse(result, uri.ToString());
             return result!;
+        }
+
+        private static void EnsureResponse<T>(ResponseWrapper<T> r, string url)
+        {
+            if ("OK" != r.Status)
+            {
+                throw new Exception($"Request failed, url: {url}, status: {r.Status}, error: {r.Error}");
+            }
         }
 
         private static async Task<T> ReadAsJsonAsync<T>(HttpResponseMessage response)
@@ -51,7 +60,7 @@ namespace reddio.api.V2.Rest
             var responseContent = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<T>(responseContent)!;
         }
-        
+
         public static ReddioRestClient Mainnet()
         {
             return new ReddioRestClient(MainnetApiEndpoint);
