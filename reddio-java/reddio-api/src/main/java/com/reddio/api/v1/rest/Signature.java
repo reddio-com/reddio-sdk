@@ -14,4 +14,10 @@ public class Signature {
     @JsonProperty("s")
     public String s;
 
+    @JsonProperty("stark_key")
+    public String starkKey;
+
+    public static Signature of(String r, String s) {
+        return of(r, s, "");
+    }
 }

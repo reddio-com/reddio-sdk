@@ -12,6 +12,11 @@ public class OrderMessage {
     public static final Long DIRECTION_ASK = 0L;
     public static final Long DIRECTION_BID = 1L;
 
+    public static final String STOP_LIMIT_TIME_IN_FORCE_GTC = "GTC";
+    public static final String STOP_LIMIT_TIME_IN_FORCE_IOC = "IOC";
+    public static final String STOP_LIMIT_TIME_IN_FORCE_FOK = "FOK";
+
+
     @JsonProperty("amount")
     public String amount;
     @JsonProperty("amount_buy")
@@ -47,4 +52,25 @@ public class OrderMessage {
 
     @JsonProperty("stark_key")
     public String starkKey;
+
+    @JsonProperty("stop_limit_time_in_force")
+    public String stopLimitTimeInForce;
+
+    @JsonProperty("payment")
+    public Payment payment;
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor(staticName = "of")
+    public static class Payment {
+
+        @JsonProperty("pay_info")
+        public com.reddio.api.v1.rest.Payment.PayInfo payInfo;
+
+        @JsonProperty("nonce")
+        public Long nonce;
+
+        @JsonProperty("signature")
+        public Signature signature;
+    }
 }

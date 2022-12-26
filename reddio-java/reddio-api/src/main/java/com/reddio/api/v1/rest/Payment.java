@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "of")
-public class BizMessage {
-    @JsonProperty("payinfo")
+public class Payment {
+    @JsonProperty("pay_info")
     public PayInfo payInfo;
     @JsonProperty("state")
     public String state;
@@ -18,7 +18,7 @@ public class BizMessage {
     @NoArgsConstructor
     @AllArgsConstructor(staticName = "of")
     public static class PayInfo {
-        @JsonProperty("orderId")
-        public int orderId;
+        @JsonProperty("order_id")
+        public String orderId;
     }
 }

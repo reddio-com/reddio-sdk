@@ -216,7 +216,7 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         if ("OK".equals(responseWrapper.getStatus())) {
             return responseWrapper;
         }
-        throw new ReddioException("response status is not OK, status: " + responseWrapper.getStatus() + ", messages: " + String.join(",", messages));
+        throw new ReddioException("response status is not OK, status: " + responseWrapper.getStatus() + ", error: " + responseWrapper.error + ", messages: " + String.join(",", messages));
     }
 
     private static class ToCompletableFutureCallback<T> implements Callback {
