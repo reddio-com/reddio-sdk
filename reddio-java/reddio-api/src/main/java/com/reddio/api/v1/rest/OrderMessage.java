@@ -65,7 +65,7 @@ public class OrderMessage {
     public static class Payment {
 
         @JsonProperty("pay_info")
-        public BizMessage.PayInfo payInfo;
+        public com.reddio.api.v1.rest.Payment.PayInfo payInfo;
 
         @JsonProperty("nonce")
         public Long nonce;

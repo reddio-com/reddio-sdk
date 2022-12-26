@@ -35,7 +35,7 @@ public interface ReddioClient {
                 String amount,
                 OrderType orderType,
                 String marketplaceUuid,
-                BizMessage.PayInfo payInfo,
+                Payment.PayInfo payInfo,
                 String signPayInfoPrivateKey
         );
 
@@ -49,7 +49,7 @@ public interface ReddioClient {
                 String price,
                 String amount,
                 String marketplaceUuid,
-                BizMessage.PayInfo payInfo,
+                Payment.PayInfo payInfo,
                 String signPayInfoPrivateKey
         );
 

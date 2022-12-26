@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "of")
-public class BizMessage {
+public class Payment {
     @JsonProperty("pay_info")
     public PayInfo payInfo;
     @JsonProperty("state")

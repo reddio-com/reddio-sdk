@@ -1,14 +1,11 @@
 package com.reddio.api.v1
 
-import com.reddio.ReddioException
 import com.reddio.api.v1.rest.*
-import com.reddio.crypto.CryptoService
-import com.reddio.sign.BizMessageSHA3
+import com.reddio.sign.PaymentSign
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
 import org.web3j.utils.Convert
-import java.math.BigInteger
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.CompletableFuture
@@ -283,7 +280,7 @@ class DefaultReddioClient(
             amount: String,
             orderType: OrderType,
             marketplaceUuid: String,
-            payInfo: BizMessage.PayInfo,
+            payInfo: Payment.PayInfo,
             signPayInfoPrivateKey: String,
         ): CompletableFuture<ResponseWrapper<OrderResponse>> {
 
@@ -356,30 +353,19 @@ class DefaultReddioClient(
                         orderMessage.feeInfo.feeLimit
                     )
 
-                    // sign pay info
-                    val bizMessage = BizMessage.of(payInfo, "")
-                    val hash = BizMessageSHA3.getBizMessageHash(bizMessage, orderInfoResponse.data.nonce)
-                    val privateKey = BigInteger(
-                        signPayInfoPrivateKey.replace("0x", "").lowercase(),
-                        16
-                    )
-                    val sign = CryptoService.sign(
-                        privateKey, hash, null
-                    )
-                    val pubKey = CryptoService.getPublicKey(privateKey)
                     // append pay info
                     if (OrderType.BUY == orderType) {
                         orderMessage.setStopLimitTimeInForce(OrderMessage.STOP_LIMIT_TIME_IN_FORCE_IOC)
-                        val signature = Signature.of(
-                            "0x" + sign.r,
-                            "0x" + sign.s,
-                            "0x" + pubKey.toString(16)
+                        val sign = PaymentSign.sign(
+                            signPayInfoPrivateKey,
+                            payInfo.orderId,
+                            orderInfoResponse.data.nonce
                         )
                         orderMessage.setPayment(
                             OrderMessage.Payment.of(
                                 payInfo,
                                 orderInfoResponse.data.nonce,
-                                signature
+                                sign
                             )
                         )
                     }
@@ -410,7 +396,7 @@ class DefaultReddioClient(
             price: String,
             amount: String,
             marketplaceUuid: String,
-            payInfo: BizMessage.PayInfo,
+            payInfo: Payment.PayInfo,
             signPayInfoPrivateKey: String
         ): CompletableFuture<ResponseWrapper<OrderResponse>> {
             return orderWithPayInfo(

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.reddio.api.v1.rest.*;
 import com.reddio.crypto.CryptoService;
 import com.reddio.crypto.Signature;
-import com.reddio.sign.BizMessageSHA3;
+import com.reddio.sign.PaymentSHA3;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -181,7 +181,7 @@ public class DefaultReddioClientTest {
                 "0.013",
                 "1",
                 "",
-                BizMessage.PayInfo.of("123456789"),
+                Payment.PayInfo.of("123456789"),
                 "0x1a35ffa8bafc5c6656271bcae1f847bb6201705d7e2895c413cfb7d757a3111"
         );
         ResponseWrapper<OrderResponse> result = future.get();
@@ -192,9 +192,9 @@ public class DefaultReddioClientTest {
     @Test
     @Ignore("example usages, not a test")
     public void testGetSign() {
-        BigInteger hash = BizMessageSHA3.getBizMessageHash(
-                BizMessage.of(
-                        BizMessage.PayInfo.of("123456789"),
+        BigInteger hash = PaymentSHA3.getPaymentHash(
+                Payment.of(
+                        Payment.PayInfo.of("123456789"),
                         ""
                 ),
                 2
