@@ -2,6 +2,7 @@ package com.reddio.crypto;
 
 import com.sun.jna.Library;
 import com.sun.jna.Native;
+import com.sun.jna.ptr.IntByReference;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -16,6 +17,8 @@ public class CryptoService {
         String explain(int errno);
 
         int sign(SignDocument document, SignResult ret);
+
+        int verify(VerifySignatureMessage signature, IntByReference valid);
 
         int get_transfer_msg_hash(TransferMsg msg, ByteBuffer ret);
 
@@ -41,6 +44,21 @@ public class CryptoService {
             throw new ReddioCryptoException(Reddio.instance.explain(errno));
         }
         return new Signature(StandardCharsets.UTF_8.decode(ret.r).toString().trim(), StandardCharsets.UTF_8.decode(ret.s).toString().trim());
+    }
+
+    public static boolean verify(BigInteger publicKey, BigInteger msgHash, Signature signature) {
+        IntByReference ref = new IntByReference();
+        VerifySignatureMessage message = new VerifySignatureMessage();
+        message.public_key = publicKey.toString(16);
+        message.msg_hash = msgHash.toString(16);
+        message.r = signature.r;
+        message.s = signature.s;
+        int errno = Reddio.instance.verify(message, ref);
+        if (errno != 0) {
+            throw new ReddioCryptoException(Reddio.instance.explain(errno));
+        }
+        int value = ref.getValue();
+        return value != 0;
     }
 
     public static BigInteger getTransferMsgHash(
@@ -115,6 +133,7 @@ public class CryptoService {
         }
         return new BigInteger(StandardCharsets.UTF_8.decode(ret).toString().trim(), 16);
     }
+
     public static BigInteger getRandomPrivateKey() {
         ByteBuffer ret = ByteBuffer.allocateDirect(Reddio.STRING_MAX_SIZE);
         int errno = Reddio.instance.get_random_private_key(ret);
