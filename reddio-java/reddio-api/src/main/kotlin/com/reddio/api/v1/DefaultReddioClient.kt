@@ -359,25 +359,27 @@ class DefaultReddioClient(
                     // sign pay info
                     val bizMessage = BizMessage.of(payInfo, "")
                     val hash = BizMessageSHA3.getBizMessageHash(bizMessage, orderInfoResponse.data.nonce)
-                    val sign = CryptoService.sign(
-                        BigInteger(
-                            signPayInfoPrivateKey.replace("0x", "").lowercase(),
-                            16
-                        ), hash, null
+                    val privateKey = BigInteger(
+                        signPayInfoPrivateKey.replace("0x", "").lowercase(),
+                        16
                     )
-
+                    val sign = CryptoService.sign(
+                        privateKey, hash, null
+                    )
+                    val pubKey = CryptoService.getPublicKey(privateKey)
                     // append pay info
                     if (OrderType.BUY == orderType) {
                         orderMessage.setStopLimitTimeInForce(OrderMessage.STOP_LIMIT_TIME_IN_FORCE_IOC)
+                        val signature = Signature.of(
+                            "0x" + sign.r,
+                            "0x" + sign.s,
+                            "0x" + pubKey.toString(16)
+                        )
                         orderMessage.setPayment(
                             OrderMessage.Payment.of(
                                 payInfo,
                                 orderInfoResponse.data.nonce,
-                                Signature.of(
-                                    "0x" + sign.r,
-                                    "0x" + sign.s,
-                                    starkKey
-                                )
+                                signature
                             )
                         )
                     }

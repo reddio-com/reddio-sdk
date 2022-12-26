@@ -13,7 +13,7 @@ public class BizMessageSHA3 {
     public static final BigInteger CurveOrder = new BigInteger("3618502788666131213697322783095070105526743751716087489154079457884512865583");
 
     public static BigInteger getBizMessageHash(BizMessage message, long nonce) {
-        byte[] orderIdBytes = String.format("%d", message.payInfo.orderId).getBytes(StandardCharsets.UTF_8);
+        byte[] orderIdBytes = String.format("%s", message.payInfo.orderId).getBytes(StandardCharsets.UTF_8);
         byte[] stateBytes32 = message.state.getBytes(StandardCharsets.UTF_8);
         byte[] nonceBytes = Numeric.toBytesPadded(BigInteger.valueOf(nonce), 32);
 

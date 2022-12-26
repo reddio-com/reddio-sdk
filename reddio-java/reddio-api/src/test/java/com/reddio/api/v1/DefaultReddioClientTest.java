@@ -159,7 +159,7 @@ public class DefaultReddioClientTest {
         CompletableFuture<ResponseWrapper<OrderResponse>> future = clientWithSigner.sellNFTWithRUSD("0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
                 "ERC721",
                 REDDIO721_CONTRACT_ADDRESS,
-                "1202",
+                "1209",
                 "0.013",
                 "1", "");
         ResponseWrapper<OrderResponse> result = future.get();
@@ -177,11 +177,11 @@ public class DefaultReddioClientTest {
                 "0x13a69a1b7a5f033ee2358ebb8c28fd5a6b86d42e30a61845d655d3c7be4ad0e",
                 "ERC721",
                 REDDIO721_CONTRACT_ADDRESS,
-                "1202",
+                "1209",
                 "0.013",
                 "1",
                 "",
-                BizMessage.PayInfo.of(123456789),
+                BizMessage.PayInfo.of("123456789"),
                 "0x1a35ffa8bafc5c6656271bcae1f847bb6201705d7e2895c413cfb7d757a3111"
         );
         ResponseWrapper<OrderResponse> result = future.get();
@@ -194,7 +194,7 @@ public class DefaultReddioClientTest {
     public void testGetSign() {
         BigInteger hash = BizMessageSHA3.getBizMessageHash(
                 BizMessage.of(
-                        BizMessage.PayInfo.of(123456789),
+                        BizMessage.PayInfo.of("123456789"),
                         ""
                 ),
                 2

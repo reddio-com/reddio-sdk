@@ -19,6 +19,6 @@ public class BizMessage {
     @AllArgsConstructor(staticName = "of")
     public static class PayInfo {
         @JsonProperty("order_id")
-        public int orderId;
+        public String orderId;
     }
 }

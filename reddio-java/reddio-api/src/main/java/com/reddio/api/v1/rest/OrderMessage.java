@@ -64,7 +64,7 @@ public class OrderMessage {
     @AllArgsConstructor(staticName = "of")
     public static class Payment {
 
-        @JsonProperty("payinfo")
+        @JsonProperty("pay_info")
         public BizMessage.PayInfo payInfo;
 
         @JsonProperty("nonce")

@@ -14,7 +14,7 @@ public class BizMessageSHA3Test {
     @Test
     public void testGetBizMessageHash1() {
         BizMessage bizMessage = BizMessage.of(
-                BizMessage.PayInfo.of(0),
+                BizMessage.PayInfo.of("0"),
                 ""
         );
         long nonce = 0;
@@ -24,7 +24,7 @@ public class BizMessageSHA3Test {
     @Test
     public void testGetBizMessageHash2() {
         BizMessage bizMessage = BizMessage.of(
-                BizMessage.PayInfo.of(233),
+                BizMessage.PayInfo.of("233"),
                 "OK"
         );
         long nonce = 2333;
@@ -34,7 +34,7 @@ public class BizMessageSHA3Test {
     @Test
     public void testSignBizMessageHash() {
         BizMessage bizMessage = BizMessage.of(
-                BizMessage.PayInfo.of(233),
+                BizMessage.PayInfo.of("233"),
                 "OK"
         );
         long nonce = 2333;
