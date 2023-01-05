@@ -271,6 +271,18 @@ class DefaultReddioClient(
 
         }
 
+        override fun cancelOrder(
+            starkKey: String,
+            orderId: Long
+        ): CompletableFuture<ResponseWrapper<CancelOrderResponse>> {
+            return CompletableFuture.supplyAsync {
+                runBlocking {
+                    val signature = starkExSigner.signCancelOrderMsg(orderId)
+                    restClient.cancelOrder(orderId, CancelOrderMessage.of(starkKey, signature)).await()
+                }
+            }
+        }
+
         override fun orderWithPayInfo(
             starkKey: String,
             contractType: String,

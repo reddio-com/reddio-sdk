@@ -59,6 +59,14 @@ class StarExSigner(private val privateKey: String) {
         return Signature.of("0x${result.r}", "0x${result.s}")
     }
 
+    fun signCancelOrderMsg(
+        orderId: Long
+    ): Signature {
+        val hash = CryptoService.getCancelOrderMsgHash(orderId)
+        val result = CryptoService.sign(BigInteger(privateKey.lowercase().replace("0x", ""), 16), hash, null);
+        return Signature.of("0x${result.r}", "0x${result.s}")
+    }
+
     companion object {
         @JvmStatic
         fun buildWithPrivateKey(privateKey: String): StarExSigner {
