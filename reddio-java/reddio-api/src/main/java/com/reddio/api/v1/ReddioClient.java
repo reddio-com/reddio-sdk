@@ -26,6 +26,8 @@ public interface ReddioClient {
 
         CompletableFuture<ResponseWrapper<OrderResponse>> order(String starkKey, String contractType, String contractAddress, String tokenId, String price, String amount, OrderType orderType, String baseTokenType, String baseTokenContract, String marketplaceUuid);
 
+        CompletableFuture<ResponseWrapper<CancelOrderResponse>> cancelOrder(String starkKey, long orderId);
+
         CompletableFuture<ResponseWrapper<OrderResponse>> orderWithPayInfo(
                 String starkKey,
                 String contractType,

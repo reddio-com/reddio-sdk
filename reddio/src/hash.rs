@@ -293,6 +293,28 @@ pub unsafe extern "C" fn get_limit_order_msg_hash_with_fee(
     }
 }
 
+#[repr(C)]
+pub struct CancelOrderMsg {
+    /// decimal string
+    pub order_id: BigInt,
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn get_cancel_order_msg_hash(msg: CancelOrderMsg, hash: MutBigInt) -> Errno {
+    let get_cancel_order_msg_hash_impl = move || {
+        let order_id = parse_bigint_decimal(msg.order_id)?;
+        let zero = FieldElement::ZERO;
+        let result = starknet_crypto::pedersen_hash(&order_id, &zero);
+        write_bigint(&result, hash);
+        Ok::<_, Errno>(())
+    };
+
+    match get_cancel_order_msg_hash_impl() {
+        Ok(_) => Errno::Ok,
+        Err(e) => e,
+    }
+}
+
 trait FromFieldElement {
     fn from_fe(fe: &FieldElement) -> Self;
 }
@@ -445,11 +467,13 @@ mod tests {
     use std::ffi::{c_char, CStr, CString};
     use std::ptr::null;
 
+    use anyhow::Ok;
+
     use super::{get_limit_order_msg_hash, get_transfer_msg_hash, LimitOrderMsg, TransferMsg};
     use crate::exports::BIG_INT_SIZE;
     use crate::hash::{
-        get_limit_order_msg_hash_with_fee, get_transfer_msg_hash_with_fee, LimitOrderMsgWithFee,
-        TransferMsgWithFee,
+        get_cancel_order_msg_hash, get_limit_order_msg_hash_with_fee,
+        get_transfer_msg_hash_with_fee, CancelOrderMsg, LimitOrderMsgWithFee, TransferMsgWithFee,
     };
 
     /// ref: https://github.com/starkware-libs/starkex-resources/blob/844ac3dcb1f735451457f7eecc6e37cd96d1cb2d/crypto/starkware/crypto/signature/signature_test_data.json#L38
@@ -730,6 +754,26 @@ mod tests {
                 result,
                 "1924a457d5573e6ab300b73cda341fd73a19e5f4077d805a3cb33d28ca105ee"
             )
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn test_cancel_order_msg() -> anyhow::Result<()> {
+        let buffer: *mut c_char = ([0 as c_char; BIG_INT_SIZE]).as_mut_ptr();
+        unsafe {
+            let errno = get_cancel_order_msg_hash(
+                CancelOrderMsg {
+                    order_id: CString::new("233")?.into_raw(),
+                },
+                buffer,
+            );
+            assert_eq!(errno as u8, 0);
+            let result = CStr::from_ptr(buffer).to_str()?;
+            assert_eq!(
+                result,
+                "2d97ce4376a8cec568b243857eafd329fd90afca2437a3368f34884eed53fd3"
+            );
         }
         Ok(())
     }

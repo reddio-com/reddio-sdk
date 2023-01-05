@@ -60,6 +60,12 @@ public class CryptoServiceTest {
     }
 
     @Test
+    public void testGetCancelOrderMsgHash() {
+        BigInteger hash = CryptoService.getCancelOrderMsgHash(233);
+        Assert.assertEquals("2d97ce4376a8cec568b243857eafd329fd90afca2437a3368f34884eed53fd3", hash.toString(16));
+    }
+
+    @Test
     public void testRandomPrivateKey() {
         BigInteger privateKey = CryptoService.getRandomPrivateKey();
         BigInteger publicKey = CryptoService.getPublicKey(privateKey);

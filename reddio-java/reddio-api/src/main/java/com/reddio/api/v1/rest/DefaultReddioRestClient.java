@@ -167,6 +167,23 @@ public class DefaultReddioRestClient implements ReddioRestClient {
     }
 
     @Override
+    public CompletableFuture<ResponseWrapper<CancelOrderResponse>> cancelOrder(Long orderId, CancelOrderMessage cancelOrderMessage) {
+        final HttpUrl.Builder builder = Objects.requireNonNull(HttpUrl.parse(String.format("%s/v1/orders/%d/cancel", baseEndpoint, orderId))).newBuilder();
+        final String jsonString;
+        try {
+            jsonString = objectMapper.writeValueAsString(cancelOrderMessage);
+        } catch (JsonProcessingException e) {
+            throw new ReddioException(e);
+        }
+        final HttpUrl endpoint = builder.build();
+
+        Request request = new Request.Builder().url(endpoint).post(RequestBody.create(jsonString, JSON)).build();
+        Call call = this.httpClient.newCall(request);
+        return asFuture(call, new TypeReference<ResponseWrapper<CancelOrderResponse>>() {
+        }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint.toString()));
+    }
+
+    @Override
     public CompletableFuture<ResponseWrapper<GetContractInfoResponse>> getContractInfo(GetContractInfoMessage getContractInfoMessage) {
         String endpoint = baseEndpoint + "/v1/contract_info?type=" + getContractInfoMessage.type + "&contract_address=" + getContractInfoMessage.contractAddress;
 

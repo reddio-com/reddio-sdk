@@ -159,7 +159,7 @@ public class DefaultReddioClientTest {
         CompletableFuture<ResponseWrapper<OrderResponse>> future = clientWithSigner.sellNFTWithRUSD("0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
                 "ERC721",
                 REDDIO721_CONTRACT_ADDRESS,
-                "1209",
+                "1210",
                 "0.013",
                 "1", "");
         ResponseWrapper<OrderResponse> result = future.get();
@@ -206,7 +206,18 @@ public class DefaultReddioClientTest {
                         16
                 ), hash, null
         );
-        System.out.println("r: 0x"+sign.r);
-        System.out.println("s: 0x"+sign.s);
+        System.out.println("r: 0x" + sign.r);
+        System.out.println("s: 0x" + sign.s);
+    }
+
+    @Test
+    @Ignore("example usages, not a test")
+    public void testCancelOrder() throws ExecutionException, InterruptedException, JsonProcessingException {
+        DefaultReddioClient client = DefaultReddioClient.testnet();
+        ReddioClient.WithStarkExSigner withStarkExSigner = client.withStarkExSigner("0x4d55b547af138c5b6200495d86ab6aed3e06c25fdd75b4b6a00e48515df2b3d");
+        CompletableFuture<ResponseWrapper<CancelOrderResponse>> future = withStarkExSigner.cancelOrder("0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4", 303590);
+        ResponseWrapper<CancelOrderResponse> result = future.get();
+        System.out.println(new ObjectMapper().writeValueAsString(result));
+        Assert.assertEquals("OK", result.status);
     }
 }
