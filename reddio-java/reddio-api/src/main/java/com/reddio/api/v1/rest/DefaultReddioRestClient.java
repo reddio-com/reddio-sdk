@@ -136,7 +136,7 @@ public class DefaultReddioRestClient implements ReddioRestClient {
 
     @Override
     public CompletableFuture<ResponseWrapper<OrderListResponse>> orderList(OrderListMessage orderListMessage) {
-        final HttpUrl.Builder builder = Objects.requireNonNull(HttpUrl.parse(baseEndpoint + "/v1/balances")).newBuilder();
+        final HttpUrl.Builder builder = Objects.requireNonNull(HttpUrl.parse(baseEndpoint + "/v1/orders")).newBuilder();
         if (orderListMessage.getStarkKey() != null) {
             builder.addQueryParameter("stark_key", orderListMessage.getStarkKey());
         }
