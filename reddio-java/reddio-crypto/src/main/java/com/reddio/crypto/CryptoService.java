@@ -24,6 +24,8 @@ public class CryptoService {
 
         int get_limit_order_msg_hash_with_fee(LimitOrderMsgWithFee msg, ByteBuffer ret);
 
+        int get_cancel_order_msg_hash(CancelOrderMsg msg, ByteBuffer ret);
+
         int get_random_private_key(ByteBuffer ret);
 
         int get_public_key(String privateKey, ByteBuffer ret);
@@ -119,6 +121,19 @@ public class CryptoService {
         msg.fee_limit = String.valueOf(feeLimit);
         ByteBuffer ret = ByteBuffer.allocateDirect(Reddio.STRING_MAX_SIZE);
         int errno = Reddio.instance.get_limit_order_msg_hash_with_fee(msg, ret);
+        if (errno != 0) {
+            throw new ReddioCryptoException(Reddio.instance.explain(errno));
+        }
+        return new BigInteger(StandardCharsets.UTF_8.decode(ret).toString().trim(), 16);
+    }
+
+    public static BigInteger getCancelOrderMsgHash(
+            long orderId
+    ){
+        CancelOrderMsg msg = new CancelOrderMsg();
+        msg.order_id = String.valueOf(orderId);
+        ByteBuffer ret = ByteBuffer.allocateDirect(Reddio.STRING_MAX_SIZE);
+        int errno = Reddio.instance.get_cancel_order_msg_hash(msg, ret);
         if (errno != 0) {
             throw new ReddioCryptoException(Reddio.instance.explain(errno));
         }
