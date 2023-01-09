@@ -44,7 +44,7 @@ class BlockConfirmationRequiredEvents<T>(
                             cancelSchedule?.cancel(false)
                         }
                         // TODO: do not hardcode blocktime
-                    }, 0, 12, TimeUnit.SECONDS)
+                    }, 0, BLOCK_TIME, TimeUnit.SECONDS)
 
                 }, BackpressureStrategy.BUFFER
             )
@@ -67,7 +67,7 @@ class BlockConfirmationRequiredEvents<T>(
                         }
                         // eth would generate new block about every 12 seconds
                         // TODO: do not hardcode blocktime
-                    }, 0, 12, TimeUnit.SECONDS
+                    }, 0, BLOCK_TIME, TimeUnit.SECONDS
                 )
                 subscriber.setCancellable {
                     schedule.cancel(false)
