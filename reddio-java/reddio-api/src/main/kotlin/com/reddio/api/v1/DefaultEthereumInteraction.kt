@@ -317,12 +317,14 @@ class DefaultEthereumInteraction(
     }
 
     override fun watchDeposit(
-        consumer: Consumer<Deposits.LogDepositEventResponse>, startBlockNumber: BigInteger, requiredBlockConfirmation: Long
+        consumer: Consumer<Deposits.LogDepositEventResponse>,
+        startBlockNumber: BigInteger,
+        requiredBlockConfirmation: Long
     ): Disposable {
         return runBlocking {
             val deposits = Deposits.load(reddioStarexContractAddress(), web3j, credentials, null)
             val blockConfirmationRequiredEvents = BlockConfirmationRequiredEvents(
-                deposits::logDepositEventFlowable, BlockConfirmationRequiredEvents.DEFAULT_BLOCK_CONFIRMATION, web3j
+                deposits::logDepositEventFlowable, requiredBlockConfirmation, web3j
             )
             blockConfirmationRequiredEvents.eventFlowable(startBlockNumber).subscribe {
                 consumer.accept(it)
@@ -342,12 +344,14 @@ class DefaultEthereumInteraction(
     }
 
     override fun watchNftDeposit(
-        consumer: Consumer<Deposits.LogNftDepositEventResponse>, startBlockNumber: BigInteger, requiredBlockConfirmation: Long
+        consumer: Consumer<Deposits.LogNftDepositEventResponse>,
+        startBlockNumber: BigInteger,
+        requiredBlockConfirmation: Long
     ): Disposable {
         return runBlocking {
             val deposits = Deposits.load(reddioStarexContractAddress(), web3j, credentials, null)
             val blockConfirmationRequiredEvents = BlockConfirmationRequiredEvents(
-                deposits::logNftDepositEventFlowable, BlockConfirmationRequiredEvents.DEFAULT_BLOCK_CONFIRMATION, web3j
+                deposits::logNftDepositEventFlowable, requiredBlockConfirmation, web3j
             )
             blockConfirmationRequiredEvents.eventFlowable(startBlockNumber).subscribe {
                 consumer.accept(it)
