@@ -12,6 +12,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
+import java.math.BigInteger;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -179,7 +180,7 @@ public class DefaultEthereumInteractionTest {
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
-        });
+        }, BigInteger.valueOf(8281659), 3);
         Thread.sleep(Duration.ofSeconds(600).toMillis());
         disposable.dispose();
     }
