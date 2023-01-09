@@ -1,9 +1,14 @@
 package com.reddio.api.v1;
 
+import com.reddio.abi.Deposits;
+import com.reddio.abi.Withdrawals;
 import com.reddio.gas.GasOption;
+import io.reactivex.disposables.Disposable;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
+import java.math.BigInteger;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public interface EthereumInteraction {
 
@@ -46,5 +51,13 @@ public interface EthereumInteraction {
             String tokenId,
             GasOption gasOption
     );
+
+    Disposable watchDeposit(Consumer<Deposits.LogDepositEventResponse> consumer);
+
+    Disposable watchDeposit(Consumer<Deposits.LogDepositEventResponse> consumer, BigInteger startBlockNumber);
+
+    Disposable watchNftDeposit(Consumer<Deposits.LogNftDepositEventResponse> consumer);
+
+    Disposable watchNftDeposit(Consumer<Deposits.LogNftDepositEventResponse> consumer, BigInteger startBlockNumber);
 
 }
