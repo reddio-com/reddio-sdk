@@ -18,7 +18,7 @@ class BlockConfirmationRequiredEvents<T>(
 
     suspend fun eventFlowable(startBlockNumber: BigInteger): Flowable<T> {
         var prevBlockNumber = startBlockNumber
-        blockNumberFlowable().flatMap<T> { ethBlockNumber ->
+        return blockNumberFlowable().flatMap<T> { ethBlockNumber ->
             val end = ethBlockNumber.blockNumber.subtract(BigInteger.valueOf(requiredBlockConfirmation))
             if (prevBlockNumber.toLong() > end.toLong()) {
                 Flowable.empty<T>()
@@ -51,7 +51,6 @@ class BlockConfirmationRequiredEvents<T>(
             prevBlockNumber = end
             result
         }
-        TODO("Not yet implemented")
     }
 
     suspend fun blockNumberFlowable(): Flowable<EthBlockNumber> {
