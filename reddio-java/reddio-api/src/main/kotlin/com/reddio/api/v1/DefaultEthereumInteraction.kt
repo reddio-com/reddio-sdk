@@ -9,6 +9,8 @@ import com.reddio.api.v1.rest.ReddioRestClient
 import com.reddio.contract.EthNextEventSubscriber
 import com.reddio.gas.GasOption
 import com.reddio.gas.StaticGasLimitSuggestionPriceGasProvider
+import io.reactivex.Flowable
+import io.reactivex.disposables.Disposable
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
 import org.web3j.contracts.eip20.generated.ERC20
@@ -16,12 +18,14 @@ import org.web3j.contracts.eip721.generated.ERC721
 import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.Web3jService
+import org.web3j.protocol.core.DefaultBlockParameter
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.protocol.http.HttpService
 import org.web3j.tx.gas.ContractGasProvider
 import org.web3j.utils.Numeric
 import java.math.BigInteger
 import java.util.concurrent.CompletableFuture
+import java.util.function.Consumer
 
 class DefaultEthereumInteraction(
     private val restClient: ReddioRestClient,
@@ -312,6 +316,44 @@ class DefaultEthereumInteraction(
             return starexContractsResponseResponseWrapper.data.mainnet
         }
         return starexContractsResponseResponseWrapper.data.testnet
+    }
+
+    override fun watchDeposit(consumer: Consumer<Deposits.LogDepositEventResponse>): Disposable {
+        val startBlockNumber = this.web3j.ethBlockNumber().send().blockNumber
+        return watchDeposit(consumer, startBlockNumber)
+    }
+
+    override fun watchDeposit(
+        consumer: Consumer<Deposits.LogDepositEventResponse>,
+        startBlockNumber: BigInteger
+    ): Disposable {
+        return runBlocking {
+            val deposits = Deposits.load(reddioStarexContractAddress(), web3j, credentials, null)
+            val flowable =
+                deposits.logDepositEventFlowable(DefaultBlockParameter.valueOf(startBlockNumber), null)
+            flowable.subscribe {
+                consumer.accept(it)
+            }
+        }
+    }
+
+    override fun watchNftDeposit(consumer: Consumer<Deposits.LogNftDepositEventResponse>): Disposable {
+        val startBlockNumber = this.web3j.ethBlockNumber().send().blockNumber
+        return watchNftDeposit(consumer, startBlockNumber)
+    }
+
+    override fun watchNftDeposit(
+        consumer: Consumer<Deposits.LogNftDepositEventResponse>,
+        startBlockNumber: BigInteger
+    ): Disposable {
+        return runBlocking {
+            val deposits = Deposits.load(reddioStarexContractAddress(), web3j, credentials, null)
+            val flowable =
+                deposits.logNftDepositEventFlowable(DefaultBlockParameter.valueOf(startBlockNumber), null)
+            flowable.subscribe {
+                consumer.accept(it)
+            }
+        }
     }
 
     companion object {

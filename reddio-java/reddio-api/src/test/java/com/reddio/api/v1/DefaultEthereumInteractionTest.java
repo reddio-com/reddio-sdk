@@ -7,10 +7,12 @@ import com.reddio.api.v1.rest.GetContractInfoMessage;
 import com.reddio.api.v1.rest.GetContractInfoResponse;
 import com.reddio.api.v1.rest.ResponseWrapper;
 import com.reddio.gas.GasOption;
+import io.reactivex.disposables.Disposable;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
+import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -157,5 +159,51 @@ public class DefaultEthereumInteractionTest {
                 "3",
                 GasOption.Market).get();
         System.out.println(txn.getTransactionHash());
+    }
+
+    @Test
+    @Ignore("not reproducible test")
+    public void testWatchDeposit() throws InterruptedException {
+        ObjectMapper om = new ObjectMapper();
+        DefaultReddioRestClient restClient = DefaultReddioRestClient.testnet();
+        DefaultEthereumInteraction ethereumInteraction = DefaultEthereumInteraction.build(
+                restClient,
+                DefaultEthereumInteraction.GOERIL_ID,
+                "https://eth-goerli.g.alchemy.com/v2/yyabgQ1GlM0xxqDC4ZBbR1lBcBKQmnxT",
+                "0x0"
+        );
+        Disposable disposable = ethereumInteraction.watchDeposit((it) -> {
+            try {
+                String asJson = om.writeValueAsString(it);
+                System.out.println(asJson);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        Thread.sleep(Duration.ofSeconds(600).toMillis());
+        disposable.dispose();
+    }
+
+    @Test
+    @Ignore("not reproducible test")
+    public void testWatchNftDeposit() throws InterruptedException {
+        ObjectMapper om = new ObjectMapper();
+        DefaultReddioRestClient restClient = DefaultReddioRestClient.testnet();
+        DefaultEthereumInteraction ethereumInteraction = DefaultEthereumInteraction.build(
+                restClient,
+                DefaultEthereumInteraction.GOERIL_ID,
+                "https://eth-goerli.g.alchemy.com/v2/yyabgQ1GlM0xxqDC4ZBbR1lBcBKQmnxT",
+                "0x0"
+        );
+        Disposable disposable = ethereumInteraction.watchNftDeposit((it) -> {
+            try {
+                String asJson = om.writeValueAsString(it);
+                System.out.println(asJson);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        Thread.sleep(Duration.ofSeconds(600).toMillis());
+        disposable.dispose();
     }
 }
