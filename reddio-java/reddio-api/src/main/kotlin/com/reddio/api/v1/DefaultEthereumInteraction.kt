@@ -306,7 +306,9 @@ class DefaultEthereumInteraction(
     }
 
     override fun watchDeposit(consumer: Consumer<Deposits.LogDepositEventResponse>): Disposable {
-        val startBlockNumber = this.web3j.ethBlockNumber().send().blockNumber
+        val currentBlockNumber = this.web3j.ethBlockNumber().send().blockNumber
+        val startBlockNumber =
+            currentBlockNumber.subtract(BigInteger.valueOf(BlockConfirmationRequiredEvents.DEFAULT_BLOCK_CONFIRMATION))
         return watchDeposit(consumer, startBlockNumber)
     }
 
@@ -333,7 +335,9 @@ class DefaultEthereumInteraction(
     }
 
     override fun watchNftDeposit(consumer: Consumer<Deposits.LogNftDepositEventResponse>): Disposable {
-        val startBlockNumber = this.web3j.ethBlockNumber().send().blockNumber
+        val currentBlockNumber = this.web3j.ethBlockNumber().send().blockNumber
+        val startBlockNumber =
+            currentBlockNumber.subtract(BigInteger.valueOf(BlockConfirmationRequiredEvents.DEFAULT_BLOCK_CONFIRMATION))
         return watchNftDeposit(consumer, startBlockNumber)
     }
 
