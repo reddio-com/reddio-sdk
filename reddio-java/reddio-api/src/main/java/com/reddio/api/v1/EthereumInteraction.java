@@ -56,8 +56,12 @@ public interface EthereumInteraction {
 
     Disposable watchDeposit(Consumer<Deposits.LogDepositEventResponse> consumer, BigInteger startBlockNumber);
 
+    Disposable watchDeposit(Consumer<Deposits.LogDepositEventResponse> consumer, BigInteger startBlockNumber, Long requiredBlockConfirmation);
+
     Disposable watchNftDeposit(Consumer<Deposits.LogNftDepositEventResponse> consumer);
 
     Disposable watchNftDeposit(Consumer<Deposits.LogNftDepositEventResponse> consumer, BigInteger startBlockNumber);
+
+    Disposable watchNftDeposit(Consumer<Deposits.LogNftDepositEventResponse> consumer, BigInteger startBlockNumber, Long requiredBlockConfirmation);
 
 }

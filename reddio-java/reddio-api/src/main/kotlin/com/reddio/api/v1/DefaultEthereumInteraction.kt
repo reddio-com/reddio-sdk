@@ -9,7 +9,6 @@ import com.reddio.api.v1.rest.ReddioRestClient
 import com.reddio.contract.EthNextEventSubscriber
 import com.reddio.gas.GasOption
 import com.reddio.gas.StaticGasLimitSuggestionPriceGasProvider
-import io.reactivex.Flowable
 import io.reactivex.disposables.Disposable
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
@@ -18,7 +17,6 @@ import org.web3j.contracts.eip721.generated.ERC721
 import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.Web3jService
-import org.web3j.protocol.core.DefaultBlockParameter
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.protocol.http.HttpService
 import org.web3j.tx.gas.ContractGasProvider
@@ -143,10 +141,7 @@ class DefaultEthereumInteraction(
     }
 
     internal suspend fun asyncDepositERC20(
-        tokenAddress: String,
-        starkKey: String,
-        amount: String,
-        gasProvider: ContractGasProvider
+        tokenAddress: String, starkKey: String, amount: String, gasProvider: ContractGasProvider
     ): LogDeposit {
         val (assetId, assetType) = getAssetTypeAndId("ERC20", tokenAddress, "")
 
@@ -212,9 +207,7 @@ class DefaultEthereumInteraction(
 
 
     override fun withdrawETHOrERC20(
-        ethAddress: String,
-        assetType: String,
-        gasOption: GasOption
+        ethAddress: String, assetType: String, gasOption: GasOption
     ): CompletableFuture<TransactionReceipt> {
         val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
             this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
@@ -227,10 +220,7 @@ class DefaultEthereumInteraction(
     }
 
     override fun withdrawalERC721(
-        ethAddress: String,
-        assetType: String,
-        tokenId: String,
-        gasOption: GasOption
+        ethAddress: String, assetType: String, tokenId: String, gasOption: GasOption
     ): CompletableFuture<TransactionReceipt> {
         val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
             this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
@@ -243,10 +233,7 @@ class DefaultEthereumInteraction(
     }
 
     override fun withdrawalERC721M(
-        ethAddress: String,
-        assetType: String,
-        tokenId: String,
-        gasOption: GasOption
+        ethAddress: String, assetType: String, tokenId: String, gasOption: GasOption
     ): CompletableFuture<TransactionReceipt> {
         val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
             this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
@@ -324,14 +311,22 @@ class DefaultEthereumInteraction(
     }
 
     override fun watchDeposit(
+        consumer: Consumer<Deposits.LogDepositEventResponse>, startBlockNumber: BigInteger
+    ): Disposable {
+        return watchDeposit(consumer, startBlockNumber, BlockConfirmationRequiredEvents.DEFAULT_BLOCK_CONFIRMATION)
+    }
+
+    override fun watchDeposit(
         consumer: Consumer<Deposits.LogDepositEventResponse>,
-        startBlockNumber: BigInteger
+        startBlockNumber: BigInteger,
+        requiredBlockConfirmation: Long
     ): Disposable {
         return runBlocking {
             val deposits = Deposits.load(reddioStarexContractAddress(), web3j, credentials, null)
-            val flowable =
-                deposits.logDepositEventFlowable(DefaultBlockParameter.valueOf(startBlockNumber), null)
-            flowable.subscribe {
+            val blockConfirmationRequiredEvents = BlockConfirmationRequiredEvents(
+                deposits::logDepositEventFlowable, requiredBlockConfirmation, web3j
+            )
+            blockConfirmationRequiredEvents.eventFlowable(startBlockNumber).subscribe {
                 consumer.accept(it)
             }
         }
@@ -343,14 +338,22 @@ class DefaultEthereumInteraction(
     }
 
     override fun watchNftDeposit(
+        consumer: Consumer<Deposits.LogNftDepositEventResponse>, startBlockNumber: BigInteger
+    ): Disposable {
+        return watchNftDeposit(consumer, startBlockNumber, BlockConfirmationRequiredEvents.DEFAULT_BLOCK_CONFIRMATION)
+    }
+
+    override fun watchNftDeposit(
         consumer: Consumer<Deposits.LogNftDepositEventResponse>,
-        startBlockNumber: BigInteger
+        startBlockNumber: BigInteger,
+        requiredBlockConfirmation: Long
     ): Disposable {
         return runBlocking {
             val deposits = Deposits.load(reddioStarexContractAddress(), web3j, credentials, null)
-            val flowable =
-                deposits.logNftDepositEventFlowable(DefaultBlockParameter.valueOf(startBlockNumber), null)
-            flowable.subscribe {
+            val blockConfirmationRequiredEvents = BlockConfirmationRequiredEvents(
+                deposits::logNftDepositEventFlowable, requiredBlockConfirmation, web3j
+            )
+            blockConfirmationRequiredEvents.eventFlowable(startBlockNumber).subscribe {
                 consumer.accept(it)
             }
         }
@@ -378,10 +381,7 @@ class DefaultEthereumInteraction(
             credentials: Credentials,
         ): DefaultEthereumInteraction {
             return DefaultEthereumInteraction(
-                restClient,
-                chainId,
-                HttpService(ethJSONRpcHTTPEndpoint),
-                credentials
+                restClient, chainId, HttpService(ethJSONRpcHTTPEndpoint), credentials
             )
         }
 
@@ -393,10 +393,7 @@ class DefaultEthereumInteraction(
             ethPrivateKey: String,
         ): DefaultEthereumInteraction {
             return DefaultEthereumInteraction(
-                restClient,
-                chainId,
-                HttpService(ethJSONRpcHTTPEndpoint),
-                Credentials.create(ethPrivateKey)
+                restClient, chainId, HttpService(ethJSONRpcHTTPEndpoint), Credentials.create(ethPrivateKey)
             )
         }
 
