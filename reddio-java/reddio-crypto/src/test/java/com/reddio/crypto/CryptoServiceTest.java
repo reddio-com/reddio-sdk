@@ -72,4 +72,11 @@ public class CryptoServiceTest {
         System.out.println("privateKey: " + privateKey.toString(16));
         System.out.println("publicKey: " + publicKey.toString(16));
     }
+
+    @Test
+    public void testGetPrivateKeyFromEthSignature() {
+        BigInteger ethSignature = new BigInteger("21fbf0696d5e0aa2ef41a2b4ffb623bcaf070461d61cf7251c74161f82fec3a4370854bc0a34b3ab487c1bc021cd318c734c51ae29374f2beb0e6f2dd49b4bf41c", 16);
+        BigInteger starkPrivateKey = CryptoService.getPrivateKeyFromEthSignature(ethSignature);
+        Assert.assertEquals("766f11e90cd7c7b43085b56da35c781f8c067ac0d578eabdceebc4886435bda", starkPrivateKey.toString(16));
+    }
 }
