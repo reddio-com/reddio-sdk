@@ -173,7 +173,7 @@ public class DefaultReddioClientTest {
         DefaultReddioClient client = DefaultReddioClient.testnet();
         DefaultReddioRestClient restClient = DefaultReddioRestClient.testnet();
         ReddioClient.WithStarkExSigner clientWithSigner = client.withStarkExSigner("5f6fbfbcd995e20f94a768193c42060f7e626e6ae8042cacc15e82031087a55");
-        CompletableFuture<ResponseWrapper<OrderResponse>> future = clientWithSigner.buyNFTWithPayInfo(
+        CompletableFuture<ResponseWrapper<OrderResponse>> future = clientWithSigner.buyNFTWithPayInfoBaseTokenRUSD(
                 "0x13a69a1b7a5f033ee2358ebb8c28fd5a6b86d42e30a61845d655d3c7be4ad0e",
                 "ERC721",
                 REDDIO721_CONTRACT_ADDRESS,

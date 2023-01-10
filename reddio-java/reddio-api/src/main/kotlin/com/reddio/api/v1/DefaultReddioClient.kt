@@ -294,6 +294,8 @@ class DefaultReddioClient(
             marketplaceUuid: String,
             payInfo: Payment.PayInfo,
             signPayInfoPrivateKey: String,
+            baseTokenType: String,
+            baseTokenAddress: String
         ): CompletableFuture<ResponseWrapper<OrderResponse>> {
 
             return CompletableFuture.supplyAsync {
@@ -303,8 +305,8 @@ class DefaultReddioClient(
                             starkKey,
                             String.format(
                                 "%s:%s",
-                                ReddioClient.TOKEN_TYPE_ERC20,
-                                ReddioClient.RUSD_TESTNET_CONTRACT_ADDRESS
+                                baseTokenType,
+                                baseTokenAddress
                             ),
                             String.format("%s:%s:%s", contractType, contractAddress, tokenId)
                         )
@@ -315,8 +317,8 @@ class DefaultReddioClient(
                     val quoteToken = orderInfoResponse.data.assetIds[1]
                     val quantizedPrice = quantizedHelper.quantizedAmount(
                         price,
-                        ReddioClient.TOKEN_TYPE_ERC20,
-                        ReddioClient.RUSD_TESTNET_CONTRACT_ADDRESS
+                        baseTokenType,
+                        baseTokenAddress
                     )
                     val formatPrice = quantizedPrice.toString()
                     val amountBuy = (quantizedPrice.toDouble() * amount.toDouble()).toLong().toString()
@@ -400,7 +402,7 @@ class DefaultReddioClient(
             )
         }
 
-        override fun buyNFTWithPayInfo(
+        override fun buyNFTWithPayInfoBaseTokenRUSD(
             starkKey: String,
             contractType: String,
             contractAddress: String,
@@ -421,7 +423,36 @@ class DefaultReddioClient(
                 OrderType.BUY,
                 marketplaceUuid,
                 payInfo,
-                signPayInfoPrivateKey
+                signPayInfoPrivateKey,
+                ReddioClient.TOKEN_TYPE_ERC20,
+                ReddioClient.RUSD_TESTNET_CONTRACT_ADDRESS
+            )
+        }
+
+        override fun buyNFTWithPayInfoBaseTokenETH(
+            starkKey: String,
+            contractType: String,
+            contractAddress: String,
+            tokenId: String,
+            price: String,
+            amount: String,
+            marketplaceUuid: String,
+            payInfo: Payment.PayInfo,
+            signPayInfoPrivateKey: String
+        ): CompletableFuture<ResponseWrapper<OrderResponse>> {
+            return orderWithPayInfo(
+                starkKey,
+                contractType,
+                contractAddress,
+                tokenId,
+                price,
+                amount,
+                OrderType.BUY,
+                marketplaceUuid,
+                payInfo,
+                signPayInfoPrivateKey,
+                ReddioClient.TOKEN_TYPE_ETH,
+                "ETH",
             )
         }
 
