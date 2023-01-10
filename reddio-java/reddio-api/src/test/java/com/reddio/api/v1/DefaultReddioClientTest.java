@@ -169,7 +169,7 @@ public class DefaultReddioClientTest {
 
     @Test
     @Ignore("not reproducible test")
-    public void testBuyOrderWithPayInfo() throws ExecutionException, InterruptedException, JsonProcessingException {
+    public void testBuyOrderWithPayInfoBaseTokenRUSD() throws ExecutionException, InterruptedException, JsonProcessingException {
         DefaultReddioClient client = DefaultReddioClient.testnet();
         DefaultReddioRestClient restClient = DefaultReddioRestClient.testnet();
         ReddioClient.WithStarkExSigner clientWithSigner = client.withStarkExSigner("5f6fbfbcd995e20f94a768193c42060f7e626e6ae8042cacc15e82031087a55");
@@ -182,6 +182,28 @@ public class DefaultReddioClientTest {
                 "1",
                 "",
                 Payment.PayInfo.of("123456789"),
+                "0x1a35ffa8bafc5c6656271bcae1f847bb6201705d7e2895c413cfb7d757a3111"
+        );
+        ResponseWrapper<OrderResponse> result = future.get();
+        System.out.println(new ObjectMapper().writeValueAsString(result));
+        Assert.assertEquals("OK", result.status);
+    }
+
+    @Test
+    @Ignore("not reproducible test")
+    public void testBuyOrderWithPayInfoBaseTokenETH() throws ExecutionException, InterruptedException, JsonProcessingException {
+        DefaultReddioClient client = DefaultReddioClient.testnet();
+        DefaultReddioRestClient restClient = DefaultReddioRestClient.testnet();
+        ReddioClient.WithStarkExSigner clientWithSigner = client.withStarkExSigner("0x4d55b547af138c5b6200495d86ab6aed3e06c25fdd75b4b6a00e48515df2b3d");
+        CompletableFuture<ResponseWrapper<OrderResponse>> future = clientWithSigner.buyNFTWithPayInfoBaseTokenETH(
+                "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
+                "ERC721",
+                REDDIO721_CONTRACT_ADDRESS,
+                "34",
+                "0.001",
+                "1",
+                "",
+                Payment.PayInfo.of("13579"),
                 "0x1a35ffa8bafc5c6656271bcae1f847bb6201705d7e2895c413cfb7d757a3111"
         );
         ResponseWrapper<OrderResponse> result = future.get();
