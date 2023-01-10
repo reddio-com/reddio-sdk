@@ -1,5 +1,7 @@
 package com.reddio.api.v1
 
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.reddio.abi.Deposits
 import com.reddio.abi.Withdrawals
 import com.reddio.api.v1.rest.GetAssetIdMessage
@@ -7,6 +9,7 @@ import com.reddio.api.v1.rest.GetContractInfoMessage
 import com.reddio.api.v1.rest.GetVaultIdMessage
 import com.reddio.api.v1.rest.ReddioRestClient
 import com.reddio.contract.EthNextEventSubscriber
+import com.reddio.crypto.CryptoService
 import com.reddio.gas.GasOption
 import com.reddio.gas.StaticGasLimitSuggestionPriceGasProvider
 import io.reactivex.disposables.Disposable
@@ -14,7 +17,7 @@ import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
 import org.web3j.contracts.eip20.generated.ERC20
 import org.web3j.contracts.eip721.generated.ERC721
-import org.web3j.crypto.Credentials
+import org.web3j.crypto.*
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.Web3jService
 import org.web3j.protocol.core.methods.response.TransactionReceipt
@@ -22,13 +25,15 @@ import org.web3j.protocol.http.HttpService
 import org.web3j.tx.gas.ContractGasProvider
 import org.web3j.utils.Numeric
 import java.math.BigInteger
+import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.function.Consumer
+
 
 class DefaultEthereumInteraction(
     private val restClient: ReddioRestClient,
     private val chainId: Long,
-    web3jService: Web3jService,
+    private val web3jService: Web3jService,
     private val credentials: Credentials,
 ) : EthereumInteraction {
 
@@ -363,7 +368,93 @@ class DefaultEthereumInteraction(
         }
     }
 
+    override fun getStarkPrivateKey(): BigInteger {
+        val signature = this.ethSignReddioTypedPayload(SIGN_MESSAGE)
+        return CryptoService.getPrivateKeyFromEthSignature(
+            BigInteger(
+                signature.replace("0x", "").lowercase(
+                    Locale.getDefault()
+                ), 16
+            )
+        )
+    }
+
+    private fun ethSignReddioTypedPayload(message: String): String {
+        val hash = StructuredDataEncoder(
+            objectMapper.writeValueAsString(
+                ReddioSignPayload.create(message, this.chainId)
+            )
+        ).hashStructuredData()
+        val signature = Sign.signMessage(hash, credentials.ecKeyPair, false)
+        val signatureBytes = ByteArray(65)
+        System.arraycopy(signature.r, 0, signatureBytes, 0, 32)
+        System.arraycopy(signature.s, 0, signatureBytes, 32, 32)
+        System.arraycopy(signature.v, 0, signatureBytes, 64, 1)
+        return Numeric.toHexString(signatureBytes)
+    }
+
+
     companion object {
+        private const val SIGN_MESSAGE = "Generate layer 2 key"
+        private val objectMapper = ObjectMapper()
+
+        class ReddioSignPayload {
+            private constructor(
+                domain: ReddioSignPayloadDomain,
+                message: ReddioSignPayloadMessage,
+                primaryType: String,
+                types: Map<String, List<ReddioSignPayloadTypesEntry>>
+            ) {
+                this.domain = domain
+                this.message = message
+                this.primaryType = primaryType
+                this.types = types
+            }
+
+            @JsonProperty("domain")
+            val domain: ReddioSignPayloadDomain;
+
+            @JsonProperty("message")
+            val message: ReddioSignPayloadMessage;
+
+            @JsonProperty("primaryType")
+            val primaryType: String;
+
+            @JsonProperty("types")
+            val types: Map<String, List<ReddioSignPayloadTypesEntry>>
+
+            companion object {
+                fun create(
+                    message: String, chainId: Long
+                ): ReddioSignPayload {
+                    return ReddioSignPayload(
+                        ReddioSignPayloadDomain(chainId), ReddioSignPayloadMessage(message), "reddio", mapOf(
+                            "EIP712Domain" to listOf(
+                                ReddioSignPayloadTypesEntry("chainId", "uint256")
+                            ), "reddio" to listOf(
+                                ReddioSignPayloadTypesEntry("contents", "string")
+                            )
+                        )
+                    )
+                }
+            }
+        }
+
+        class ReddioSignPayloadDomain(
+            @JsonProperty("chainId") val chainId: Long
+        )
+
+        class ReddioSignPayloadMessage(
+            @JsonProperty("contents") val contents: String
+        )
+
+        class ReddioSignPayloadTypesEntry(
+            @JsonProperty("name") val name: String,
+
+            @JsonProperty("type") val type: String
+        )
+
+
         const val MAINNET_ID = 1L;
         const val GOERIL_ID = 5L;
 

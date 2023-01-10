@@ -26,6 +26,8 @@ public class CryptoService {
 
         int get_cancel_order_msg_hash(CancelOrderMsg msg, ByteBuffer ret);
 
+        int get_private_key_from_eth_signature(String ethSignature, ByteBuffer privateKeyString);
+
         int get_random_private_key(ByteBuffer ret);
 
         int get_public_key(String privateKey, ByteBuffer ret);
@@ -129,7 +131,7 @@ public class CryptoService {
 
     public static BigInteger getCancelOrderMsgHash(
             long orderId
-    ){
+    ) {
         CancelOrderMsg msg = new CancelOrderMsg();
         msg.order_id = String.valueOf(orderId);
         ByteBuffer ret = ByteBuffer.allocateDirect(Reddio.STRING_MAX_SIZE);
@@ -143,6 +145,15 @@ public class CryptoService {
     public static BigInteger getPublicKey(BigInteger privateKey) {
         ByteBuffer ret = ByteBuffer.allocateDirect(Reddio.STRING_MAX_SIZE);
         int errno = Reddio.instance.get_public_key(privateKey.toString(16), ret);
+        if (errno != 0) {
+            throw new ReddioCryptoException(Reddio.instance.explain(errno));
+        }
+        return new BigInteger(StandardCharsets.UTF_8.decode(ret).toString().trim(), 16);
+    }
+
+    public static BigInteger getPrivateKeyFromEthSignature(BigInteger ethSignature) {
+        ByteBuffer ret = ByteBuffer.allocateDirect(Reddio.STRING_MAX_SIZE);
+        int errno = Reddio.instance.get_private_key_from_eth_signature(ethSignature.toString(16), ret);
         if (errno != 0) {
             throw new ReddioCryptoException(Reddio.instance.explain(errno));
         }

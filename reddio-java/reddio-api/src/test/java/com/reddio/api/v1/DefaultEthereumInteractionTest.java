@@ -6,6 +6,7 @@ import com.reddio.api.v1.rest.DefaultReddioRestClient;
 import com.reddio.api.v1.rest.GetContractInfoMessage;
 import com.reddio.api.v1.rest.GetContractInfoResponse;
 import com.reddio.api.v1.rest.ResponseWrapper;
+import com.reddio.crypto.CryptoService;
 import com.reddio.gas.GasOption;
 import io.reactivex.disposables.Disposable;
 import org.junit.Assert;
@@ -120,7 +121,7 @@ public class DefaultEthereumInteractionTest {
                 System.out.println("currentBlockNumber: " + currentBlockNumber.longValue());
                 Assert.assertTrue(currentBlockNumber.subtract(it.log.getBlockNumber()).longValue() >= requiredBlockConfirmations);
                 disposableReference.get().dispose();
-                synchronized(disposableReference) {
+                synchronized (disposableReference) {
                     disposableReference.notify();
                 }
             } catch (IOException e) {
@@ -128,7 +129,7 @@ public class DefaultEthereumInteractionTest {
             }
         }, startBlockNumber, requiredBlockConfirmations);
         disposableReference.set(disposable);
-        synchronized(disposableReference) {
+        synchronized (disposableReference) {
             disposableReference.wait();
         }
     }
@@ -149,5 +150,14 @@ public class DefaultEthereumInteractionTest {
         });
         Thread.sleep(Duration.ofSeconds(600).toMillis());
         disposable.dispose();
+    }
+
+    @Test
+    public void testEthSignAndGetStarkKey() {
+        DefaultReddioRestClient restClient = DefaultReddioRestClient.testnet();
+        DefaultEthereumInteraction ethereumInteraction = DefaultEthereumInteraction.build(restClient, DefaultEthereumInteraction.GOERIL_ID, "https://eth-goerli.g.alchemy.com/v2/yyabgQ1GlM0xxqDC4ZBbR1lBcBKQmnxT",
+                "552ad9b756acfeb2e32cfd3354b653b1f95177b851a44155d6178d244b80e08b");
+        BigInteger result = ethereumInteraction.getStarkPrivateKey();
+        Assert.assertEquals("5f6fbfbcd995e20f94a768193c42060f7e626e6ae8042cacc15e82031087a55", result.toString(16));
     }
 }
