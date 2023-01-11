@@ -115,11 +115,12 @@ public class DefaultEthereumInteractionTest {
 
         Disposable disposable = ethereumInteraction.watchDeposit((it) -> {
             try {
-                String asJson = om.writeValueAsString(it);
+                String asJson = om.writeValueAsString(it.component1());
                 System.out.println(asJson);
+                System.out.println(it.component2().toString());
                 BigInteger currentBlockNumber = web3j.ethBlockNumber().send().getBlockNumber();
                 System.out.println("currentBlockNumber: " + currentBlockNumber.longValue());
-                Assert.assertTrue(currentBlockNumber.subtract(it.log.getBlockNumber()).longValue() >= requiredBlockConfirmations);
+                Assert.assertTrue(currentBlockNumber.subtract(it.component1().log.getBlockNumber()).longValue() >= requiredBlockConfirmations);
                 disposableReference.get().dispose();
                 synchronized (disposableReference) {
                     disposableReference.notify();

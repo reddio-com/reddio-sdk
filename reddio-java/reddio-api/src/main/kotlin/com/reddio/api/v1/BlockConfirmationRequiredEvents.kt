@@ -4,7 +4,11 @@ import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameter
+import org.web3j.protocol.core.Response
+import org.web3j.protocol.core.methods.response.BaseEventResponse
+import org.web3j.protocol.core.methods.response.EthBlock
 import org.web3j.protocol.core.methods.response.EthBlockNumber
+import org.web3j.tuples.generated.Tuple2
 import java.math.BigInteger
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
@@ -14,8 +18,7 @@ class BlockConfirmationRequiredEvents<T>(
     private val flowableProvider: (start: DefaultBlockParameter, end: DefaultBlockParameter) -> Flowable<T>,
     private val requiredBlockConfirmation: Long,
     private val web3j: Web3j
-) {
-
+) where T : BaseEventResponse {
     suspend fun eventFlowable(startBlockNumber: BigInteger): Flowable<T> {
         var prevBlockNumber = startBlockNumber
         return blockNumberFlowable().flatMap<T> { ethBlockNumber ->
@@ -50,6 +53,14 @@ class BlockConfirmationRequiredEvents<T>(
             )
             prevBlockNumber = end
             result
+        }
+    }
+
+    suspend fun eventFlowableWithEthBlock(startBlockNumber: BigInteger): Flowable<Tuple2<T, EthBlock>> {
+        return this.eventFlowable(startBlockNumber).flatMap { response ->
+            val blockNumber = response.log.blockNumber!!
+            web3j.ethGetBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), false)
+                .flowable().map { Tuple2(response, it) }
         }
     }
 

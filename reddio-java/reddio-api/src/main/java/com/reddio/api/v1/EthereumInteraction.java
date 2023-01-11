@@ -4,7 +4,9 @@ import com.reddio.abi.Deposits;
 import com.reddio.abi.Withdrawals;
 import com.reddio.gas.GasOption;
 import io.reactivex.disposables.Disposable;
+import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.tuples.generated.Tuple2;
 
 import java.math.BigInteger;
 import java.util.concurrent.CompletableFuture;
@@ -52,17 +54,17 @@ public interface EthereumInteraction {
             GasOption gasOption
     );
 
-    Disposable watchDeposit(Consumer<Deposits.LogDepositEventResponse> consumer);
+    Disposable watchDeposit(Consumer<Tuple2<Deposits.LogDepositEventResponse, EthBlock>> consumer);
 
-    Disposable watchDeposit(Consumer<Deposits.LogDepositEventResponse> consumer, BigInteger startBlockNumber);
+    Disposable watchDeposit(Consumer<Tuple2<Deposits.LogDepositEventResponse, EthBlock>> consumer, BigInteger startBlockNumber);
 
-    Disposable watchDeposit(Consumer<Deposits.LogDepositEventResponse> consumer, BigInteger startBlockNumber, Long requiredBlockConfirmation);
+    Disposable watchDeposit(Consumer<Tuple2<Deposits.LogDepositEventResponse, EthBlock>> consumer, BigInteger startBlockNumber, Long requiredBlockConfirmation);
 
-    Disposable watchNftDeposit(Consumer<Deposits.LogNftDepositEventResponse> consumer);
+    Disposable watchNftDeposit(Consumer<Tuple2<Deposits.LogNftDepositEventResponse, EthBlock>> consumer);
 
-    Disposable watchNftDeposit(Consumer<Deposits.LogNftDepositEventResponse> consumer, BigInteger startBlockNumber);
+    Disposable watchNftDeposit(Consumer<Tuple2<Deposits.LogNftDepositEventResponse, EthBlock>> consumer, BigInteger startBlockNumber);
 
-    Disposable watchNftDeposit(Consumer<Deposits.LogNftDepositEventResponse> consumer, BigInteger startBlockNumber, Long requiredBlockConfirmation);
+    Disposable watchNftDeposit(Consumer<Tuple2<Deposits.LogNftDepositEventResponse, EthBlock>> consumer, BigInteger startBlockNumber, Long requiredBlockConfirmation);
 
     BigInteger getStarkPrivateKey();
 
