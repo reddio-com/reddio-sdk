@@ -20,8 +20,10 @@ import org.web3j.contracts.eip721.generated.ERC721
 import org.web3j.crypto.*
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.Web3jService
+import org.web3j.protocol.core.methods.response.EthBlock
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.protocol.http.HttpService
+import org.web3j.tuples.generated.Tuple2
 import org.web3j.tx.gas.ContractGasProvider
 import org.web3j.utils.Numeric
 import java.math.BigInteger
@@ -310,7 +312,7 @@ class DefaultEthereumInteraction(
         return starexContractsResponseResponseWrapper.data.testnet
     }
 
-    override fun watchDeposit(consumer: Consumer<Deposits.LogDepositEventResponse>): Disposable {
+    override fun watchDeposit(consumer: Consumer<Tuple2<Deposits.LogDepositEventResponse, EthBlock>>): Disposable {
         val currentBlockNumber = this.web3j.ethBlockNumber().send().blockNumber
         val startBlockNumber =
             currentBlockNumber.subtract(BigInteger.valueOf(BlockConfirmationRequiredEvents.DEFAULT_BLOCK_CONFIRMATION))
@@ -318,13 +320,13 @@ class DefaultEthereumInteraction(
     }
 
     override fun watchDeposit(
-        consumer: Consumer<Deposits.LogDepositEventResponse>, startBlockNumber: BigInteger
+        consumer: Consumer<Tuple2<Deposits.LogDepositEventResponse, EthBlock>>, startBlockNumber: BigInteger
     ): Disposable {
         return watchDeposit(consumer, startBlockNumber, BlockConfirmationRequiredEvents.DEFAULT_BLOCK_CONFIRMATION)
     }
 
     override fun watchDeposit(
-        consumer: Consumer<Deposits.LogDepositEventResponse>,
+        consumer: Consumer<Tuple2<Deposits.LogDepositEventResponse, EthBlock>>,
         startBlockNumber: BigInteger,
         requiredBlockConfirmation: Long
     ): Disposable {
@@ -333,13 +335,15 @@ class DefaultEthereumInteraction(
             val blockConfirmationRequiredEvents = BlockConfirmationRequiredEvents(
                 deposits::logDepositEventFlowable, requiredBlockConfirmation, web3j
             )
-            blockConfirmationRequiredEvents.eventFlowable(startBlockNumber).subscribe {
-                consumer.accept(it)
-            }
+            blockConfirmationRequiredEvents.eventFlowableWithEthBlock(startBlockNumber)
+                .subscribe {
+                    consumer.accept(it)
+                }
         }
     }
 
-    override fun watchNftDeposit(consumer: Consumer<Deposits.LogNftDepositEventResponse>): Disposable {
+
+    override fun watchNftDeposit(consumer: Consumer<Tuple2<Deposits.LogNftDepositEventResponse, EthBlock>>): Disposable {
         val currentBlockNumber = this.web3j.ethBlockNumber().send().blockNumber
         val startBlockNumber =
             currentBlockNumber.subtract(BigInteger.valueOf(BlockConfirmationRequiredEvents.DEFAULT_BLOCK_CONFIRMATION))
@@ -347,13 +351,14 @@ class DefaultEthereumInteraction(
     }
 
     override fun watchNftDeposit(
-        consumer: Consumer<Deposits.LogNftDepositEventResponse>, startBlockNumber: BigInteger
+        consumer: Consumer<Tuple2<Deposits.LogNftDepositEventResponse, EthBlock>>,
+        startBlockNumber: BigInteger
     ): Disposable {
         return watchNftDeposit(consumer, startBlockNumber, BlockConfirmationRequiredEvents.DEFAULT_BLOCK_CONFIRMATION)
     }
 
     override fun watchNftDeposit(
-        consumer: Consumer<Deposits.LogNftDepositEventResponse>,
+        consumer: Consumer<Tuple2<Deposits.LogNftDepositEventResponse, EthBlock>>,
         startBlockNumber: BigInteger,
         requiredBlockConfirmation: Long
     ): Disposable {
@@ -362,9 +367,10 @@ class DefaultEthereumInteraction(
             val blockConfirmationRequiredEvents = BlockConfirmationRequiredEvents(
                 deposits::logNftDepositEventFlowable, requiredBlockConfirmation, web3j
             )
-            blockConfirmationRequiredEvents.eventFlowable(startBlockNumber).subscribe {
-                consumer.accept(it)
-            }
+            blockConfirmationRequiredEvents.eventFlowableWithEthBlock(startBlockNumber)
+                .subscribe {
+                    consumer.accept(it)
+                }
         }
     }
 
