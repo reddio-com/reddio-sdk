@@ -38,12 +38,26 @@ public interface ReddioClient {
                 OrderType orderType,
                 String marketplaceUuid,
                 Payment.PayInfo payInfo,
-                String signPayInfoPrivateKey
+                String signPayInfoPrivateKey,
+                String baseTokenType ,
+                String baseTokenAddress
         );
 
         CompletableFuture<ResponseWrapper<OrderResponse>> orderWithEth(String starkKey, String contractType, String contractAddress, String tokenId, String price, String amount, OrderType orderType);
 
-        CompletableFuture<ResponseWrapper<OrderResponse>> buyNFTWithPayInfo(
+        CompletableFuture<ResponseWrapper<OrderResponse>> buyNFTWithPayInfoBaseTokenRUSD(
+                String starkKey,
+                String contractType,
+                String contractAddress,
+                String tokenId,
+                String price,
+                String amount,
+                String marketplaceUuid,
+                Payment.PayInfo payInfo,
+                String signPayInfoPrivateKey
+        );
+
+        CompletableFuture<ResponseWrapper<OrderResponse>> buyNFTWithPayInfoBaseTokenETH(
                 String starkKey,
                 String contractType,
                 String contractAddress,
