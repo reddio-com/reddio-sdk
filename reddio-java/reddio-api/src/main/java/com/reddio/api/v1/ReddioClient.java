@@ -22,9 +22,9 @@ public interface ReddioClient {
         CompletableFuture<ResponseWrapper<WithdrawalToResponse>> withdrawal(String starkKey, String amount, String contractAddress, String tokenId, String type, String receiver, long expirationTimeStamp);
 
         @Deprecated
-        CompletableFuture<ResponseWrapper<OrderResponse>> order(String starkKey, String price, String amount, String tokenAddress, String tokenId, String marketplaceUuid, String tokenType, OrderType orderType);
+        CompletableFuture<ResponseWrapper<OrderResponse>> order(String starkKey, String price, String amount, String tokenAddress, String tokenId, String marketplaceUuid, String tokenType, OrderBehavior orderType);
 
-        CompletableFuture<ResponseWrapper<OrderResponse>> order(String starkKey, String contractType, String contractAddress, String tokenId, String price, String amount, OrderType orderType, String baseTokenType, String baseTokenContract, String marketplaceUuid);
+        CompletableFuture<ResponseWrapper<OrderResponse>> order(String starkKey, String contractType, String contractAddress, String tokenId, String price, String amount, OrderBehavior orderType, String baseTokenType, String baseTokenContract, String marketplaceUuid);
 
         CompletableFuture<ResponseWrapper<CancelOrderResponse>> cancelOrder(String starkKey, long orderId);
 
@@ -35,7 +35,7 @@ public interface ReddioClient {
                 String tokenId,
                 String price,
                 String amount,
-                OrderType orderType,
+                OrderBehavior orderType,
                 String marketplaceUuid,
                 Payment.PayInfo payInfo,
                 String signPayInfoPrivateKey,
@@ -43,7 +43,7 @@ public interface ReddioClient {
                 String baseTokenAddress
         );
 
-        CompletableFuture<ResponseWrapper<OrderResponse>> orderWithEth(String starkKey, String contractType, String contractAddress, String tokenId, String price, String amount, OrderType orderType);
+        CompletableFuture<ResponseWrapper<OrderResponse>> orderWithEth(String starkKey, String contractType, String contractAddress, String tokenId, String price, String amount, OrderBehavior orderType);
 
         CompletableFuture<ResponseWrapper<OrderResponse>> buyNFTWithPayInfoBaseTokenRUSD(
                 String starkKey,
@@ -57,7 +57,7 @@ public interface ReddioClient {
                 String signPayInfoPrivateKey
         );
 
-        CompletableFuture<ResponseWrapper<OrderResponse>> buyNFTWithETHStopLimitTimeInForceIOC(
+        CompletableFuture<ResponseWrapper<OrderResponse>> buyNFTWithETHOrderTypeIOC(
                 String starkKey,
                 String contractType,
                 String contractAddress,

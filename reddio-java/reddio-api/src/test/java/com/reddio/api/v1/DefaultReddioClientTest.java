@@ -109,7 +109,7 @@ public class DefaultReddioClientTest {
                 toSell.getTokenId(),
                 "11ed793a-cc11-4e44-9738-97165c4e14a7",
                 "ERC721",
-                OrderType.SELL
+                OrderBehavior.SELL
         );
         ResponseWrapper<OrderResponse> result = future.get();
         System.out.println(new ObjectMapper().writeValueAsString(result));
@@ -140,7 +140,7 @@ public class DefaultReddioClientTest {
                 toSell.getTokenId(),
                 "0.013",
                 "1",
-                OrderType.SELL,
+                OrderBehavior.SELL,
                 "ERC20",
                 RDD20_CONTRACT_ADDRESS,
                 ""

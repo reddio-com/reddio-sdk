@@ -6,7 +6,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
 import org.web3j.utils.Convert
-import java.nio.charset.CoderMalfunctionError
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.CompletableFuture
@@ -128,7 +127,7 @@ class DefaultReddioClient(
             tokenId: String,
             marketplaceUuid: String,
             tokenType: String,
-            orderType: OrderType
+            orderType: OrderBehavior
         ): CompletableFuture<ResponseWrapper<OrderResponse>> {
             return CompletableFuture.supplyAsync {
                 runBlocking {
@@ -159,7 +158,7 @@ class DefaultReddioClient(
                         orderInfoResponse.data.feeToken,
                         vaultIds[0].toLong()
                     )
-                    if (orderType == OrderType.BUY) {
+                    if (orderType == OrderBehavior.BUY) {
                         orderMessage.direction = OrderMessage.DIRECTION_BID
                         orderMessage.tokenSell = orderInfoResponse.data.baseToken
                         orderMessage.tokenBuy = quoteToken
@@ -201,7 +200,7 @@ class DefaultReddioClient(
             tokenId: String,
             price: String,
             amount: String,
-            orderType: OrderType,
+            orderType: OrderBehavior,
             baseTokenType: String,
             baseTokenContract: String,
             marketplaceUuid: String,
@@ -236,7 +235,7 @@ class DefaultReddioClient(
                         orderInfoResponse.data.feeToken,
                         vaultIds[0].toLong()
                     )
-                    if (orderType == OrderType.BUY) {
+                    if (orderType == OrderBehavior.BUY) {
                         orderMessage.direction = OrderMessage.DIRECTION_BID
                         orderMessage.tokenSell = orderInfoResponse.data.baseToken
                         orderMessage.tokenBuy = quoteToken
@@ -290,7 +289,7 @@ class DefaultReddioClient(
             tokenId: String,
             price: String,
             amount: String,
-            orderType: OrderType,
+            orderType: OrderBehavior,
             marketplaceUuid: String,
             payInfo: Payment.PayInfo,
             signPayInfoPrivateKey: String,
@@ -330,7 +329,7 @@ class DefaultReddioClient(
                         orderInfoResponse.data.feeToken,
                         vaultIds[0].toLong()
                     )
-                    if (orderType == OrderType.BUY) {
+                    if (orderType == OrderBehavior.BUY) {
                         orderMessage.direction = OrderMessage.DIRECTION_BID
                         orderMessage.tokenSell = orderInfoResponse.data.baseToken
                         orderMessage.tokenBuy = quoteToken
@@ -362,7 +361,7 @@ class DefaultReddioClient(
                     )
 
                     // append pay info
-                    if (OrderType.BUY == orderType) {
+                    if (OrderBehavior.BUY == orderType) {
                         orderMessage.setStopLimitTimeInForce(OrderMessage.STOP_LIMIT_TIME_IN_FORCE_IOC)
                         val sign = PaymentSign.sign(
                             signPayInfoPrivateKey, payInfo.orderId, orderInfoResponse.data.nonce
@@ -385,7 +384,7 @@ class DefaultReddioClient(
             tokenId: String,
             price: String,
             amount: String,
-            orderType: OrderType
+            orderType: OrderBehavior
         ): CompletableFuture<ResponseWrapper<OrderResponse>> {
             return order(
                 starkKey, contractType, contractAddress, tokenId, price, amount, orderType, "ETH", "eth", ""
@@ -410,7 +409,7 @@ class DefaultReddioClient(
                 tokenId,
                 price,
                 amount,
-                OrderType.BUY,
+                OrderBehavior.BUY,
                 marketplaceUuid,
                 payInfo,
                 signPayInfoPrivateKey,
@@ -419,7 +418,7 @@ class DefaultReddioClient(
             )
         }
 
-        override fun buyNFTWithETHStopLimitTimeInForceIOC(
+        override fun buyNFTWithETHOrderTypeIOC(
             starkKey: String,
             contractType: String,
             contractAddress: String,
@@ -430,7 +429,7 @@ class DefaultReddioClient(
         ): CompletableFuture<ResponseWrapper<OrderResponse>> {
             val baseTokenType = "ETH";
             val baseTokenContract = "ETH";
-            val orderType = OrderType.BUY;
+            val orderType = OrderBehavior.BUY;
             val stopLimitTimeInForce = OrderMessage.STOP_LIMIT_TIME_IN_FORCE_IOC;
 
             // FIXME: duplicated codes, expect stop limit order
@@ -463,7 +462,7 @@ class DefaultReddioClient(
                         orderInfoResponse.data.feeToken,
                         vaultIds[0].toLong()
                     )
-                    if (orderType == OrderType.BUY) {
+                    if (orderType == OrderBehavior.BUY) {
                         orderMessage.direction = OrderMessage.DIRECTION_BID
                         orderMessage.tokenSell = orderInfoResponse.data.baseToken
                         orderMessage.tokenBuy = quoteToken
@@ -516,7 +515,7 @@ class DefaultReddioClient(
                 tokenId,
                 price,
                 amount,
-                OrderType.SELL,
+                OrderBehavior.SELL,
                 ReddioClient.TOKEN_TYPE_ERC20,
                 ReddioClient.RUSD_TESTNET_CONTRACT_ADDRESS,
                 marketplaceUuid
