@@ -6,6 +6,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
 import org.web3j.utils.Convert
+import java.nio.charset.CoderMalfunctionError
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.CompletableFuture
@@ -203,7 +204,7 @@ class DefaultReddioClient(
             orderType: OrderType,
             baseTokenType: String,
             baseTokenContract: String,
-            marketplaceUuid: String
+            marketplaceUuid: String,
         ): CompletableFuture<ResponseWrapper<OrderResponse>> {
             return CompletableFuture.supplyAsync {
                 runBlocking {
@@ -272,8 +273,7 @@ class DefaultReddioClient(
         }
 
         override fun cancelOrder(
-            starkKey: String,
-            orderId: Long
+            starkKey: String, orderId: Long
         ): CompletableFuture<ResponseWrapper<CancelOrderResponse>> {
             return CompletableFuture.supplyAsync {
                 runBlocking {
@@ -302,13 +302,9 @@ class DefaultReddioClient(
                 runBlocking {
                     val orderInfoResponse = restClient.orderInfo(
                         OrderInfoMessage.of(
-                            starkKey,
-                            String.format(
-                                "%s:%s",
-                                baseTokenType,
-                                baseTokenAddress
-                            ),
-                            String.format("%s:%s:%s", contractType, contractAddress, tokenId)
+                            starkKey, String.format(
+                                "%s:%s", baseTokenType, baseTokenAddress
+                            ), String.format("%s:%s:%s", contractType, contractAddress, tokenId)
                         )
                     ).await()
 
@@ -316,9 +312,7 @@ class DefaultReddioClient(
                     val vaultIds = orderInfoResponse.data.getVaultIds()
                     val quoteToken = orderInfoResponse.data.assetIds[1]
                     val quantizedPrice = quantizedHelper.quantizedAmount(
-                        price,
-                        baseTokenType,
-                        baseTokenAddress
+                        price, baseTokenType, baseTokenAddress
                     )
                     val formatPrice = quantizedPrice.toString()
                     val amountBuy = (quantizedPrice.toDouble() * amount.toDouble()).toLong().toString()
@@ -371,15 +365,11 @@ class DefaultReddioClient(
                     if (OrderType.BUY == orderType) {
                         orderMessage.setStopLimitTimeInForce(OrderMessage.STOP_LIMIT_TIME_IN_FORCE_IOC)
                         val sign = PaymentSign.sign(
-                            signPayInfoPrivateKey,
-                            payInfo.orderId,
-                            orderInfoResponse.data.nonce
+                            signPayInfoPrivateKey, payInfo.orderId, orderInfoResponse.data.nonce
                         )
                         orderMessage.setPayment(
                             OrderMessage.Payment.of(
-                                payInfo,
-                                orderInfoResponse.data.nonce,
-                                sign
+                                payInfo, orderInfoResponse.data.nonce, sign
                             )
                         )
                     }
@@ -429,31 +419,85 @@ class DefaultReddioClient(
             )
         }
 
-        override fun buyNFTWithPayInfoBaseTokenETH(
+        override fun buyNFTWithETHStopLimitTimeInForceIOC(
             starkKey: String,
             contractType: String,
             contractAddress: String,
             tokenId: String,
             price: String,
             amount: String,
-            marketplaceUuid: String,
-            payInfo: Payment.PayInfo,
-            signPayInfoPrivateKey: String
+            marketplaceUuid: String
         ): CompletableFuture<ResponseWrapper<OrderResponse>> {
-            return orderWithPayInfo(
-                starkKey,
-                contractType,
-                contractAddress,
-                tokenId,
-                price,
-                amount,
-                OrderType.BUY,
-                marketplaceUuid,
-                payInfo,
-                signPayInfoPrivateKey,
-                ReddioClient.TOKEN_TYPE_ETH,
-                "ETH",
-            )
+            val baseTokenType = "ETH";
+            val baseTokenContract = "ETH";
+            val orderType = OrderType.BUY;
+            val stopLimitTimeInForce = OrderMessage.STOP_LIMIT_TIME_IN_FORCE_IOC;
+
+            // FIXME: duplicated codes, expect stop limit order
+            return CompletableFuture.supplyAsync {
+                runBlocking {
+                    val orderInfoResponse = restClient.orderInfo(
+                        OrderInfoMessage.of(
+                            starkKey,
+                            String.format("%s:%s", baseTokenType, baseTokenContract),
+                            String.format("%s:%s:%s", contractType, contractAddress, tokenId)
+                        )
+                    ).await()
+
+                    val vaultIds = orderInfoResponse.data.getVaultIds()
+                    val quoteToken = orderInfoResponse.data.assetIds[1]
+                    val quantizedPrice = quantizedHelper.quantizedAmount(price, baseTokenType, baseTokenContract)
+                    val formatPrice = quantizedPrice.toString()
+                    val amountBuy = (quantizedPrice.toDouble() * amount.toDouble()).toLong().toString()
+
+                    val orderMessage = OrderMessage()
+                    orderMessage.amount = amount;
+                    orderMessage.baseToken = orderInfoResponse.data.getBaseToken()
+                    orderMessage.quoteToken = quoteToken
+                    orderMessage.price = formatPrice
+                    orderMessage.starkKey = starkKey
+                    orderMessage.expirationTimestamp = 4194303;
+                    orderMessage.nonce = orderInfoResponse.data.nonce;
+                    orderMessage.feeInfo = FeeInfo.of(
+                        (orderInfoResponse.data.feeRate.toDouble() * amountBuy.toDouble()).toLong(),
+                        orderInfoResponse.data.feeToken,
+                        vaultIds[0].toLong()
+                    )
+                    if (orderType == OrderType.BUY) {
+                        orderMessage.direction = OrderMessage.DIRECTION_BID
+                        orderMessage.tokenSell = orderInfoResponse.data.baseToken
+                        orderMessage.tokenBuy = quoteToken
+                        orderMessage.amountSell = amountBuy
+                        orderMessage.amountBuy = amount
+                        orderMessage.vaultIdBuy = vaultIds[1]
+                        orderMessage.vaultIdSell = vaultIds[0]
+                    } else {
+                        orderMessage.direction = OrderMessage.DIRECTION_ASK
+                        orderMessage.tokenSell = quoteToken
+                        orderMessage.tokenBuy = orderInfoResponse.data.baseToken
+                        orderMessage.amountSell = amount
+                        orderMessage.amountBuy = amountBuy
+                        orderMessage.vaultIdBuy = vaultIds[0]
+                        orderMessage.vaultIdSell = vaultIds[1]
+                    }
+                    orderMessage.signature = starkExSigner.signOrderMsgWithFee(
+                        orderMessage.vaultIdSell,
+                        orderMessage.vaultIdBuy,
+                        orderMessage.amountSell,
+                        orderMessage.amountBuy,
+                        orderMessage.tokenSell,
+                        orderMessage.tokenBuy,
+                        orderMessage.nonce,
+                        orderMessage.expirationTimestamp,
+                        orderMessage.feeInfo.tokenId,
+                        orderMessage.feeInfo.sourceVaultId,
+                        orderMessage.feeInfo.feeLimit
+                    )
+                    // setup stop limit order as IOC
+                    orderMessage.setStopLimitTimeInForce(stopLimitTimeInForce)
+                    restClient.order(orderMessage).await()
+                }
+            }
         }
 
         override fun sellNFTWithRUSD(

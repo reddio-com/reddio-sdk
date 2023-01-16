@@ -57,16 +57,14 @@ public interface ReddioClient {
                 String signPayInfoPrivateKey
         );
 
-        CompletableFuture<ResponseWrapper<OrderResponse>> buyNFTWithPayInfoBaseTokenETH(
+        CompletableFuture<ResponseWrapper<OrderResponse>> buyNFTWithETHStopLimitTimeInForceIOC(
                 String starkKey,
                 String contractType,
                 String contractAddress,
                 String tokenId,
                 String price,
                 String amount,
-                String marketplaceUuid,
-                Payment.PayInfo payInfo,
-                String signPayInfoPrivateKey
+                String marketplaceUuid
         );
 
         CompletableFuture<ResponseWrapper<OrderResponse>> sellNFTWithRUSD(
