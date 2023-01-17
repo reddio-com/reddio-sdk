@@ -40,12 +40,7 @@ public class DefaultReddioRestClient implements ReddioRestClient {
     }
 
     public DefaultReddioRestClient(String baseUrl) {
-        this.apiKey = "";
-        this.baseEndpoint = baseUrl;
-        this.httpClient = new OkHttpClient.Builder()
-                .addInterceptor(ReddioUAInterceptor.create())
-                .addInterceptor(ReddioApiKeyInterceptor.create(this.apiKey))
-                .build();
+        this(baseUrl, "");
     }
 
     @Override
