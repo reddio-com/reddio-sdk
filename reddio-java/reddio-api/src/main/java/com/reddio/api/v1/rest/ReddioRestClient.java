@@ -1,5 +1,7 @@
 package com.reddio.api.v1.rest;
 
+import io.reactivex.internal.operators.completable.CompletableAmb;
+
 import java.util.concurrent.CompletableFuture;
 
 public interface ReddioRestClient {
@@ -82,4 +84,6 @@ public interface ReddioRestClient {
      * @return
      */
     CompletableFuture<ResponseWrapper<StarexContractsResponse>> starexContracts();
+
+    CompletableFuture<ResponseWrapper<MintResponse>> mints(MintsMessage mintsMessage);
 }

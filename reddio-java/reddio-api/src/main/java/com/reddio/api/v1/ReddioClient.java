@@ -1,6 +1,7 @@
 package com.reddio.api.v1;
 
 import com.reddio.api.v1.rest.*;
+import io.reactivex.internal.operators.mixed.CompletableAndThenObservable;
 
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
@@ -39,7 +40,7 @@ public interface ReddioClient {
                 String marketplaceUuid,
                 Payment.PayInfo payInfo,
                 String signPayInfoPrivateKey,
-                String baseTokenType ,
+                String baseTokenType,
                 String baseTokenAddress
         );
 
@@ -84,6 +85,8 @@ public interface ReddioClient {
     CompletableFuture<ResponseWrapper<GetRecordResponse>> waitingTransferGetApproved(String starkKey, long sequenceId);
 
     CompletableFuture<ResponseWrapper<GetRecordResponse>> waitingTransferGetApproved(String starkKey, long sequenceId, Duration interval, Duration deadline, AtomicBoolean shouldStop);
+
+    CompletableFuture<ResponseWrapper<MintResponse>> mints(String contractAddress, String starkKey, long amount);
 
     WithStarkExSigner withStarkExSigner(StarExSigner starkExSigner);
 
