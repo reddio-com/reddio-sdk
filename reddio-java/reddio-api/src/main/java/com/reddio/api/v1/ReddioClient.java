@@ -1,7 +1,6 @@
 package com.reddio.api.v1;
 
 import com.reddio.api.v1.rest.*;
-import io.reactivex.internal.operators.mixed.CompletableAndThenObservable;
 
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;

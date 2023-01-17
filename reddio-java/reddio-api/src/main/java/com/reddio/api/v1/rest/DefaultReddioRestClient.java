@@ -33,13 +33,19 @@ public class DefaultReddioRestClient implements ReddioRestClient {
     public DefaultReddioRestClient(String baseUrl, String apiKey) {
         this.apiKey = apiKey;
         this.baseEndpoint = baseUrl;
-        this.httpClient = new OkHttpClient.Builder().addInterceptor(ReddioUAInterceptor.create()).build();
+        this.httpClient = new OkHttpClient.Builder()
+                .addInterceptor(ReddioUAInterceptor.create())
+                .addInterceptor(ReddioApiKeyInterceptor.create(this.apiKey))
+                .build();
     }
 
     public DefaultReddioRestClient(String baseUrl) {
         this.apiKey = "";
         this.baseEndpoint = baseUrl;
-        this.httpClient = new OkHttpClient.Builder().addInterceptor(ReddioUAInterceptor.create()).build();
+        this.httpClient = new OkHttpClient.Builder()
+                .addInterceptor(ReddioUAInterceptor.create())
+                .addInterceptor(ReddioApiKeyInterceptor.create(this.apiKey))
+                .build();
     }
 
     @Override
@@ -308,7 +314,7 @@ public class DefaultReddioRestClient implements ReddioRestClient {
             return chain.proceed(requestWithUserAgent);
         }
 
-        private static String geMavenProjecttVersion() {
+        private static String geMavenProjectVersion() {
             Properties properties = new Properties();
             try {
                 properties.load(Objects.requireNonNull(ReddioUAInterceptor.class.getResourceAsStream("/version.properties")));
@@ -319,9 +325,30 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         }
 
         public static ReddioUAInterceptor create() {
-            return new ReddioUAInterceptor(geMavenProjecttVersion());
+            return new ReddioUAInterceptor(geMavenProjectVersion());
         }
 
+    }
+
+    public static final class ReddioApiKeyInterceptor implements Interceptor {
+
+        public ReddioApiKeyInterceptor(String apiKey) {
+            this.apiKey = apiKey;
+        }
+
+        private String apiKey;
+
+        @NotNull
+        @Override
+        public Response intercept(@NotNull Chain chain) throws IOException {
+            Request originalRequest = chain.request();
+            Request requestWithUserAgent = originalRequest.newBuilder().header("x-api-key", this.apiKey).build();
+            return chain.proceed(requestWithUserAgent);
+        }
+
+        public final static ReddioApiKeyInterceptor create(String apiKey) {
+            return new ReddioApiKeyInterceptor(apiKey);
+        }
     }
 
     public static DefaultReddioRestClient mainnet() {
