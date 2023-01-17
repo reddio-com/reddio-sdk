@@ -39,7 +39,7 @@ public interface ReddioClient {
                 String marketplaceUuid,
                 Payment.PayInfo payInfo,
                 String signPayInfoPrivateKey,
-                String baseTokenType ,
+                String baseTokenType,
                 String baseTokenAddress
         );
 
@@ -84,6 +84,8 @@ public interface ReddioClient {
     CompletableFuture<ResponseWrapper<GetRecordResponse>> waitingTransferGetApproved(String starkKey, long sequenceId);
 
     CompletableFuture<ResponseWrapper<GetRecordResponse>> waitingTransferGetApproved(String starkKey, long sequenceId, Duration interval, Duration deadline, AtomicBoolean shouldStop);
+
+    CompletableFuture<ResponseWrapper<MintResponse>> mints(String contractAddress, String starkKey, long amount);
 
     WithStarkExSigner withStarkExSigner(StarExSigner starkExSigner);
 

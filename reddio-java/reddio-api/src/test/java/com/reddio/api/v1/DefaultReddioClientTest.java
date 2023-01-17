@@ -6,6 +6,7 @@ import com.reddio.api.v1.rest.*;
 import com.reddio.crypto.CryptoService;
 import com.reddio.crypto.Signature;
 import com.reddio.sign.PaymentSHA3;
+import jnr.ffi.annotations.Encoding;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -217,6 +218,16 @@ public class DefaultReddioClientTest {
         ReddioClient.WithStarkExSigner withStarkExSigner = client.withStarkExSigner("0x4d55b547af138c5b6200495d86ab6aed3e06c25fdd75b4b6a00e48515df2b3d");
         CompletableFuture<ResponseWrapper<CancelOrderResponse>> future = withStarkExSigner.cancelOrder("0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4", 303590);
         ResponseWrapper<CancelOrderResponse> result = future.get();
+        System.out.println(new ObjectMapper().writeValueAsString(result));
+        Assert.assertEquals("OK", result.status);
+    }
+
+    @Test
+    @Ignore("example usages, not a test, require api key")
+    public void testMints() throws ExecutionException, InterruptedException, JsonProcessingException {
+        DefaultReddioClient client = DefaultReddioClient.testnet("<truncated-api-key>");
+        CompletableFuture<ResponseWrapper<MintResponse>> future = client.mints("0x113536494406bc039586c1ad9b8f51af664d6ef8", "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4", 1);
+        ResponseWrapper<MintResponse> result = future.get();
         System.out.println(new ObjectMapper().writeValueAsString(result));
         Assert.assertEquals("OK", result.status);
     }

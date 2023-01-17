@@ -25,13 +25,22 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
-
     private final String baseEndpoint;
+    private final String apiKey;
     private final OkHttpClient httpClient;
 
-    public DefaultReddioRestClient(String baseUrl) {
+
+    public DefaultReddioRestClient(String baseUrl, String apiKey) {
+        this.apiKey = apiKey;
         this.baseEndpoint = baseUrl;
-        this.httpClient = new OkHttpClient.Builder().addInterceptor(ReddioUAInterceptor.create()).build();
+        this.httpClient = new OkHttpClient.Builder()
+                .addInterceptor(ReddioUAInterceptor.create())
+                .addInterceptor(ReddioApiKeyInterceptor.create(this.apiKey))
+                .build();
+    }
+
+    public DefaultReddioRestClient(String baseUrl) {
+        this(baseUrl, "");
     }
 
     @Override
@@ -222,11 +231,35 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint));
     }
 
+    @Override
+    public CompletableFuture<ResponseWrapper<MintResponse>> mints(MintsMessage mintsMessage) {
+        this.requireApiKey();
+        final HttpUrl.Builder builder = Objects.requireNonNull(HttpUrl.parse(baseEndpoint + "/v1/mints")).newBuilder();
+
+        final String jsonString;
+        try {
+            jsonString = objectMapper.writeValueAsString(mintsMessage);
+        } catch (JsonProcessingException e) {
+            throw new ReddioException(e);
+        }
+        final HttpUrl endpoint = builder.build();
+        Request request = new Request.Builder().url(endpoint).post(RequestBody.create(jsonString, JSON)).build();
+        Call call = this.httpClient.newCall(request);
+        return asFuture(call, new TypeReference<ResponseWrapper<MintResponse>>() {
+        }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint.toString()));
+    }
+
     private static <T> CompletableFuture<T> asFuture(Call call, TypeReference<T> typeReference) {
         CompletableFuture<T> future = new CompletableFuture<>();
         // notice: the HTTP request would execute in the background after call.enqueue(), not after the future.get().
         call.enqueue(new ToCompletableFutureCallback<>(future, typeReference));
         return future;
+    }
+
+    public void requireApiKey() {
+        if (null == this.apiKey || this.apiKey.isEmpty()) {
+            throw new ReddioException("API key is required");
+        }
     }
 
     public static <T> ResponseWrapper<T> ensureSuccess(ResponseWrapper<T> responseWrapper, String... messages) {
@@ -276,7 +309,7 @@ public class DefaultReddioRestClient implements ReddioRestClient {
             return chain.proceed(requestWithUserAgent);
         }
 
-        private static String geMavenProjecttVersion() {
+        private static String geMavenProjectVersion() {
             Properties properties = new Properties();
             try {
                 properties.load(Objects.requireNonNull(ReddioUAInterceptor.class.getResourceAsStream("/version.properties")));
@@ -287,16 +320,46 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         }
 
         public static ReddioUAInterceptor create() {
-            return new ReddioUAInterceptor(geMavenProjecttVersion());
+            return new ReddioUAInterceptor(geMavenProjectVersion());
         }
 
+    }
+
+    public static final class ReddioApiKeyInterceptor implements Interceptor {
+
+        public ReddioApiKeyInterceptor(String apiKey) {
+            this.apiKey = apiKey;
+        }
+
+        private String apiKey;
+
+        @NotNull
+        @Override
+        public Response intercept(@NotNull Chain chain) throws IOException {
+            Request originalRequest = chain.request();
+            Request requestWithUserAgent = originalRequest.newBuilder().header("x-api-key", this.apiKey).build();
+            return chain.proceed(requestWithUserAgent);
+        }
+
+        public final static ReddioApiKeyInterceptor create(String apiKey) {
+            return new ReddioApiKeyInterceptor(apiKey);
+        }
     }
 
     public static DefaultReddioRestClient mainnet() {
         return new DefaultReddioRestClient(MAINNET_API_ENDPOINT);
     }
 
+    public static DefaultReddioRestClient mainnet(String apiKey) {
+        return new DefaultReddioRestClient(MAINNET_API_ENDPOINT, apiKey);
+    }
+
     public static DefaultReddioRestClient testnet() {
         return new DefaultReddioRestClient(TESTNET_API_ENDPOINT);
     }
+
+    public static DefaultReddioRestClient testnet(String apiKey) {
+        return new DefaultReddioRestClient(TESTNET_API_ENDPOINT, apiKey);
+    }
+
 }

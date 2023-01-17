@@ -67,6 +67,14 @@ class DefaultReddioClient(
         }
     }
 
+    override fun mints(
+        contractAddress: String,
+        starkKey: String,
+        amount: Long
+    ): CompletableFuture<ResponseWrapper<MintResponse>> {
+        return restClient.mints(MintsMessage.of(contractAddress, starkKey, amount.toString()))
+    }
+
     override fun withStarkExSigner(starkExSigner: StarExSigner): ReddioClient.WithStarkExSigner {
         return DefaultWithStarkExSigner(restClient, starkExSigner)
     }
@@ -585,7 +593,13 @@ class DefaultReddioClient(
         fun mainnet(): DefaultReddioClient = DefaultReddioClient(DefaultReddioRestClient.mainnet())
 
         @JvmStatic
+        fun mainnet(apiKey: String): DefaultReddioClient = DefaultReddioClient(DefaultReddioRestClient.mainnet(apiKey))
+
+        @JvmStatic
         fun testnet(): DefaultReddioClient = DefaultReddioClient(DefaultReddioRestClient.testnet())
+
+        @JvmStatic
+        fun testnet(apiKey: String): DefaultReddioClient = DefaultReddioClient(DefaultReddioRestClient.testnet(apiKey))
 
         private data class VaultIds(val senderVaultId: String, val receiverVaultId: String)
     }
