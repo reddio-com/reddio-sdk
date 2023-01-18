@@ -60,7 +60,7 @@ class DefaultReddioClient(
                     if (GetRecordResponse.SequenceRecord.SEQUENCE_STATUS_FAILED == record.getData()[0].getStatus()) {
                         throw TransferFailedException("transfer failed", record.getData())
                     }
-                    delay(interval.toKotlinDuration())
+                    delay(interval.toMillis())
                 }
                 result
             }
