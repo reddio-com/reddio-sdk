@@ -15,13 +15,13 @@ class StarExSigner(private val privateKey: String) {
         expirationTimestamp: Long = 4194303L,
     ): Signature {
         val result = CryptoService.sign(
-            BigInteger(privateKey.lowercase().replace("0x", ""), 16), CryptoService.getTransferMsgHash(
+            BigInteger(privateKey.toLowerCase().replace("0x", ""), 16), CryptoService.getTransferMsgHash(
                 amount.toLong(),
                 nonce,
                 senderVaultId.toLong(),
-                BigInteger(token.lowercase().replace("0x", ""), 16),
+                BigInteger(token.toLowerCase().replace("0x", ""), 16),
                 receiverVaultId.toLong(),
-                BigInteger(receiverPublicKey.lowercase().replace("0x", ""), 16),
+                BigInteger(receiverPublicKey.toLowerCase().replace("0x", ""), 16),
                 expirationTimestamp,
                 null
             ), null
@@ -47,15 +47,15 @@ class StarExSigner(private val privateKey: String) {
             vaultIdBuy.toLong(),
             amountSell.toLong(),
             amountBuy.toLong(),
-            BigInteger(tokenSell.lowercase().replace("0x", ""), 16),
-            BigInteger(tokenBuy.lowercase().replace("0x", ""), 16),
+            BigInteger(tokenSell.toLowerCase().replace("0x", ""), 16),
+            BigInteger(tokenBuy.toLowerCase().replace("0x", ""), 16),
             nonce,
             expirationTimestamp,
-            BigInteger(feeToken.lowercase().replace("0x", ""), 16),
+            BigInteger(feeToken.toLowerCase().replace("0x", ""), 16),
             feeSourceVaultId,
             feeLimit
         )
-        val result = CryptoService.sign(BigInteger(privateKey.lowercase().replace("0x", ""), 16), hash, null);
+        val result = CryptoService.sign(BigInteger(privateKey.toLowerCase().replace("0x", ""), 16), hash, null);
         return Signature.of("0x${result.r}", "0x${result.s}")
     }
 
@@ -63,7 +63,7 @@ class StarExSigner(private val privateKey: String) {
         orderId: Long
     ): Signature {
         val hash = CryptoService.getCancelOrderMsgHash(orderId)
-        val result = CryptoService.sign(BigInteger(privateKey.lowercase().replace("0x", ""), 16), hash, null);
+        val result = CryptoService.sign(BigInteger(privateKey.toLowerCase().replace("0x", ""), 16), hash, null);
         return Signature.of("0x${result.r}", "0x${result.s}")
     }
 

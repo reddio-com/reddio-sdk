@@ -129,8 +129,8 @@ class DefaultEthereumInteraction(
 
         val quantizedAmount = quantizedHelper.quantizedAmount(amount, "ETH", "ETH")
         val call = deposits.depositEth(
-            BigInteger(starkKey.lowercase().replace("0x", ""), 16),
-            BigInteger(assetType.lowercase().replace("0x", ""), 16),
+            BigInteger(starkKey.toLowerCase().replace("0x", ""), 16),
+            BigInteger(assetType.toLowerCase().replace("0x", ""), 16),
             BigInteger(vaultId, 10),
             quantizedAmount.toBigInteger(),
         );
@@ -160,8 +160,8 @@ class DefaultEthereumInteraction(
         )
 
         val call = deposits.depositERC20(
-            BigInteger(starkKey.lowercase().replace("0x", ""), 16),
-            BigInteger(assetType.lowercase().replace("0x", ""), 16),
+            BigInteger(starkKey.toLowerCase().replace("0x", ""), 16),
+            BigInteger(assetType.toLowerCase().replace("0x", ""), 16),
             BigInteger(vaultId, 10),
             quantizedAmount.toBigInteger(),
         )
@@ -192,8 +192,8 @@ class DefaultEthereumInteraction(
             this.reddioStarexContractAddress(), web3j, credentials, gasProvider
         )
         val call = deposits.depositNft(
-            BigInteger(starkKey.lowercase().replace("0x", ""), 16),
-            BigInteger(assetType.lowercase().replace("0x", ""), 16),
+            BigInteger(starkKey.toLowerCase().replace("0x", ""), 16),
+            BigInteger(assetType.toLowerCase().replace("0x", ""), 16),
             BigInteger(vaultId, 10),
             BigInteger(tokenId, 10),
         )
@@ -259,8 +259,8 @@ class DefaultEthereumInteraction(
     ): TransactionReceipt {
         val withdrawals = Withdrawals.load(this.reddioStarexContractAddress(), web3j, credentials, gasProvider)
         return withdrawals.withdraw(
-            BigInteger(ethAddress.lowercase().replace("0x", ""), 16),
-            BigInteger(assetType.lowercase().replace("0x", ""), 16),
+            BigInteger(ethAddress.toLowerCase().replace("0x", ""), 16),
+            BigInteger(assetType.toLowerCase().replace("0x", ""), 16),
         ).sendAsync().await()
     }
 
@@ -272,8 +272,8 @@ class DefaultEthereumInteraction(
     ): TransactionReceipt {
         val withdrawals = Withdrawals.load(this.reddioStarexContractAddress(), web3j, credentials, gasProvider)
         return withdrawals.withdrawNft(
-            BigInteger(ethAddress.lowercase().replace("0x", ""), 16),
-            BigInteger(assetType.lowercase().replace("0x", ""), 16),
+            BigInteger(ethAddress.toLowerCase().replace("0x", ""), 16),
+            BigInteger(assetType.toLowerCase().replace("0x", ""), 16),
             BigInteger(tokenId, 10),
         ).sendAsync().await()
     }
@@ -287,8 +287,8 @@ class DefaultEthereumInteraction(
         val withdrawals = Withdrawals.load(this.reddioStarexContractAddress(), web3j, credentials, gasProvider)
 
         return withdrawals.withdrawAndMint(
-            BigInteger(ethAddress.lowercase().replace("0x", ""), 16),
-            BigInteger(assetType.lowercase().replace("0x", ""), 16),
+            BigInteger(ethAddress.toLowerCase().replace("0x", ""), 16),
+            BigInteger(assetType.toLowerCase().replace("0x", ""), 16),
             Numeric.hexStringToByteArray(BigInteger(tokenId, 10).toString(16)),
         ).sendAsync().await()
     }
@@ -378,7 +378,7 @@ class DefaultEthereumInteraction(
         val signature = this.ethSignReddioTypedPayload(SIGN_MESSAGE)
         return CryptoService.getPrivateKeyFromEthSignature(
             BigInteger(
-                signature.replace("0x", "").lowercase(
+                signature.replace("0x", "").toLowerCase(
                     Locale.getDefault()
                 ), 16
             )
