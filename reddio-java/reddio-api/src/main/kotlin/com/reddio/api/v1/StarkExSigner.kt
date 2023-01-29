@@ -4,6 +4,9 @@ import com.reddio.api.v1.rest.Signature
 import com.reddio.crypto.CryptoService
 import java.math.BigInteger
 
+/**
+ * StarkExSigner encapsulates usages of the stark private key.
+ */
 class StarkExSigner(private val privateKey: String) {
 
     fun getStarkKey(): String {
@@ -71,6 +74,10 @@ class StarkExSigner(private val privateKey: String) {
         val hash = CryptoService.getCancelOrderMsgHash(orderId)
         val result = CryptoService.sign(BigInteger(privateKey.toLowerCase().replace("0x", ""), 16), hash, null);
         return Signature.of("0x${result.r}", "0x${result.s}")
+    }
+
+    fun getStarKey(): BigInteger {
+        return CryptoService.getPublicKey(BigInteger(privateKey.toLowerCase().replace("0x", ""), 16))
     }
 
     companion object {

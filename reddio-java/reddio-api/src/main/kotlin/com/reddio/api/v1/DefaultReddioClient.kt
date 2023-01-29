@@ -249,20 +249,12 @@ class DefaultReddioClient(
             tokenId: String,
             marketplaceUuid: String,
             tokenType: String,
-            orderType: OrderBehavior
+            orderBehavior: OrderBehavior
         ): CompletableFuture<ResponseWrapper<OrderResponse>> {
             return CompletableFuture.supplyAsync {
                 runBlocking {
                     val orderMessage = orderMessage(
-                        starkKey,
-                        "ETH",
-                        "ETH",
-                        tokenType,
-                        tokenAddress,
-                        tokenId,
-                        price,
-                        amount,
-                        orderType
+                        starkKey, "ETH", "ETH", tokenType, tokenAddress, tokenId, price, amount, orderBehavior
                     )
                     restClient.order(orderMessage).await()
                 }
@@ -276,7 +268,7 @@ class DefaultReddioClient(
             tokenId: String,
             price: String,
             amount: String,
-            orderType: OrderBehavior,
+            orderBehavior: OrderBehavior,
             baseTokenType: String,
             baseTokenContract: String,
             marketplaceUuid: String,
@@ -292,7 +284,7 @@ class DefaultReddioClient(
                         tokenId,
                         price,
                         amount,
-                        orderType
+                        orderBehavior
                     )
                     restClient.order(orderMessage).await()
                 }
@@ -390,7 +382,7 @@ class DefaultReddioClient(
             tokenId: String,
             price: String,
             amount: String,
-            orderType: OrderBehavior,
+            orderBehavior: OrderBehavior,
             marketplaceUuid: String,
             payInfo: Payment.PayInfo,
             signPayInfoPrivateKey: String,
@@ -410,7 +402,7 @@ class DefaultReddioClient(
                         tokenId,
                         price,
                         amount,
-                        orderType
+                        orderBehavior
                     )
 
                     val orderInfoResponse = restClient.orderInfo(
@@ -422,7 +414,7 @@ class DefaultReddioClient(
                     ).await()
 
                     // append pay info
-                    if (OrderBehavior.BUY == orderType) {
+                    if (OrderBehavior.BUY == orderBehavior) {
                         orderMessage.setStopLimitTimeInForce(OrderMessage.STOP_LIMIT_TIME_IN_FORCE_IOC)
                         val sign = PaymentSign.sign(
                             signPayInfoPrivateKey, payInfo.orderId, orderInfoResponse.data.nonce
@@ -445,10 +437,10 @@ class DefaultReddioClient(
             tokenId: String,
             price: String,
             amount: String,
-            orderType: OrderBehavior
+            orderBehavior: OrderBehavior
         ): CompletableFuture<ResponseWrapper<OrderResponse>> {
             return order(
-                starkKey, contractType, contractAddress, tokenId, price, amount, orderType, "ETH", "eth", ""
+                starkKey, contractType, contractAddress, tokenId, price, amount, orderBehavior, "ETH", "eth", ""
             )
         }
 
@@ -491,15 +483,7 @@ class DefaultReddioClient(
             return CompletableFuture.supplyAsync {
                 runBlocking {
                     val orderMessage = orderMessage(
-                        starkKey,
-                        "ETH",
-                        "ETH",
-                        contractType,
-                        contractAddress,
-                        tokenId,
-                        price,
-                        amount,
-                        OrderBehavior.BUY
+                        starkKey, "ETH", "ETH", contractType, contractAddress, tokenId, price, amount, OrderBehavior.BUY
                     )
 
                     // setup stop limit order as IOC
@@ -598,13 +582,7 @@ class DefaultReddioClient(
         ): CompletableFuture<ResponseWrapper<TransferResponse>> {
             val starkKey = this.starkExSigner.getStarkKey();
             return this.transfer(
-                starkKey,
-                "1",
-                contractAddress,
-                tokenId,
-                ReddioClient.TOKEN_TYPE_ERC721,
-                receiver,
-                expirationTimeStamp
+                starkKey, "1", contractAddress, tokenId, ReddioClient.TOKEN_TYPE_ERC721, receiver, expirationTimeStamp
             )
         }
     }
@@ -612,6 +590,7 @@ class DefaultReddioClient(
     override fun close() {
         // noop
     }
+
 
     private suspend fun getAssetId(
         contractAddress: String,

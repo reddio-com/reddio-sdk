@@ -24,7 +24,7 @@ public interface ReddioClient extends AutoCloseable {
 
         CompletableFuture<ResponseWrapper<TransferResponse>> transferERC20(String amount, String contractAddress, String receiver, long expirationTimeStamp);
 
-        CompletableFuture<ResponseWrapper<TransferResponse>> transferERC721( String contractAddress, String tokenId, String receiver, long expirationTimeStamp);
+        CompletableFuture<ResponseWrapper<TransferResponse>> transferERC721(String contractAddress, String tokenId, String receiver, long expirationTimeStamp);
 
 
         WithdrawalToMessage withdrawalMessage(String amount, String contractAddress, String tokenId, String type, String receiver, long expirationTimeStamp);
