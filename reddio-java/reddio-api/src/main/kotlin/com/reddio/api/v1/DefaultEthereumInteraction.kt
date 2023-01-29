@@ -375,7 +375,7 @@ class DefaultEthereumInteraction(
     }
 
     override fun getStarkPrivateKey(): BigInteger {
-        val signature = this.ethSignReddioTypedPayload(SIGN_MESSAGE)
+        val signature = ethSignReddioTypedPayload(SIGN_MESSAGE, this.chainId, this.credentials)
         return CryptoService.getPrivateKeyFromEthSignature(
             BigInteger(
                 signature.replace("0x", "").toLowerCase(
@@ -383,20 +383,6 @@ class DefaultEthereumInteraction(
                 ), 16
             )
         )
-    }
-
-    private fun ethSignReddioTypedPayload(message: String): String {
-        val hash = StructuredDataEncoder(
-            objectMapper.writeValueAsString(
-                ReddioSignPayload.create(message, this.chainId)
-            )
-        ).hashStructuredData()
-        val signature = Sign.signMessage(hash, credentials.ecKeyPair, false)
-        val signatureBytes = ByteArray(65)
-        System.arraycopy(signature.r, 0, signatureBytes, 0, 32)
-        System.arraycopy(signature.s, 0, signatureBytes, 32, 32)
-        System.arraycopy(signature.v, 0, signatureBytes, 64, 1)
-        return Numeric.toHexString(signatureBytes)
     }
 
 
@@ -498,5 +484,32 @@ class DefaultEthereumInteraction(
             )
         }
 
+
+        @JvmStatic
+        fun getStarkPrivateKey(ethPrivateKey: String, chainId: Long): BigInteger {
+            val credentials = Credentials.create(ethPrivateKey)
+            val signature = ethSignReddioTypedPayload(SIGN_MESSAGE, chainId, credentials)
+            return CryptoService.getPrivateKeyFromEthSignature(
+                BigInteger(
+                    signature.replace("0x", "").toLowerCase(
+                        Locale.getDefault()
+                    ), 16
+                )
+            )
+        }
+
+        private fun ethSignReddioTypedPayload(message: String, chainId: Long, credentials: Credentials): String {
+            val hash = StructuredDataEncoder(
+                objectMapper.writeValueAsString(
+                    ReddioSignPayload.create(message, chainId)
+                )
+            ).hashStructuredData()
+            val signature = Sign.signMessage(hash, credentials.ecKeyPair, false)
+            val signatureBytes = ByteArray(65)
+            System.arraycopy(signature.r, 0, signatureBytes, 0, 32)
+            System.arraycopy(signature.s, 0, signatureBytes, 32, 32)
+            System.arraycopy(signature.v, 0, signatureBytes, 64, 1)
+            return Numeric.toHexString(signatureBytes)
+        }
     }
 }

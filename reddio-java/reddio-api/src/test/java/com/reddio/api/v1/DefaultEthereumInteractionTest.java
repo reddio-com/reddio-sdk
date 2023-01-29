@@ -161,4 +161,10 @@ public class DefaultEthereumInteractionTest {
         BigInteger result = ethereumInteraction.getStarkPrivateKey();
         Assert.assertEquals("5f6fbfbcd995e20f94a768193c42060f7e626e6ae8042cacc15e82031087a55", result.toString(16));
     }
+
+    @Test
+    public void testEthSignAndGetStarkKeyStaticMethod() {
+        BigInteger result = DefaultEthereumInteraction.getStarkPrivateKey("552ad9b756acfeb2e32cfd3354b653b1f95177b851a44155d6178d244b80e08b", DefaultEthereumInteraction.GOERIL_ID);
+        Assert.assertEquals("5f6fbfbcd995e20f94a768193c42060f7e626e6ae8042cacc15e82031087a55", result.toString(16));
+    }
 }
