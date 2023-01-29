@@ -1,7 +1,6 @@
 package com.reddio.api.v1;
 
 import com.reddio.abi.Deposits;
-import com.reddio.abi.Withdrawals;
 import com.reddio.gas.GasOption;
 import io.reactivex.disposables.Disposable;
 import org.web3j.protocol.core.methods.response.EthBlock;
