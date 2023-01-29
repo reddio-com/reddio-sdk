@@ -10,7 +10,6 @@ import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.time.toKotlinDuration
 
 class DefaultReddioClient(
     private val restClient: ReddioRestClient
@@ -73,6 +72,14 @@ class DefaultReddioClient(
         amount: Long
     ): CompletableFuture<ResponseWrapper<MintResponse>> {
         return restClient.mints(MintsMessage.of(contractAddress, starkKey, amount.toString()))
+    }
+
+    override fun mints(
+        contractAddress: String,
+        starkKey: String,
+        tokenIds: List<Long>
+    ): CompletableFuture<ResponseWrapper<MintResponse>> {
+        return restClient.mints(MintsMessage.of(contractAddress, starkKey, "", MintsMessage.tokenIdsAsString(tokenIds)))
     }
 
     override fun withStarkExSigner(starkExSigner: StarExSigner): ReddioClient.WithStarkExSigner {

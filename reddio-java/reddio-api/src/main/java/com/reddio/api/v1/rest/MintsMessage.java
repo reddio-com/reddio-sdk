@@ -1,9 +1,12 @@
 package com.reddio.api.v1.rest;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -22,8 +25,28 @@ public class MintsMessage {
     public String starkKey;
 
     /**
-     * Amount of tokens mint on layer 2
+     * Amount of tokens mint on layer 2.
+     * <p>
+     * Can not be used with {@link #tokenIds}
      */
     @JsonProperty("amount")
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public String amount;
+
+    /**
+     * Specified token ids to mint.
+     * <p>
+     * Can not be used with {@link #amount}
+     */
+    @JsonProperty("token_ids")
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public String tokenIds;
+
+    public static final String tokenIdsAsString(List<Long> tokenIds) {
+        return String.join(",", tokenIds.stream().map(Object::toString).toArray(String[]::new));
+    }
+
+    public static MintsMessage of(String contractAddress, String starkKey, String amount) {
+        return new MintsMessage(contractAddress, starkKey, amount, "");
+    }
 }
