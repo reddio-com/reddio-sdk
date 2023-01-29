@@ -3,6 +3,7 @@ package com.reddio.api.v1;
 import com.reddio.api.v1.rest.*;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -86,6 +87,8 @@ public interface ReddioClient {
     CompletableFuture<ResponseWrapper<GetRecordResponse>> waitingTransferGetApproved(String starkKey, long sequenceId, Duration interval, Duration deadline, AtomicBoolean shouldStop);
 
     CompletableFuture<ResponseWrapper<MintResponse>> mints(String contractAddress, String starkKey, long amount);
+
+    CompletableFuture<ResponseWrapper<MintResponse>> mints(String contractAddress, String starkKey, List<Long> tokenIds);
 
     WithStarkExSigner withStarkExSigner(StarExSigner starkExSigner);
 

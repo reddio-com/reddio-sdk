@@ -12,6 +12,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -227,6 +229,20 @@ public class DefaultReddioClientTest {
     public void testMints() throws ExecutionException, InterruptedException, JsonProcessingException {
         DefaultReddioClient client = DefaultReddioClient.testnet("<truncated-api-key>");
         CompletableFuture<ResponseWrapper<MintResponse>> future = client.mints("0x113536494406bc039586c1ad9b8f51af664d6ef8", "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4", 1);
+        ResponseWrapper<MintResponse> result = future.get();
+        System.out.println(new ObjectMapper().writeValueAsString(result));
+        Assert.assertEquals("OK", result.status);
+    }
+
+    @Test
+    @Ignore("example usages, not a test, require api key")
+    public void testMintWithCertainTokenIds() throws ExecutionException, InterruptedException, JsonProcessingException {
+//        DefaultReddioClient client = DefaultReddioClient.testnet("<truncated-api-key>");
+        DefaultReddioClient client = DefaultReddioClient.testnet("rk-1236d5fc-f4c1-4a19-a2ff-9c29e3a70e37");
+        List<Long> tokenIds = new ArrayList<>();
+        tokenIds.add(300L);
+        tokenIds.add(301L);
+        CompletableFuture<ResponseWrapper<MintResponse>> future = client.mints("0x113536494406bc039586c1ad9b8f51af664d6ef8", "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4", tokenIds);
         ResponseWrapper<MintResponse> result = future.get();
         System.out.println(new ObjectMapper().writeValueAsString(result));
         Assert.assertEquals("OK", result.status);
