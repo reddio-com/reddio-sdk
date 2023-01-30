@@ -335,10 +335,9 @@ class DefaultEthereumInteraction(
             val blockConfirmationRequiredEvents = BlockConfirmationRequiredEvents(
                 deposits::logDepositEventFlowable, requiredBlockConfirmation, web3j
             )
-            blockConfirmationRequiredEvents.eventFlowableWithEthBlock(startBlockNumber)
-                .subscribe {
-                    consumer.accept(it)
-                }
+            blockConfirmationRequiredEvents.eventFlowableWithEthBlock(startBlockNumber).subscribe {
+                consumer.accept(it)
+            }
         }
     }
 
@@ -351,8 +350,7 @@ class DefaultEthereumInteraction(
     }
 
     override fun watchNftDeposit(
-        consumer: Consumer<Tuple2<Deposits.LogNftDepositEventResponse, EthBlock>>,
-        startBlockNumber: BigInteger
+        consumer: Consumer<Tuple2<Deposits.LogNftDepositEventResponse, EthBlock>>, startBlockNumber: BigInteger
     ): Disposable {
         return watchNftDeposit(consumer, startBlockNumber, BlockConfirmationRequiredEvents.DEFAULT_BLOCK_CONFIRMATION)
     }
@@ -367,10 +365,9 @@ class DefaultEthereumInteraction(
             val blockConfirmationRequiredEvents = BlockConfirmationRequiredEvents(
                 deposits::logNftDepositEventFlowable, requiredBlockConfirmation, web3j
             )
-            blockConfirmationRequiredEvents.eventFlowableWithEthBlock(startBlockNumber)
-                .subscribe {
-                    consumer.accept(it)
-                }
+            blockConfirmationRequiredEvents.eventFlowableWithEthBlock(startBlockNumber).subscribe {
+                consumer.accept(it)
+            }
         }
     }
 
@@ -495,6 +492,16 @@ class DefaultEthereumInteraction(
                         Locale.getDefault()
                     ), 16
                 )
+            )
+        }
+
+        @JvmStatic
+        fun getStarkKeys(ethPrivateKey: String, chainId: Long): StarkKeys {
+            val starkPrivateKey = getStarkPrivateKey(ethPrivateKey, chainId)
+            val starkKey = CryptoService.getPublicKey(starkPrivateKey)
+            return StarkKeys.of(
+                "0x" + starkKey.toString(16),
+                "0x" + starkPrivateKey.toString(16)
             )
         }
 
