@@ -1,5 +1,6 @@
 package com.reddio.api.v1.rest;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,6 +16,7 @@ public class Signature {
     public String s;
 
     @JsonProperty("stark_key")
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public String starkKey;
 
     public static Signature of(String r, String s) {
