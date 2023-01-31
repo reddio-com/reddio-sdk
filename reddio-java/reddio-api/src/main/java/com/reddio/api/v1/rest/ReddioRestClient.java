@@ -55,6 +55,8 @@ public interface ReddioRestClient {
      */
     CompletableFuture<ResponseWrapper<GetRecordResponse>> getRecord(GetRecordMessage getRecordMessage);
 
+    CompletableFuture<ResponseWrapper<GetTxnResponse>> getTxn(GetTxnMessage getTxnMessage);
+
     /**
      * Withdrawal to another Ethereum address for ERC-20/ETH and ERC-721
      * <p>

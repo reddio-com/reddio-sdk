@@ -19,6 +19,13 @@ public class DefaultReddioRestClientTest extends TestCase {
         Assert.assertEquals(GetRecordResponse.SequenceRecord.SEQUENCE_STATUS_ACCEPTED, response.data.get(0).status);
     }
 
+    public void testGetTxn() throws ExecutionException, InterruptedException {
+        DefaultReddioRestClient client = DefaultReddioRestClient.testnet();
+        ResponseWrapper<GetTxnResponse> response = client.getTxn(
+                GetTxnMessage.of(300523L)).get();
+        Assert.assertEquals(GetRecordResponse.SequenceRecord.SEQUENCE_STATUS_ACCEPTED, response.data.get(0).status);
+    }
+
     public void testOrderList() throws ExecutionException, InterruptedException {
         DefaultReddioRestClient client = DefaultReddioRestClient.testnet();
         CompletableFuture<ResponseWrapper<OrderListResponse>> future = client.orderList(OrderListMessage.of(

@@ -82,6 +82,8 @@ public interface ReddioClient {
 
     CompletableFuture<ResponseWrapper<GetRecordResponse>> getRecord(String starkKey, long sequenceId);
 
+    CompletableFuture<ResponseWrapper<GetTxnResponse>> getTxn(long sequenceId);
+
     CompletableFuture<ResponseWrapper<GetRecordResponse>> waitingTransferGetApproved(String starkKey, long sequenceId);
 
     CompletableFuture<ResponseWrapper<GetRecordResponse>> waitingTransferGetApproved(String starkKey, long sequenceId, Duration interval, Duration deadline, AtomicBoolean shouldStop);
