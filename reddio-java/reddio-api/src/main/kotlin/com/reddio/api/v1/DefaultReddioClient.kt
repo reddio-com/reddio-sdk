@@ -22,6 +22,10 @@ class DefaultReddioClient(
         return restClient.getRecord(GetRecordMessage.of(starkKey, sequenceId))
     }
 
+    override fun getTxn(sequenceId: Long): CompletableFuture<ResponseWrapper<GetTxnResponse>> {
+        return restClient.getTxn(GetTxnMessage.of(sequenceId))
+    }
+
     override fun waitingTransferGetApproved(
         starkKey: String, sequenceId: Long
     ): CompletableFuture<ResponseWrapper<GetRecordResponse>> {
