@@ -126,6 +126,17 @@ public class DefaultReddioRestClient implements ReddioRestClient {
     }
 
     @Override
+    public CompletableFuture<ResponseWrapper<WithdrawalStatusResponse>> withdrawalStatus(WithdrawalStatusMessage withdrawalStatusMessage) {
+        String endpoint = baseEndpoint + "/v1/withdrawal/status?" +
+                "stage=" + withdrawalStatusMessage.getStage() +
+                "&ethaddress=" + withdrawalStatusMessage.getEthAddress();
+        Request request = new Request.Builder().url(endpoint).get().build();
+        Call call = this.httpClient.newCall(request);
+        return asFuture(call, new TypeReference<ResponseWrapper<WithdrawalStatusResponse>>() {
+        }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint));
+    }
+
+    @Override
     public CompletableFuture<ResponseWrapper<OrderResponse>> order(OrderMessage orderMessage) {
         String endpoint = baseEndpoint + "/v1/order";
 

@@ -68,6 +68,14 @@ public interface ReddioRestClient {
      */
     CompletableFuture<ResponseWrapper<WithdrawalToResponse>> withdrawalTo(WithdrawalToMessage withdrawalToMessage);
 
+    /**
+     * Check if your asset is ready to withdraw to L1.
+     *
+     * @param withdrawalStatusMessage
+     * @return
+     */
+    CompletableFuture<ResponseWrapper<WithdrawalStatusResponse>> withdrawalStatus(WithdrawalStatusMessage withdrawalStatusMessage);
+
     CompletableFuture<ResponseWrapper<OrderResponse>> order(OrderMessage orderMessage);
 
     CompletableFuture<ResponseWrapper<OrderInfoResponse>> orderInfo(OrderInfoMessage orderInfoMessage);

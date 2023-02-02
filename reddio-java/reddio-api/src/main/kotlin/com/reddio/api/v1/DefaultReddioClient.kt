@@ -86,6 +86,13 @@ class DefaultReddioClient(
         return restClient.mints(MintsMessage.of(contractAddress, starkKey, "", MintsMessage.tokenIdsAsString(tokenIds)))
     }
 
+    override fun withdrawalStatus(
+        stage: String,
+        ethAddress: String
+    ): CompletableFuture<ResponseWrapper<WithdrawalStatusResponse>> {
+        return this.restClient.withdrawalStatus(WithdrawalStatusMessage.of(stage, ethAddress))
+    }
+
     override fun withStarkExSigner(starkExSigner: StarExSigner): ReddioClient.WithStarkExSigner {
         return DefaultWithStarkExSigner(restClient, starkExSigner)
     }
