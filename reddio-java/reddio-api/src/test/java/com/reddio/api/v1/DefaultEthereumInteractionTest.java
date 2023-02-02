@@ -2,17 +2,21 @@ package com.reddio.api.v1;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.reddio.abi.Erc721m;
 import com.reddio.api.v1.rest.DefaultReddioRestClient;
 import com.reddio.api.v1.rest.GetContractInfoMessage;
 import com.reddio.api.v1.rest.GetContractInfoResponse;
 import com.reddio.api.v1.rest.ResponseWrapper;
 import com.reddio.crypto.CryptoService;
 import com.reddio.gas.GasOption;
+import com.reddio.gas.StaticGasLimitSuggestionPriceGasProvider;
 import io.reactivex.disposables.Disposable;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
 
@@ -173,5 +177,14 @@ public class DefaultEthereumInteractionTest {
         StarkKeys starkKeys = DefaultEthereumInteraction.getStarkKeys("552ad9b756acfeb2e32cfd3354b653b1f95177b851a44155d6178d244b80e08b", DefaultEthereumInteraction.GOERIL_ID);
         Assert.assertEquals("0x13a69a1b7a5f033ee2358ebb8c28fd5a6b86d42e30a61845d655d3c7be4ad0e", starkKeys.getStarkKey());
         Assert.assertEquals("0x5f6fbfbcd995e20f94a768193c42060f7e626e6ae8042cacc15e82031087a55", starkKeys.getStarkPrivateKey());
+    }
+
+    @Test
+    public void testDeployERC721M() throws Exception {
+        Web3j web3j = Web3j.build(new HttpService("https://eth-goerli.g.alchemy.com/v2/yyabgQ1GlM0xxqDC4ZBbR1lBcBKQmnxT"));
+        Credentials credentials = Credentials.create("552ad9b756acfeb2e32cfd3354b653b1f95177b851a44155d6178d244b80e08b");
+        StaticGasLimitSuggestionPriceGasProvider gasProvider = new StaticGasLimitSuggestionPriceGasProvider(5, GasOption.Market, new BigInteger("10000000"));
+        RemoteCall<Erc721m> deployRemoteCall = Erc721m.deploy(web3j, credentials, gasProvider, "NON3", "NON3", "");
+        Erc721m send = deployRemoteCall.send();
     }
 }
