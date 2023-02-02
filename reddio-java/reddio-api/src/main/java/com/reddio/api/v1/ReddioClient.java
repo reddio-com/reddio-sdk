@@ -21,7 +21,6 @@ public interface ReddioClient {
         CompletableFuture<ResponseWrapper<TransferResponse>> transfer(String starkKey, String amount, String contractAddress, String tokenId, String type, String receiver, long expirationTimeStamp);
 
         CompletableFuture<ResponseWrapper<WithdrawalToResponse>> withdrawal(String starkKey, String amount, String contractAddress, String tokenId, String type, String receiver, long expirationTimeStamp);
-
         @Deprecated
         CompletableFuture<ResponseWrapper<OrderResponse>> order(String starkKey, String price, String amount, String tokenAddress, String tokenId, String marketplaceUuid, String tokenType, OrderBehavior orderType);
 
@@ -91,6 +90,8 @@ public interface ReddioClient {
     CompletableFuture<ResponseWrapper<MintResponse>> mints(String contractAddress, String starkKey, long amount);
 
     CompletableFuture<ResponseWrapper<MintResponse>> mints(String contractAddress, String starkKey, List<Long> tokenIds);
+
+    CompletableFuture<ResponseWrapper<WithdrawalStatusResponse>> withdrawalStatus(String stage, String ethAddress);
 
     WithStarkExSigner withStarkExSigner(StarExSigner starkExSigner);
 
