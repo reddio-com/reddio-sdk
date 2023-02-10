@@ -49,13 +49,13 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>copy-resources-osx</id>
+                        <id>copy-resources-darwin</id>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${basedir}/target/classes/osx-x86-64</outputDirectory>
+                            <outputDirectory>${basedir}/target/classes/darwin-x86-64</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>../../output/lib</directory>
