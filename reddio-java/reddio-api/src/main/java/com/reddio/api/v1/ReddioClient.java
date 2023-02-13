@@ -27,6 +27,8 @@ public interface ReddioClient {
         CompletableFuture<ResponseWrapper<TransferResponse>> transferERC721(String amount, String contractAddress, String tokenId, String receiver, long expirationTimeStamp);
 
 
+
+        WithdrawalToMessage withdrawalMessage(String starkKey, String amount, String contractAddress, String tokenId, String type, String receiver, long expirationTimeStamp);
         WithdrawalToMessage withdrawalETHMessage(String amount, String receiver, long expirationTimeStamp);
 
         WithdrawalToMessage withdrawalERC20Message(String amount, String contractAddress, String receiver, long expirationTimeStamp);
