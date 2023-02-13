@@ -101,17 +101,17 @@ class DefaultReddioClient(
         return this.restClient.withdrawalStatus(WithdrawalStatusMessage.of(stage, ethAddress))
     }
 
-    override fun withStarkExSigner(starkExSigner: StarExSigner): ReddioClient.WithStarkExSigner {
+    override fun withStarkExSigner(starkExSigner: StarkExSigner): ReddioClient.WithStarkExSigner {
         return DefaultWithStarkExSigner(restClient, starkExSigner)
     }
 
     override fun withStarkExSigner(starkPrivateKey: String): ReddioClient.WithStarkExSigner {
-        return DefaultWithStarkExSigner(restClient, StarExSigner.buildWithPrivateKey(starkPrivateKey))
+        return DefaultWithStarkExSigner(restClient, StarkExSigner.buildWithPrivateKey(starkPrivateKey))
     }
 
     inner class DefaultWithStarkExSigner(
         private val restClient: ReddioRestClient,
-        private val starkExSigner: StarExSigner,
+        private val starkExSigner: StarkExSigner,
     ) : ReddioClient.WithStarkExSigner {
 
         override fun withdrawal(
@@ -151,6 +151,61 @@ class DefaultReddioClient(
                     ).await()
                 }
             }
+        }
+
+
+        override fun withdrawalETH(
+            amount: String,
+            receiver: String,
+            expirationTimeStamp: Long
+        ): CompletableFuture<ResponseWrapper<WithdrawalToResponse>> {
+            val starkKey = starkExSigner.getStarkKey()
+            return this.withdrawal(
+                starkKey,
+                amount,
+                "ETH",
+                "",
+                ReddioClient.TOKEN_TYPE_ETH,
+                receiver,
+                expirationTimeStamp,
+            )
+        }
+
+        override fun withdrawalERC20(
+            amount: String,
+            contractAddress: String,
+            receiver: String,
+            expirationTimeStamp: Long
+        ): CompletableFuture<ResponseWrapper<WithdrawalToResponse>> {
+            val starkKey = starkExSigner.getStarkKey()
+            return this.withdrawal(
+                starkKey,
+                amount,
+                contractAddress,
+                "",
+                ReddioClient.TOKEN_TYPE_ERC20,
+                receiver,
+                expirationTimeStamp,
+            )
+        }
+
+        override fun withdrawalERC721(
+            amount: String,
+            contractAddress: String,
+            tokenId: String,
+            receiver: String,
+            expirationTimeStamp: Long
+        ): CompletableFuture<ResponseWrapper<WithdrawalToResponse>> {
+            val starkKey = starkExSigner.getStarkKey()
+            return this.withdrawal(
+                starkKey,
+                amount,
+                contractAddress,
+                tokenId,
+                ReddioClient.TOKEN_TYPE_ERC721,
+                receiver,
+                expirationTimeStamp,
+            )
         }
 
         override fun order(
@@ -594,7 +649,61 @@ class DefaultReddioClient(
             }
         }
 
+        override fun transferETH(
+            amount: String,
+            receiver: String,
+            expirationTimeStamp: Long
+        ): CompletableFuture<ResponseWrapper<TransferResponse>> {
+            val starkKey = this.starkExSigner.getStarkKey();
+            return this.transfer(
+                starkKey,
+                amount,
+                "ETH",
+                "",
+                ReddioClient.TOKEN_TYPE_ETH,
+                receiver,
+                expirationTimeStamp
+            )
+        }
+
+        override fun transferERC20(
+            amount: String,
+            contractAddress: String,
+            receiver: String,
+            expirationTimeStamp: Long
+        ): CompletableFuture<ResponseWrapper<TransferResponse>> {
+            val starkKey = this.starkExSigner.getStarkKey();
+            return this.transfer(
+                starkKey,
+                amount,
+                contractAddress,
+                "",
+                ReddioClient.TOKEN_TYPE_ETH,
+                receiver,
+                expirationTimeStamp
+            )
+        }
+
+        override fun transferERC721(
+            amount: String,
+            contractAddress: String,
+            tokenId: String,
+            receiver: String,
+            expirationTimeStamp: Long
+        ): CompletableFuture<ResponseWrapper<TransferResponse>> {
+            val starkKey = this.starkExSigner.getStarkKey();
+            return this.transfer(
+                starkKey,
+                amount,
+                contractAddress,
+                tokenId,
+                ReddioClient.TOKEN_TYPE_ERC721,
+                receiver,
+                expirationTimeStamp
+            )
+        }
     }
+
 
     private suspend fun getAssetId(
         contractAddress: String,
