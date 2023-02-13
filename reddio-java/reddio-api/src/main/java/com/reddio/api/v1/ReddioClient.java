@@ -18,7 +18,7 @@ public interface ReddioClient {
 
     interface WithStarkExSigner {
 
-        CompletableFuture<ResponseWrapper<TransferResponse>> transfer(String starkKey, String amount, String contractAddress, String tokenId, String type, String receiver, long expirationTimeStamp);
+        CompletableFuture<ResponseWrapper<TransferResponse>> transfer(String starkKey, String amount, String contractAddress, String tokenId, String tokenType, String receiver, long expirationTimeStamp);
 
         CompletableFuture<ResponseWrapper<TransferResponse>> transferETH(String amount, String receiver, long expirationTimeStamp);
 

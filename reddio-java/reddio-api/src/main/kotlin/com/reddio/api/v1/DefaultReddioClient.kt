@@ -616,15 +616,15 @@ class DefaultReddioClient(
             amount: String,
             contractAddress: String,
             tokenId: String,
-            type: String,
+            tokenType: String,
             receiver: String,
             expirationTimeStamp: Long
         ): CompletableFuture<ResponseWrapper<TransferResponse>> {
             return CompletableFuture.supplyAsync {
                 runBlocking {
-                    val assetId = getAssetId(contractAddress, tokenId, type)
+                    val assetId = getAssetId(contractAddress, tokenId, tokenType)
 
-                    val quantizedAmount = quantizedHelper.quantizedAmount(amount, type, contractAddress).toString()
+                    val quantizedAmount = quantizedHelper.quantizedAmount(amount, tokenType, contractAddress).toString()
                     val vaultsIds = getVaultsIds(assetId, starkKey, receiver)
                     val senderVaultId = vaultsIds.senderVaultId
                     val receiverVaultId = vaultsIds.receiverVaultId
@@ -678,7 +678,7 @@ class DefaultReddioClient(
                 amount,
                 contractAddress,
                 "",
-                ReddioClient.TOKEN_TYPE_ETH,
+                ReddioClient.TOKEN_TYPE_ERC20,
                 receiver,
                 expirationTimeStamp
             )
