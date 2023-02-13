@@ -4,7 +4,12 @@ import com.reddio.api.v1.rest.Signature
 import com.reddio.crypto.CryptoService
 import java.math.BigInteger
 
-class StarExSigner(private val privateKey: String) {
+class StarkExSigner(private val privateKey: String) {
+
+    fun getStarkKey(): String {
+        return CryptoService.getPublicKey(BigInteger(privateKey.toLowerCase().replace("0x", ""), 16)).toString(16)
+    }
+
     fun signTransferMessage(
         amount: String,
         nonce: Long,
@@ -69,8 +74,8 @@ class StarExSigner(private val privateKey: String) {
 
     companion object {
         @JvmStatic
-        fun buildWithPrivateKey(privateKey: String): StarExSigner {
-            return StarExSigner(privateKey)
+        fun buildWithPrivateKey(privateKey: String): StarkExSigner {
+            return StarkExSigner(privateKey)
         }
     }
 }

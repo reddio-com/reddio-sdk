@@ -20,7 +20,21 @@ public interface ReddioClient {
 
         CompletableFuture<ResponseWrapper<TransferResponse>> transfer(String starkKey, String amount, String contractAddress, String tokenId, String type, String receiver, long expirationTimeStamp);
 
+        CompletableFuture<ResponseWrapper<TransferResponse>> transferETH(String amount, String receiver, long expirationTimeStamp);
+
+        CompletableFuture<ResponseWrapper<TransferResponse>> transferERC20(String amount, String contractAddress, String receiver, long expirationTimeStamp);
+
+        CompletableFuture<ResponseWrapper<TransferResponse>> transferERC721(String amount, String contractAddress, String tokenId, String receiver, long expirationTimeStamp);
+
+
         CompletableFuture<ResponseWrapper<WithdrawalToResponse>> withdrawal(String starkKey, String amount, String contractAddress, String tokenId, String type, String receiver, long expirationTimeStamp);
+
+        CompletableFuture<ResponseWrapper<WithdrawalToResponse>> withdrawalETH(String amount, String receiver, long expirationTimeStamp);
+
+        CompletableFuture<ResponseWrapper<WithdrawalToResponse>> withdrawalERC20(String amount, String contractAddress, String receiver, long expirationTimeStamp);
+
+        CompletableFuture<ResponseWrapper<WithdrawalToResponse>> withdrawalERC721(String amount, String contractAddress, String tokenId, String receiver, long expirationTimeStamp);
+
         @Deprecated
         CompletableFuture<ResponseWrapper<OrderResponse>> order(String starkKey, String price, String amount, String tokenAddress, String tokenId, String marketplaceUuid, String tokenType, OrderBehavior orderType);
 
@@ -28,56 +42,16 @@ public interface ReddioClient {
 
         CompletableFuture<ResponseWrapper<CancelOrderResponse>> cancelOrder(String starkKey, long orderId);
 
-        CompletableFuture<ResponseWrapper<OrderResponse>> orderWithPayInfo(
-                String starkKey,
-                String contractType,
-                String contractAddress,
-                String tokenId,
-                String price,
-                String amount,
-                OrderBehavior orderType,
-                String marketplaceUuid,
-                Payment.PayInfo payInfo,
-                String signPayInfoPrivateKey,
-                String baseTokenType,
-                String baseTokenAddress
-        );
+        CompletableFuture<ResponseWrapper<OrderResponse>> orderWithPayInfo(String starkKey, String contractType, String contractAddress, String tokenId, String price, String amount, OrderBehavior orderType, String marketplaceUuid, Payment.PayInfo payInfo, String signPayInfoPrivateKey, String baseTokenType, String baseTokenAddress);
 
         CompletableFuture<ResponseWrapper<OrderResponse>> orderWithEth(String starkKey, String contractType, String contractAddress, String tokenId, String price, String amount, OrderBehavior orderType);
 
-        CompletableFuture<ResponseWrapper<OrderResponse>> buyNFTWithPayInfoBaseTokenRUSD(
-                String starkKey,
-                String contractType,
-                String contractAddress,
-                String tokenId,
-                String price,
-                String amount,
-                String marketplaceUuid,
-                Payment.PayInfo payInfo,
-                String signPayInfoPrivateKey
-        );
+        CompletableFuture<ResponseWrapper<OrderResponse>> buyNFTWithPayInfoBaseTokenRUSD(String starkKey, String contractType, String contractAddress, String tokenId, String price, String amount, String marketplaceUuid, Payment.PayInfo payInfo, String signPayInfoPrivateKey);
 
-        CompletableFuture<ResponseWrapper<OrderResponse>> buyNFTWithETHOrderTypeIOC(
-                String starkKey,
-                String contractType,
-                String contractAddress,
-                String tokenId,
-                String price,
-                String amount,
-                String marketplaceUuid
-        );
+        CompletableFuture<ResponseWrapper<OrderResponse>> buyNFTWithETHOrderTypeIOC(String starkKey, String contractType, String contractAddress, String tokenId, String price, String amount, String marketplaceUuid);
 
-        CompletableFuture<ResponseWrapper<OrderResponse>> sellNFTWithRUSD(
-                String starkKey,
-                String contractType,
-                String contractAddress,
-                String tokenId,
-                String price,
-                String amount,
-                String marketplaceUuid
-        );
+        CompletableFuture<ResponseWrapper<OrderResponse>> sellNFTWithRUSD(String starkKey, String contractType, String contractAddress, String tokenId, String price, String amount, String marketplaceUuid);
     }
-
 
 
     CompletableFuture<ResponseWrapper<GetOrderResponse>> getOrder(long orderId);
@@ -96,7 +70,7 @@ public interface ReddioClient {
 
     CompletableFuture<ResponseWrapper<WithdrawalStatusResponse>> withdrawalStatus(String stage, String ethAddress);
 
-    WithStarkExSigner withStarkExSigner(StarExSigner starkExSigner);
+    WithStarkExSigner withStarkExSigner(StarkExSigner starkExSigner);
 
     WithStarkExSigner withStarkExSigner(String starkPrivateKey);
 
