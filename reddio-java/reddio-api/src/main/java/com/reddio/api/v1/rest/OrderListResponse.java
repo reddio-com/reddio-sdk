@@ -42,6 +42,9 @@ public class OrderListResponse {
         public String TokenId;
         @JsonProperty("display_price")
         public String DisplayPrice;
+
+        @JsonProperty("order_state")
+        public OrderState orderState;
     }
 
 
