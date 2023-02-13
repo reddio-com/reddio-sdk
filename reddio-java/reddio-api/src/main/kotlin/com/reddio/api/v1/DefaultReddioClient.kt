@@ -114,6 +114,99 @@ class DefaultReddioClient(
         private val starkExSigner: StarkExSigner,
     ) : ReddioClient.WithStarkExSigner {
 
+        override fun withdrawalMessage(
+            starkKey: String,
+            amount: String,
+            contractAddress: String,
+            tokenId: String,
+            type: String,
+            receiver: String,
+            expirationTimeStamp: Long
+        ): WithdrawalToMessage {
+            return runBlocking {
+                val quantizedAmount = quantizedHelper.quantizedAmount(amount, type, contractAddress).toString()
+                val assetId = getAssetId(contractAddress, tokenId, type)
+                val vaultsIds = getVaultsIds(assetId, starkKey, receiver)
+                val senderVaultId = vaultsIds.senderVaultId
+                val receiverVaultId = vaultsIds.receiverVaultId
+                val nonce = restClient.getNonce(GetNonceMessage.of(starkKey)).await().getData().getNonce()
+                val signature = starkExSigner.signTransferMessage(
+                    quantizedAmount, nonce, senderVaultId, assetId, receiverVaultId, receiver, expirationTimeStamp
+                )
+                WithdrawalToMessage.of(
+                    contractAddress,
+                    assetId,
+                    starkKey,
+                    quantizedAmount,
+                    tokenId,
+                    nonce,
+                    senderVaultId,
+                    receiver,
+                    receiverVaultId,
+                    expirationTimeStamp,
+                    signature
+                )
+            }
+        }
+
+        override fun withdrawalETHMessage(
+            amount: String,
+            receiver: String,
+            expirationTimeStamp: Long
+        ): WithdrawalToMessage {
+            val starkKey = starkExSigner.getStarkKey()
+            return withdrawalMessage(
+                starkKey,
+                amount,
+                "ETH",
+                "",
+                ReddioClient.TOKEN_TYPE_ETH,
+                receiver,
+                expirationTimeStamp
+            )
+        }
+
+        override fun withdrawalERC20Message(
+            amount: String,
+            contractAddress: String,
+            receiver: String,
+            expirationTimeStamp: Long
+        ): WithdrawalToMessage {
+            val starkKey = starkExSigner.getStarkKey()
+            return withdrawalMessage(
+                starkKey,
+                amount,
+                contractAddress,
+                "",
+                ReddioClient.TOKEN_TYPE_ERC20,
+                receiver,
+                expirationTimeStamp
+            )
+        }
+
+        override fun withdrawalERC721Message(
+            amount: String,
+            contractAddress: String,
+            tokenId: String,
+            receiver: String,
+            expirationTimeStamp: Long
+        ): WithdrawalToMessage {
+            val starkKey = starkExSigner.getStarkKey()
+            return withdrawalMessage(
+                starkKey,
+                amount,
+                contractAddress,
+                tokenId,
+                ReddioClient.TOKEN_TYPE_ERC721,
+                receiver,
+                expirationTimeStamp
+            )
+        }
+
+        override fun withdrawal(withdrawalToMessage: WithdrawalToMessage): CompletableFuture<ResponseWrapper<WithdrawalToResponse>> {
+            return restClient.withdrawalTo(withdrawalToMessage);
+        }
+
         override fun withdrawal(
             starkKey: String,
             amount: String,
