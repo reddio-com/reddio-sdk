@@ -18,7 +18,7 @@ class DefaultReddioClient(
     private val quantizedHelper = QuantizedHelper(restClient);
 
 
-    override fun getOrder(orderId: Long): CompletableFuture<ResponseWrapper<GetOrderResponse>> {
+    override fun getOrder(orderId: Long): CompletableFuture<ResponseWrapper<Order>> {
         return CompletableFuture.supplyAsync {
             runBlocking {
                 restClient.getOrder(orderId).await()

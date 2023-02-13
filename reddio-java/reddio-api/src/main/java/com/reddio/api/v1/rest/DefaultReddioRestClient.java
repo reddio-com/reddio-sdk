@@ -165,12 +165,12 @@ public class DefaultReddioRestClient implements ReddioRestClient {
     }
 
     @Override
-    public CompletableFuture<ResponseWrapper<GetOrderResponse>> getOrder(Long orderId) {
+    public CompletableFuture<ResponseWrapper<Order>> getOrder(Long orderId) {
         String endpoint = baseEndpoint + "/v1/order?order_id=" + orderId;
 
         Request request = new Request.Builder().url(endpoint).get().build();
         Call call = this.httpClient.newCall(request);
-        return asFuture(call, new TypeReference<ResponseWrapper<GetOrderResponse>>() {
+        return asFuture(call, new TypeReference<ResponseWrapper<Order>>() {
         }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint));
     }
 

@@ -122,9 +122,9 @@ public class DefaultReddioClientTest {
     @Ignore("example, not a test")
     public void testGetOrder() throws ExecutionException, InterruptedException {
         DefaultReddioClient client = DefaultReddioClient.testnet();
-        ResponseWrapper<GetOrderResponse> getOrderResponse = client.getOrder(304282).get();
+        ResponseWrapper<Order> getOrderResponse = client.getOrder(304282).get();
         Assert.assertEquals("OK", getOrderResponse.getStatus());
-        GetOrderResponse data = getOrderResponse.getData();
+        Order data = getOrderResponse.getData();
         Assert.assertEquals(304282, data.getOrderId().longValue());
         Assert.assertEquals("0x1ccc27877014bc1a81919fc855ebbd1b874603283c9ea93397d970b0704e581", data.getStarkKey());
         Assert.assertEquals("1000", data.getPrice());
