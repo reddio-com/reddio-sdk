@@ -1,7 +1,5 @@
 package com.reddio.api.v1.rest;
 
-import io.reactivex.internal.operators.completable.CompletableAmb;
-
 import java.util.concurrent.CompletableFuture;
 
 public interface ReddioRestClient {
@@ -79,6 +77,8 @@ public interface ReddioRestClient {
     CompletableFuture<ResponseWrapper<OrderResponse>> order(OrderMessage orderMessage);
 
     CompletableFuture<ResponseWrapper<OrderInfoResponse>> orderInfo(OrderInfoMessage orderInfoMessage);
+
+    CompletableFuture<ResponseWrapper<GetOrderResponse>> getOrder(Long orderId);
 
     CompletableFuture<ResponseWrapper<OrderListResponse>> orderList(OrderListMessage orderListMessage);
 

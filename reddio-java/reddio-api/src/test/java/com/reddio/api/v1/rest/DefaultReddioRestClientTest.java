@@ -30,8 +30,12 @@ public class DefaultReddioRestClientTest extends TestCase {
         DefaultReddioRestClient client = DefaultReddioRestClient.testnet();
         CompletableFuture<ResponseWrapper<OrderListResponse>> future = client.orderList(OrderListMessage.of(
                 "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
-                REDDIO721_CONTRACT_ADDRESS
-                , null, null, null, null));
+                REDDIO721_CONTRACT_ADDRESS,
+                null,
+                null,
+                null,
+                null,
+                null));
         ResponseWrapper<OrderListResponse> result = future.get();
         Assert.assertEquals("OK", result.status);
     }

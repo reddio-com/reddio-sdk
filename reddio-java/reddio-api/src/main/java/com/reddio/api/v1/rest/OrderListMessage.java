@@ -23,4 +23,7 @@ public class OrderListMessage {
     public Integer direction;
     @JsonProperty("token_ids")
     public List<Long> tokenIds;
+
+    @JsonProperty("order_state")
+    public OrderState orderState;
 }

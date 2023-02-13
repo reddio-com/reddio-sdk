@@ -165,6 +165,16 @@ public class DefaultReddioRestClient implements ReddioRestClient {
     }
 
     @Override
+    public CompletableFuture<ResponseWrapper<GetOrderResponse>> getOrder(Long orderId) {
+        String endpoint = baseEndpoint + "/v1/order?order_id=" + orderId;
+
+        Request request = new Request.Builder().url(endpoint).get().build();
+        Call call = this.httpClient.newCall(request);
+        return asFuture(call, new TypeReference<ResponseWrapper<GetOrderResponse>>() {
+        }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint));
+    }
+
+    @Override
     public CompletableFuture<ResponseWrapper<OrderListResponse>> orderList(OrderListMessage orderListMessage) {
         final HttpUrl.Builder builder = Objects.requireNonNull(HttpUrl.parse(baseEndpoint + "/v1/orders")).newBuilder();
         if (orderListMessage.getStarkKey() != null) {
@@ -184,6 +194,9 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         }
         if (orderListMessage.getPage() != null) {
             builder.addQueryParameter("page", orderListMessage.getPage().toString());
+        }
+        if (orderListMessage.orderState != null) {
+            builder.addQueryParameter("order_state", Integer.toString(orderListMessage.orderState.getValue()));
         }
 
         final HttpUrl endpoint = builder.build();
