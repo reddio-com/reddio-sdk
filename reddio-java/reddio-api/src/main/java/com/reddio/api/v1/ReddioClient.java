@@ -28,6 +28,8 @@ public interface ReddioClient {
 
         CompletableFuture<ResponseWrapper<CancelOrderResponse>> cancelOrder(String starkKey, long orderId);
 
+        CompletableFuture<ResponseWrapper<GetOrderResponse>> getOrder(long orderId);
+
         CompletableFuture<ResponseWrapper<OrderResponse>> orderWithPayInfo(
                 String starkKey,
                 String contractType,

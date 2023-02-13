@@ -45,28 +45,6 @@ public class OrderListResponse {
     }
 
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor(staticName = "of")
-    private static class Symbol {
-        @JsonProperty("base_token_asset_id")
-        public String BaseTokenAssetId;
-        @JsonProperty("quote_token_asset_id")
-
-        public String QuoteTokenAssetId;
-        @JsonProperty("base_token_contract_addr")
-
-        public String BaseTokenContractAddr;
-        @JsonProperty("quote_token_contract_addr")
-
-        public String QuoteTokenContractAddr;
-        @JsonProperty("base_token_name")
-
-        public String BaseTokenName;
-        @JsonProperty("quote_token_name")
-
-        public String QuoteTokenName;
-    }
 }
 
 

@@ -308,6 +308,14 @@ class DefaultReddioClient(
             }
         }
 
+        override fun getOrder(orderId: Long): CompletableFuture<ResponseWrapper<GetOrderResponse>> {
+            return CompletableFuture.supplyAsync {
+                runBlocking {
+                    restClient.getOrder(orderId).await()
+                }
+            }
+        }
+
         override fun orderWithPayInfo(
             starkKey: String,
             contractType: String,
