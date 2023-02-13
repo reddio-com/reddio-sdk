@@ -64,7 +64,7 @@ public interface ReddioClient {
     }
 
 
-    CompletableFuture<ResponseWrapper<GetOrderResponse>> getOrder(long orderId);
+    CompletableFuture<ResponseWrapper<Order>> getOrder(long orderId);
 
     CompletableFuture<ResponseWrapper<GetRecordResponse>> getRecord(String starkKey, long sequenceId);
 

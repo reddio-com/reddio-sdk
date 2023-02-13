@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "of")
-public class GetOrderResponse {
+public class Order {
     @JsonProperty("order_id")
     public Long orderId;
 
@@ -45,4 +45,7 @@ public class GetOrderResponse {
 
     @JsonProperty("order_state")
     public OrderState orderState;
+
+    @JsonProperty("resp")
+    public String resp;
 }

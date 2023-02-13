@@ -78,7 +78,7 @@ public interface ReddioRestClient {
 
     CompletableFuture<ResponseWrapper<OrderInfoResponse>> orderInfo(OrderInfoMessage orderInfoMessage);
 
-    CompletableFuture<ResponseWrapper<GetOrderResponse>> getOrder(Long orderId);
+    CompletableFuture<ResponseWrapper<Order>> getOrder(Long orderId);
 
     CompletableFuture<ResponseWrapper<OrderListResponse>> orderList(OrderListMessage orderListMessage);
 
