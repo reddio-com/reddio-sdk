@@ -43,6 +43,6 @@ public class GetOrderResponse {
     @JsonProperty("display_price")
     public String displayPrice;
 
-    @JsonProperty("orderState")
-    public String orderState;
+    @JsonProperty("order_state")
+    public OrderState orderState;
 }

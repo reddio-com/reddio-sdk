@@ -195,6 +195,9 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         if (orderListMessage.getPage() != null) {
             builder.addQueryParameter("page", orderListMessage.getPage().toString());
         }
+        if (orderListMessage.orderState != null) {
+            builder.addQueryParameter("order_state", Integer.toString(orderListMessage.orderState.getValue()));
+        }
 
         final HttpUrl endpoint = builder.build();
 

@@ -11,19 +11,25 @@ import lombok.NoArgsConstructor;
 public class Symbol {
     @JsonProperty("base_token_asset_id")
     public String BaseTokenAssetId;
+
     @JsonProperty("quote_token_asset_id")
-
     public String QuoteTokenAssetId;
+
     @JsonProperty("base_token_contract_addr")
-
     public String BaseTokenContractAddr;
+
     @JsonProperty("quote_token_contract_addr")
-
     public String QuoteTokenContractAddr;
+
     @JsonProperty("base_token_name")
-
     public String BaseTokenName;
-    @JsonProperty("quote_token_name")
 
+    @JsonProperty("quote_token_name")
     public String QuoteTokenName;
+
+    @JsonProperty("token_type")
+    public String tokenType;
+
+    @JsonProperty("token_id")
+    public String tokenId;
 }

@@ -6,7 +6,6 @@ import com.reddio.api.v1.rest.*;
 import com.reddio.crypto.CryptoService;
 import com.reddio.crypto.Signature;
 import com.reddio.sign.PaymentSHA3;
-import jnr.ffi.annotations.Encoding;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -117,6 +116,37 @@ public class DefaultReddioClientTest {
         ResponseWrapper<OrderResponse> result = future.get();
         System.out.println(new ObjectMapper().writeValueAsString(result));
         Assert.assertEquals("OK", result.status);
+    }
+
+    @Test
+    @Ignore("example, not a test")
+    public void testGetOrder() throws ExecutionException, InterruptedException {
+        DefaultReddioClient client = DefaultReddioClient.testnet();
+        ResponseWrapper<GetOrderResponse> getOrderResponse = client.getOrder(304282).get();
+        Assert.assertEquals("OK", getOrderResponse.getStatus());
+        GetOrderResponse data = getOrderResponse.getData();
+        Assert.assertEquals(304282, data.getOrderId().longValue());
+        Assert.assertEquals("0x1ccc27877014bc1a81919fc855ebbd1b874603283c9ea93397d970b0704e581", data.getStarkKey());
+        Assert.assertEquals("1000", data.getPrice());
+        Assert.assertEquals(0, data.getDirection().longValue());
+        Assert.assertEquals("1", data.getAmount());
+        Assert.assertEquals("1", data.getUnFilled());
+
+        Assert.assertEquals("0x352f9ffd821a525051de2d71126113505a7b0a73d98dbc0ac0ff343cfbdef5e", data.getSymbol().getBaseTokenAssetId());
+        Assert.assertEquals("0x22d8810dfe28c2c083463d64b886b7e7fbe2b455c9a03ea2f0afd1457abd57d", data.getSymbol().getQuoteTokenAssetId());
+        Assert.assertEquals("eth", data.getSymbol().getBaseTokenContractAddr());
+        Assert.assertEquals("0x941661bd1134dc7cc3d107bf006b8631f6e65ad5", data.getSymbol().getQuoteTokenContractAddr());
+        Assert.assertEquals("ETH", data.getSymbol().getBaseTokenName());
+        Assert.assertEquals("REDDIO721", data.getSymbol().getQuoteTokenName());
+        Assert.assertEquals("ERC721", data.getSymbol().getTokenType());
+        Assert.assertEquals("1026", data.getSymbol().getTokenId());
+
+        Assert.assertEquals("200", data.getFeeRate());
+        Assert.assertEquals("ERC721", data.getTokenType());
+        Assert.assertEquals("1026", data.getTokenId());
+        Assert.assertEquals("0.001", data.getDisplayPrice());
+        Assert.assertEquals(OrderState.Placed, data.getOrderState());
+
     }
 
     @Test

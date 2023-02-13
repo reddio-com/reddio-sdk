@@ -28,8 +28,6 @@ public interface ReddioClient {
 
         CompletableFuture<ResponseWrapper<CancelOrderResponse>> cancelOrder(String starkKey, long orderId);
 
-        CompletableFuture<ResponseWrapper<GetOrderResponse>> getOrder(long orderId);
-
         CompletableFuture<ResponseWrapper<OrderResponse>> orderWithPayInfo(
                 String starkKey,
                 String contractType,
@@ -80,6 +78,9 @@ public interface ReddioClient {
         );
     }
 
+
+
+    CompletableFuture<ResponseWrapper<GetOrderResponse>> getOrder(long orderId);
 
     CompletableFuture<ResponseWrapper<GetRecordResponse>> getRecord(String starkKey, long sequenceId);
 

@@ -18,6 +18,14 @@ class DefaultReddioClient(
     private val quantizedHelper = QuantizedHelper(restClient);
 
 
+    override fun getOrder(orderId: Long): CompletableFuture<ResponseWrapper<GetOrderResponse>> {
+        return CompletableFuture.supplyAsync {
+            runBlocking {
+                restClient.getOrder(orderId).await()
+            }
+        }
+    }
+
     override fun getRecord(starkKey: String?, sequenceId: Long): CompletableFuture<ResponseWrapper<GetRecordResponse>> {
         return restClient.getRecord(GetRecordMessage.of(starkKey, sequenceId))
     }
@@ -304,14 +312,6 @@ class DefaultReddioClient(
                 runBlocking {
                     val signature = starkExSigner.signCancelOrderMsg(orderId)
                     restClient.cancelOrder(orderId, CancelOrderMessage.of(starkKey, signature)).await()
-                }
-            }
-        }
-
-        override fun getOrder(orderId: Long): CompletableFuture<ResponseWrapper<GetOrderResponse>> {
-            return CompletableFuture.supplyAsync {
-                runBlocking {
-                    restClient.getOrder(orderId).await()
                 }
             }
         }
