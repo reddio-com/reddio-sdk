@@ -10,10 +10,10 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "of")
-public class OrderListResponse {
+public class ListRecordsResponse {
 
     @JsonProperty("list")
-    private List<Order> list;
+    private List<SequenceRecord> list;
 
     @JsonProperty("total")
     private Long total;
@@ -26,7 +26,4 @@ public class OrderListResponse {
 
     @JsonProperty("total_page")
     private Long totalPage;
-
 }
-
-

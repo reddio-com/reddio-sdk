@@ -29,6 +29,23 @@ class DefaultReddioClient(
         return restClient.getRecord(GetRecordMessage.of(starkKey, sequenceId))
     }
 
+    override fun getRecordBySignature(r: String, s: String): CompletableFuture<ResponseWrapper<GetRecordResponse>> {
+        return restClient.getRecordBySignature(Signature.of(r, s))
+    }
+
+    override fun getRecordBySignature(signature: Signature): CompletableFuture<ResponseWrapper<GetRecordResponse>> {
+        return restClient.getRecordBySignature(signature)
+    }
+
+    override fun listRecords(
+        starkKey: String,
+        limit: Long?,
+        page: Long?,
+        contractAddress: String?
+    ): CompletableFuture<ResponseWrapper<ListRecordsResponse>> {
+        return this.restClient.listRecords(ListRecordsMessage.of(starkKey, limit, page, contractAddress))
+    }
+
     override fun getTxn(sequenceId: Long): CompletableFuture<ResponseWrapper<GetTxnResponse>> {
         return restClient.getTxn(GetTxnMessage.of(sequenceId))
     }
