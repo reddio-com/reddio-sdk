@@ -27,8 +27,8 @@ public interface ReddioClient {
         CompletableFuture<ResponseWrapper<TransferResponse>> transferERC721(String amount, String contractAddress, String tokenId, String receiver, long expirationTimeStamp);
 
 
-
         WithdrawalToMessage withdrawalMessage(String amount, String contractAddress, String tokenId, String type, String receiver, long expirationTimeStamp);
+
         WithdrawalToMessage withdrawalETHMessage(String amount, String receiver, long expirationTimeStamp);
 
         WithdrawalToMessage withdrawalERC20Message(String amount, String contractAddress, String receiver, long expirationTimeStamp);
@@ -37,7 +37,21 @@ public interface ReddioClient {
 
         CompletableFuture<ResponseWrapper<WithdrawalToResponse>> withdrawal(WithdrawalToMessage withdrawalToMessage);
 
+        /**
+         * @param starkKey
+         * @param amount
+         * @param contractAddress
+         * @param tokenId
+         * @param type
+         * @param receiver
+         * @param expirationTimeStamp
+         * @return
+         * @deprecated Use {@link #withdrawal(String, String, String, String, String, long)} instead.
+         */
+        @Deprecated
         CompletableFuture<ResponseWrapper<WithdrawalToResponse>> withdrawal(String starkKey, String amount, String contractAddress, String tokenId, String type, String receiver, long expirationTimeStamp);
+
+        CompletableFuture<ResponseWrapper<WithdrawalToResponse>> withdrawal(String amount, String contractAddress, String tokenId, String type, String receiver, long expirationTimeStamp);
 
         CompletableFuture<ResponseWrapper<WithdrawalToResponse>> withdrawalETH(String amount, String receiver, long expirationTimeStamp);
 

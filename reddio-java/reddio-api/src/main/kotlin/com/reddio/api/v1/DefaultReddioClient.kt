@@ -210,45 +210,41 @@ class DefaultReddioClient(
             receiver: String,
             expirationTimeStamp: Long
         ): CompletableFuture<ResponseWrapper<WithdrawalToResponse>> {
-            return CompletableFuture.supplyAsync {
-                runBlocking {
-                    val quantizedAmount = quantizedHelper.quantizedAmount(amount, type, contractAddress).toString()
-                    val assetId = getAssetId(contractAddress, tokenId, type)
-                    val vaultsIds = getVaultsIds(assetId, starkKey, receiver)
-                    val senderVaultId = vaultsIds.senderVaultId
-                    val receiverVaultId = vaultsIds.receiverVaultId
-                    val nonce = restClient.getNonce(GetNonceMessage.of(starkKey)).await().getData().getNonce()
-                    val signature = starkExSigner.signTransferMessage(
-                        quantizedAmount, nonce, senderVaultId, assetId, receiverVaultId, receiver, expirationTimeStamp
-                    )
-                    restClient.withdrawalTo(
-                        WithdrawalToMessage.of(
-                            contractAddress,
-                            assetId,
-                            starkKey,
-                            quantizedAmount,
-                            tokenId,
-                            nonce,
-                            senderVaultId,
-                            receiver,
-                            receiverVaultId,
-                            expirationTimeStamp,
-                            signature
-                        )
-                    ).await()
-                }
-            }
+            return this.withdrawal(
+                amount,
+                contractAddress,
+                tokenId,
+                type,
+                receiver,
+                expirationTimeStamp
+            )
         }
 
+        override fun withdrawal(
+            amount: String,
+            contractAddress: String,
+            tokenId: String,
+            type: String,
+            receiver: String,
+            expirationTimeStamp: Long
+        ): CompletableFuture<ResponseWrapper<WithdrawalToResponse>> {
+            val message = this.withdrawalMessage(
+                amount,
+                contractAddress,
+                tokenId,
+                type,
+                receiver,
+                expirationTimeStamp
+            )
+            return this.withdrawal(message)
+        }
 
         override fun withdrawalETH(
             amount: String,
             receiver: String,
             expirationTimeStamp: Long
         ): CompletableFuture<ResponseWrapper<WithdrawalToResponse>> {
-            val starkKey = starkExSigner.getStarkKey()
             return this.withdrawal(
-                starkKey,
                 amount,
                 "ETH",
                 "",
@@ -264,9 +260,7 @@ class DefaultReddioClient(
             receiver: String,
             expirationTimeStamp: Long
         ): CompletableFuture<ResponseWrapper<WithdrawalToResponse>> {
-            val starkKey = starkExSigner.getStarkKey()
             return this.withdrawal(
-                starkKey,
                 amount,
                 contractAddress,
                 "",
@@ -283,9 +277,7 @@ class DefaultReddioClient(
             receiver: String,
             expirationTimeStamp: Long
         ): CompletableFuture<ResponseWrapper<WithdrawalToResponse>> {
-            val starkKey = starkExSigner.getStarkKey()
             return this.withdrawal(
-                starkKey,
                 amount,
                 contractAddress,
                 tokenId,
@@ -638,6 +630,7 @@ class DefaultReddioClient(
                         orderInfoResponse.data.feeToken,
                         vaultIds[0].toLong()
                     )
+
                     if (orderType == OrderBehavior.BUY) {
                         orderMessage.direction = OrderMessage.DIRECTION_BID
                         orderMessage.tokenSell = orderInfoResponse.data.baseToken
@@ -668,6 +661,7 @@ class DefaultReddioClient(
                         orderMessage.feeInfo.sourceVaultId,
                         orderMessage.feeInfo.feeLimit
                     )
+
                     // setup stop limit order as IOC
                     orderMessage.setStopLimitTimeInForce(stopLimitTimeInForce)
                     restClient.order(orderMessage).await()
@@ -709,15 +703,20 @@ class DefaultReddioClient(
         ): CompletableFuture<ResponseWrapper<TransferResponse>> {
             return CompletableFuture.supplyAsync {
                 runBlocking {
-                    val assetId = getAssetId(contractAddress, tokenId, tokenType)
 
                     val quantizedAmount = quantizedHelper.quantizedAmount(amount, tokenType, contractAddress).toString()
+                    val assetId = getAssetId(contractAddress, tokenId, tokenType)
                     val vaultsIds = getVaultsIds(assetId, starkKey, receiver)
-                    val senderVaultId = vaultsIds.senderVaultId
-                    val receiverVaultId = vaultsIds.receiverVaultId
                     val nonce = restClient.getNonce(GetNonceMessage.of(starkKey)).await().getData().getNonce()
+
                     val signature = starkExSigner.signTransferMessage(
-                        quantizedAmount, nonce, senderVaultId, assetId, receiverVaultId, receiver, expirationTimeStamp
+                        quantizedAmount,
+                        nonce,
+                        vaultsIds.senderVaultId,
+                        assetId,
+                        vaultsIds.receiverVaultId,
+                        receiver,
+                        expirationTimeStamp
                     )
                     restClient.transfer(
                         TransferMessage.of(
@@ -725,9 +724,9 @@ class DefaultReddioClient(
                             starkKey,
                             quantizedAmount,
                             nonce,
-                            senderVaultId,
+                            vaultsIds.senderVaultId,
                             receiver,
-                            receiverVaultId,
+                            vaultsIds.receiverVaultId,
                             expirationTimeStamp,
                             signature
                         )
