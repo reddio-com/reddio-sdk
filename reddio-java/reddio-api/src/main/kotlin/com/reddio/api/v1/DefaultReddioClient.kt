@@ -163,10 +163,10 @@ class DefaultReddioClient(
         }
 
         override fun withdrawalERC721Message(
-            amount: String, contractAddress: String, tokenId: String, receiver: String, expirationTimeStamp: Long
+            contractAddress: String, tokenId: String, receiver: String, expirationTimeStamp: Long
         ): WithdrawalToMessage {
             return withdrawalMessage(
-                amount, contractAddress, tokenId, ReddioClient.TOKEN_TYPE_ERC721, receiver, expirationTimeStamp
+                "1", contractAddress, tokenId, ReddioClient.TOKEN_TYPE_ERC721, receiver, expirationTimeStamp
             )
         }
 
@@ -229,10 +229,10 @@ class DefaultReddioClient(
         }
 
         override fun withdrawalERC721(
-            amount: String, contractAddress: String, tokenId: String, receiver: String, expirationTimeStamp: Long
+            contractAddress: String, tokenId: String, receiver: String, expirationTimeStamp: Long
         ): CompletableFuture<ResponseWrapper<WithdrawalToResponse>> {
             return this.withdrawal(
-                amount,
+                "1",
                 contractAddress,
                 tokenId,
                 ReddioClient.TOKEN_TYPE_ERC721,
@@ -594,12 +594,12 @@ class DefaultReddioClient(
         }
 
         override fun transferERC721(
-            amount: String, contractAddress: String, tokenId: String, receiver: String, expirationTimeStamp: Long
+            contractAddress: String, tokenId: String, receiver: String, expirationTimeStamp: Long
         ): CompletableFuture<ResponseWrapper<TransferResponse>> {
             val starkKey = this.starkExSigner.getStarkKey();
             return this.transfer(
                 starkKey,
-                amount,
+                "1",
                 contractAddress,
                 tokenId,
                 ReddioClient.TOKEN_TYPE_ERC721,

@@ -24,7 +24,7 @@ public interface ReddioClient extends AutoCloseable {
 
         CompletableFuture<ResponseWrapper<TransferResponse>> transferERC20(String amount, String contractAddress, String receiver, long expirationTimeStamp);
 
-        CompletableFuture<ResponseWrapper<TransferResponse>> transferERC721(String amount, String contractAddress, String tokenId, String receiver, long expirationTimeStamp);
+        CompletableFuture<ResponseWrapper<TransferResponse>> transferERC721( String contractAddress, String tokenId, String receiver, long expirationTimeStamp);
 
 
         WithdrawalToMessage withdrawalMessage(String amount, String contractAddress, String tokenId, String type, String receiver, long expirationTimeStamp);
@@ -33,7 +33,7 @@ public interface ReddioClient extends AutoCloseable {
 
         WithdrawalToMessage withdrawalERC20Message(String amount, String contractAddress, String receiver, long expirationTimeStamp);
 
-        WithdrawalToMessage withdrawalERC721Message(String amount, String contractAddress, String tokenId, String receiver, long expirationTimeStamp);
+        WithdrawalToMessage withdrawalERC721Message(String contractAddress, String tokenId, String receiver, long expirationTimeStamp);
 
         CompletableFuture<ResponseWrapper<WithdrawalToResponse>> withdrawal(WithdrawalToMessage withdrawalToMessage);
 
@@ -57,7 +57,7 @@ public interface ReddioClient extends AutoCloseable {
 
         CompletableFuture<ResponseWrapper<WithdrawalToResponse>> withdrawalERC20(String amount, String contractAddress, String receiver, long expirationTimeStamp);
 
-        CompletableFuture<ResponseWrapper<WithdrawalToResponse>> withdrawalERC721(String amount, String contractAddress, String tokenId, String receiver, long expirationTimeStamp);
+        CompletableFuture<ResponseWrapper<WithdrawalToResponse>> withdrawalERC721(String contractAddress, String tokenId, String receiver, long expirationTimeStamp);
 
         @Deprecated
         CompletableFuture<ResponseWrapper<OrderResponse>> order(String starkKey, String price, String amount, String tokenAddress, String tokenId, String marketplaceUuid, String tokenType, OrderBehavior orderType);
