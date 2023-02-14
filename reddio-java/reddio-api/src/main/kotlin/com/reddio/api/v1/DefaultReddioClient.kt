@@ -119,7 +119,7 @@ class DefaultReddioClient(
             receiver: String,
             expirationTimeStamp: Long
         ): WithdrawalToMessage {
-            val starkKey = "0x" + starkExSigner.getStarkKey()
+            val starkKey = starkExSigner.getStarkKey()
             return runBlocking {
                 val quantizedAmount = quantizedHelper.quantizedAmount(amount, type, contractAddress).toString()
                 val assetId = getAssetId(contractAddress, tokenId, type)

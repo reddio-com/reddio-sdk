@@ -7,7 +7,8 @@ import java.math.BigInteger
 class StarkExSigner(private val privateKey: String) {
 
     fun getStarkKey(): String {
-        return CryptoService.getPublicKey(BigInteger(privateKey.toLowerCase().replace("0x", ""), 16)).toString(16)
+        return "0x" + CryptoService.getPublicKey(BigInteger(privateKey.toLowerCase().replace("0x", ""), 16))
+            .toString(16)
     }
 
     fun signTransferMessage(
