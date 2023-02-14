@@ -79,24 +79,19 @@ class DefaultReddioClient(
     }
 
     override fun mints(
-        contractAddress: String,
-        starkKey: String,
-        amount: Long
+        contractAddress: String, starkKey: String, amount: Long
     ): CompletableFuture<ResponseWrapper<MintResponse>> {
         return restClient.mints(MintsMessage.of(contractAddress, starkKey, amount.toString()))
     }
 
     override fun mints(
-        contractAddress: String,
-        starkKey: String,
-        tokenIds: List<Long>
+        contractAddress: String, starkKey: String, tokenIds: List<Long>
     ): CompletableFuture<ResponseWrapper<MintResponse>> {
         return restClient.mints(MintsMessage.of(contractAddress, starkKey, "", MintsMessage.tokenIdsAsString(tokenIds)))
     }
 
     override fun withdrawalStatus(
-        stage: String,
-        ethAddress: String
+        stage: String, ethAddress: String
     ): CompletableFuture<ResponseWrapper<WithdrawalStatusResponse>> {
         return this.restClient.withdrawalStatus(WithdrawalStatusMessage.of(stage, ethAddress))
     }
@@ -150,50 +145,26 @@ class DefaultReddioClient(
         }
 
         override fun withdrawalETHMessage(
-            amount: String,
-            receiver: String,
-            expirationTimeStamp: Long
+            amount: String, receiver: String, expirationTimeStamp: Long
         ): WithdrawalToMessage {
             return withdrawalMessage(
-                amount,
-                "ETH",
-                "",
-                ReddioClient.TOKEN_TYPE_ETH,
-                receiver,
-                expirationTimeStamp
+                amount, "ETH", "", ReddioClient.TOKEN_TYPE_ETH, receiver, expirationTimeStamp
             )
         }
 
         override fun withdrawalERC20Message(
-            amount: String,
-            contractAddress: String,
-            receiver: String,
-            expirationTimeStamp: Long
+            amount: String, contractAddress: String, receiver: String, expirationTimeStamp: Long
         ): WithdrawalToMessage {
             return withdrawalMessage(
-                amount,
-                contractAddress,
-                "",
-                ReddioClient.TOKEN_TYPE_ERC20,
-                receiver,
-                expirationTimeStamp
+                amount, contractAddress, "", ReddioClient.TOKEN_TYPE_ERC20, receiver, expirationTimeStamp
             )
         }
 
         override fun withdrawalERC721Message(
-            amount: String,
-            contractAddress: String,
-            tokenId: String,
-            receiver: String,
-            expirationTimeStamp: Long
+            amount: String, contractAddress: String, tokenId: String, receiver: String, expirationTimeStamp: Long
         ): WithdrawalToMessage {
             return withdrawalMessage(
-                amount,
-                contractAddress,
-                tokenId,
-                ReddioClient.TOKEN_TYPE_ERC721,
-                receiver,
-                expirationTimeStamp
+                amount, contractAddress, tokenId, ReddioClient.TOKEN_TYPE_ERC721, receiver, expirationTimeStamp
             )
         }
 
@@ -211,12 +182,7 @@ class DefaultReddioClient(
             expirationTimeStamp: Long
         ): CompletableFuture<ResponseWrapper<WithdrawalToResponse>> {
             return this.withdrawal(
-                amount,
-                contractAddress,
-                tokenId,
-                type,
-                receiver,
-                expirationTimeStamp
+                amount, contractAddress, tokenId, type, receiver, expirationTimeStamp
             )
         }
 
@@ -229,20 +195,13 @@ class DefaultReddioClient(
             expirationTimeStamp: Long
         ): CompletableFuture<ResponseWrapper<WithdrawalToResponse>> {
             val message = this.withdrawalMessage(
-                amount,
-                contractAddress,
-                tokenId,
-                type,
-                receiver,
-                expirationTimeStamp
+                amount, contractAddress, tokenId, type, receiver, expirationTimeStamp
             )
             return this.withdrawal(message)
         }
 
         override fun withdrawalETH(
-            amount: String,
-            receiver: String,
-            expirationTimeStamp: Long
+            amount: String, receiver: String, expirationTimeStamp: Long
         ): CompletableFuture<ResponseWrapper<WithdrawalToResponse>> {
             return this.withdrawal(
                 amount,
@@ -255,10 +214,7 @@ class DefaultReddioClient(
         }
 
         override fun withdrawalERC20(
-            amount: String,
-            contractAddress: String,
-            receiver: String,
-            expirationTimeStamp: Long
+            amount: String, contractAddress: String, receiver: String, expirationTimeStamp: Long
         ): CompletableFuture<ResponseWrapper<WithdrawalToResponse>> {
             return this.withdrawal(
                 amount,
@@ -271,11 +227,7 @@ class DefaultReddioClient(
         }
 
         override fun withdrawalERC721(
-            amount: String,
-            contractAddress: String,
-            tokenId: String,
-            receiver: String,
-            expirationTimeStamp: Long
+            amount: String, contractAddress: String, tokenId: String, receiver: String, expirationTimeStamp: Long
         ): CompletableFuture<ResponseWrapper<WithdrawalToResponse>> {
             return this.withdrawal(
                 amount,
@@ -299,62 +251,16 @@ class DefaultReddioClient(
         ): CompletableFuture<ResponseWrapper<OrderResponse>> {
             return CompletableFuture.supplyAsync {
                 runBlocking {
-                    val orderInfoResponse = restClient.orderInfo(
-                        OrderInfoMessage.of(
-                            starkKey, "ETH:ETH", String.format("%s:%s:%s", tokenType, tokenAddress, tokenId)
-                        )
-                    ).await()
-
-                    val vaultIds = orderInfoResponse.data.getVaultIds()
-                    val quoteToken = orderInfoResponse.data.assetIds[1]
-                    // hard coded format ETH on layer2 (price * (10 **decimals) / quantum)
-                    val amountBuy =
-                        Convert.toWei((price.toDouble() * amount.toDouble()).toString(), Convert.Unit.MWEI).toLong()
-                            .toString()
-                    val formatPrice = Convert.toWei(price, Convert.Unit.MWEI).toString()
-
-                    val orderMessage = OrderMessage()
-                    orderMessage.amount = amount;
-                    orderMessage.baseToken = orderInfoResponse.data.getBaseToken()
-                    orderMessage.quoteToken = quoteToken
-                    orderMessage.price = formatPrice
-                    orderMessage.starkKey = starkKey
-                    orderMessage.expirationTimestamp = 4194303;
-                    orderMessage.nonce = orderInfoResponse.data.nonce;
-                    orderMessage.feeInfo = FeeInfo.of(
-                        (orderInfoResponse.data.feeRate.toDouble() * amountBuy.toDouble()).toLong(),
-                        orderInfoResponse.data.feeToken,
-                        vaultIds[0].toLong()
-                    )
-                    if (orderType == OrderBehavior.BUY) {
-                        orderMessage.direction = OrderMessage.DIRECTION_BID
-                        orderMessage.tokenSell = orderInfoResponse.data.baseToken
-                        orderMessage.tokenBuy = quoteToken
-                        orderMessage.amountSell = amountBuy
-                        orderMessage.amountBuy = amount
-                        orderMessage.vaultIdBuy = vaultIds[1]
-                        orderMessage.vaultIdSell = vaultIds[0]
-                    } else {
-                        orderMessage.direction = OrderMessage.DIRECTION_ASK
-                        orderMessage.tokenSell = quoteToken
-                        orderMessage.tokenBuy = orderInfoResponse.data.baseToken
-                        orderMessage.amountSell = amount
-                        orderMessage.amountBuy = amountBuy
-                        orderMessage.vaultIdBuy = vaultIds[0]
-                        orderMessage.vaultIdSell = vaultIds[1]
-                    }
-                    orderMessage.signature = starkExSigner.signOrderMsgWithFee(
-                        orderMessage.vaultIdSell,
-                        orderMessage.vaultIdBuy,
-                        orderMessage.amountSell,
-                        orderMessage.amountBuy,
-                        orderMessage.tokenSell,
-                        orderMessage.tokenBuy,
-                        orderMessage.nonce,
-                        orderMessage.expirationTimestamp,
-                        orderMessage.feeInfo.tokenId,
-                        orderMessage.feeInfo.sourceVaultId,
-                        orderMessage.feeInfo.feeLimit
+                   val orderMessage= orderMessage(
+                        starkKey,
+                        "ETH",
+                        "ETH",
+                        tokenType,
+                        tokenAddress,
+                        tokenId,
+                        price,
+                        amount,
+                        orderType
                     )
                     restClient.order(orderMessage).await()
                 }
@@ -375,68 +281,93 @@ class DefaultReddioClient(
         ): CompletableFuture<ResponseWrapper<OrderResponse>> {
             return CompletableFuture.supplyAsync {
                 runBlocking {
-                    val orderInfoResponse = restClient.orderInfo(
-                        OrderInfoMessage.of(
-                            starkKey,
-                            String.format("%s:%s", baseTokenType, baseTokenContract),
-                            String.format("%s:%s:%s", contractType, contractAddress, tokenId)
-                        )
-                    ).await()
-
-
-                    val vaultIds = orderInfoResponse.data.getVaultIds()
-                    val quoteToken = orderInfoResponse.data.assetIds[1]
-                    val quantizedPrice = quantizedHelper.quantizedAmount(price, baseTokenType, baseTokenContract)
-                    val formatPrice = quantizedPrice.toString()
-                    val amountBuy = (quantizedPrice.toDouble() * amount.toDouble()).toLong().toString()
-
-                    val orderMessage = OrderMessage()
-                    orderMessage.amount = amount;
-                    orderMessage.baseToken = orderInfoResponse.data.getBaseToken()
-                    orderMessage.quoteToken = quoteToken
-                    orderMessage.price = formatPrice
-                    orderMessage.starkKey = starkKey
-                    orderMessage.expirationTimestamp = 4194303;
-                    orderMessage.nonce = orderInfoResponse.data.nonce;
-                    orderMessage.feeInfo = FeeInfo.of(
-                        (orderInfoResponse.data.feeRate.toDouble() * amountBuy.toDouble()).toLong(),
-                        orderInfoResponse.data.feeToken,
-                        vaultIds[0].toLong()
-                    )
-                    if (orderType == OrderBehavior.BUY) {
-                        orderMessage.direction = OrderMessage.DIRECTION_BID
-                        orderMessage.tokenSell = orderInfoResponse.data.baseToken
-                        orderMessage.tokenBuy = quoteToken
-                        orderMessage.amountSell = amountBuy
-                        orderMessage.amountBuy = amount
-                        orderMessage.vaultIdBuy = vaultIds[1]
-                        orderMessage.vaultIdSell = vaultIds[0]
-                    } else {
-                        orderMessage.direction = OrderMessage.DIRECTION_ASK
-                        orderMessage.tokenSell = quoteToken
-                        orderMessage.tokenBuy = orderInfoResponse.data.baseToken
-                        orderMessage.amountSell = amount
-                        orderMessage.amountBuy = amountBuy
-                        orderMessage.vaultIdBuy = vaultIds[0]
-                        orderMessage.vaultIdSell = vaultIds[1]
-                    }
-                    orderMessage.signature = starkExSigner.signOrderMsgWithFee(
-                        orderMessage.vaultIdSell,
-                        orderMessage.vaultIdBuy,
-                        orderMessage.amountSell,
-                        orderMessage.amountBuy,
-                        orderMessage.tokenSell,
-                        orderMessage.tokenBuy,
-                        orderMessage.nonce,
-                        orderMessage.expirationTimestamp,
-                        orderMessage.feeInfo.tokenId,
-                        orderMessage.feeInfo.sourceVaultId,
-                        orderMessage.feeInfo.feeLimit
+                    val orderMessage = orderMessage(
+                        starkKey,
+                        baseTokenType,
+                        baseTokenContract,
+                        contractType,
+                        contractAddress,
+                        tokenId,
+                        price,
+                        amount,
+                        orderType
                     )
                     restClient.order(orderMessage).await()
                 }
             }
 
+        }
+
+        private suspend fun orderMessage(
+            starkKey: String,
+            baseTokenType: String,
+            baseTokenContract: String,
+            contractType: String,
+            contractAddress: String,
+            tokenId: String,
+            price: String,
+            amount: String,
+            orderType: OrderBehavior
+        ): OrderMessage {
+            val orderInfoResponse = restClient.orderInfo(
+                OrderInfoMessage.of(
+                    starkKey,
+                    String.format("%s:%s", baseTokenType, baseTokenContract),
+                    String.format("%s:%s:%s", contractType, contractAddress, tokenId)
+                )
+            ).await()
+
+
+            val vaultIds = orderInfoResponse.data.getVaultIds()
+            val quoteToken = orderInfoResponse.data.assetIds[1]
+            val quantizedPrice = quantizedHelper.quantizedAmount(price, baseTokenType, baseTokenContract)
+            val formatPrice = quantizedPrice.toString()
+            val amountBuy = (quantizedPrice.toDouble() * amount.toDouble()).toLong().toString()
+
+            val orderMessage = OrderMessage()
+            orderMessage.amount = amount;
+            orderMessage.baseToken = orderInfoResponse.data.getBaseToken()
+            orderMessage.quoteToken = quoteToken
+            orderMessage.price = formatPrice
+            orderMessage.starkKey = starkKey
+            orderMessage.expirationTimestamp = 4194303;
+            orderMessage.nonce = orderInfoResponse.data.nonce;
+            orderMessage.feeInfo = FeeInfo.of(
+                (orderInfoResponse.data.feeRate.toDouble() * amountBuy.toDouble()).toLong(),
+                orderInfoResponse.data.feeToken,
+                vaultIds[0].toLong()
+            )
+            if (orderType == OrderBehavior.BUY) {
+                orderMessage.direction = OrderMessage.DIRECTION_BID
+                orderMessage.tokenSell = orderInfoResponse.data.baseToken
+                orderMessage.tokenBuy = quoteToken
+                orderMessage.amountSell = amountBuy
+                orderMessage.amountBuy = amount
+                orderMessage.vaultIdBuy = vaultIds[1]
+                orderMessage.vaultIdSell = vaultIds[0]
+            } else {
+                orderMessage.direction = OrderMessage.DIRECTION_ASK
+                orderMessage.tokenSell = quoteToken
+                orderMessage.tokenBuy = orderInfoResponse.data.baseToken
+                orderMessage.amountSell = amount
+                orderMessage.amountBuy = amountBuy
+                orderMessage.vaultIdBuy = vaultIds[0]
+                orderMessage.vaultIdSell = vaultIds[1]
+            }
+            orderMessage.signature = starkExSigner.signOrderMsgWithFee(
+                orderMessage.vaultIdSell,
+                orderMessage.vaultIdBuy,
+                orderMessage.amountSell,
+                orderMessage.amountBuy,
+                orderMessage.tokenSell,
+                orderMessage.tokenBuy,
+                orderMessage.nonce,
+                orderMessage.expirationTimestamp,
+                orderMessage.feeInfo.tokenId,
+                orderMessage.feeInfo.sourceVaultId,
+                orderMessage.feeInfo.feeLimit
+            )
+            return orderMessage
         }
 
         override fun cancelOrder(
@@ -467,6 +398,19 @@ class DefaultReddioClient(
 
             return CompletableFuture.supplyAsync {
                 runBlocking {
+
+                    val orderMessage = orderMessage(
+                        starkKey,
+                        baseTokenType,
+                        baseTokenAddress,
+                        contractType,
+                        contractAddress,
+                        tokenId,
+                        price,
+                        amount,
+                        orderType
+                    )
+
                     val orderInfoResponse = restClient.orderInfo(
                         OrderInfoMessage.of(
                             starkKey, String.format(
@@ -474,59 +418,6 @@ class DefaultReddioClient(
                             ), String.format("%s:%s:%s", contractType, contractAddress, tokenId)
                         )
                     ).await()
-
-
-                    val vaultIds = orderInfoResponse.data.getVaultIds()
-                    val quoteToken = orderInfoResponse.data.assetIds[1]
-                    val quantizedPrice = quantizedHelper.quantizedAmount(
-                        price, baseTokenType, baseTokenAddress
-                    )
-                    val formatPrice = quantizedPrice.toString()
-                    val amountBuy = (quantizedPrice.toDouble() * amount.toDouble()).toLong().toString()
-
-                    val orderMessage = OrderMessage()
-                    orderMessage.amount = amount;
-                    orderMessage.baseToken = orderInfoResponse.data.getBaseToken()
-                    orderMessage.quoteToken = quoteToken
-                    orderMessage.price = formatPrice
-                    orderMessage.starkKey = starkKey
-                    orderMessage.expirationTimestamp = 4194303;
-                    orderMessage.nonce = orderInfoResponse.data.nonce;
-                    orderMessage.feeInfo = FeeInfo.of(
-                        (orderInfoResponse.data.feeRate.toDouble() * amountBuy.toDouble()).toLong(),
-                        orderInfoResponse.data.feeToken,
-                        vaultIds[0].toLong()
-                    )
-                    if (orderType == OrderBehavior.BUY) {
-                        orderMessage.direction = OrderMessage.DIRECTION_BID
-                        orderMessage.tokenSell = orderInfoResponse.data.baseToken
-                        orderMessage.tokenBuy = quoteToken
-                        orderMessage.amountSell = amountBuy
-                        orderMessage.amountBuy = amount
-                        orderMessage.vaultIdBuy = vaultIds[1]
-                        orderMessage.vaultIdSell = vaultIds[0]
-                    } else {
-                        orderMessage.direction = OrderMessage.DIRECTION_ASK
-                        orderMessage.tokenSell = quoteToken
-                        orderMessage.tokenBuy = orderInfoResponse.data.baseToken
-                        orderMessage.amountSell = amount
-                        orderMessage.amountBuy = amountBuy
-                        orderMessage.vaultIdBuy = vaultIds[0]
-                        orderMessage.vaultIdSell = vaultIds[1]
-                    }
-                    orderMessage.signature = starkExSigner.signOrderMsgWithFee(
-                        orderMessage.vaultIdSell,
-                        orderMessage.vaultIdBuy,
-                        orderMessage.amountSell,
-                        orderMessage.amountBuy,
-                        orderMessage.tokenSell,
-                        orderMessage.tokenBuy,
-                        orderMessage.nonce,
-                        orderMessage.expirationTimestamp,
-                        orderMessage.feeInfo.tokenId,
-                        orderMessage.feeInfo.sourceVaultId,
-                        orderMessage.feeInfo.feeLimit
-                    )
 
                     // append pay info
                     if (OrderBehavior.BUY == orderType) {
@@ -600,68 +491,19 @@ class DefaultReddioClient(
             val orderType = OrderBehavior.BUY;
             val stopLimitTimeInForce = OrderMessage.STOP_LIMIT_TIME_IN_FORCE_IOC;
 
-            // FIXME: duplicated codes, expect stop limit order
             return CompletableFuture.supplyAsync {
                 runBlocking {
-                    val orderInfoResponse = restClient.orderInfo(
-                        OrderInfoMessage.of(
-                            starkKey,
-                            String.format("%s:%s", baseTokenType, baseTokenContract),
-                            String.format("%s:%s:%s", contractType, contractAddress, tokenId)
-                        )
-                    ).await()
-
-                    val vaultIds = orderInfoResponse.data.getVaultIds()
-                    val quoteToken = orderInfoResponse.data.assetIds[1]
-                    val quantizedPrice = quantizedHelper.quantizedAmount(price, baseTokenType, baseTokenContract)
-                    val formatPrice = quantizedPrice.toString()
-                    val amountBuy = (quantizedPrice.toDouble() * amount.toDouble()).toLong().toString()
-
-                    val orderMessage = OrderMessage()
-                    orderMessage.amount = amount;
-                    orderMessage.baseToken = orderInfoResponse.data.getBaseToken()
-                    orderMessage.quoteToken = quoteToken
-                    orderMessage.price = formatPrice
-                    orderMessage.starkKey = starkKey
-                    orderMessage.expirationTimestamp = 4194303;
-                    orderMessage.nonce = orderInfoResponse.data.nonce;
-                    orderMessage.feeInfo = FeeInfo.of(
-                        (orderInfoResponse.data.feeRate.toDouble() * amountBuy.toDouble()).toLong(),
-                        orderInfoResponse.data.feeToken,
-                        vaultIds[0].toLong()
+                    val orderMessage = orderMessage(
+                        starkKey,
+                        baseTokenType,
+                        baseTokenContract,
+                        contractType,
+                        contractAddress,
+                        tokenId,
+                        price,
+                        amount,
+                        orderType
                     )
-
-                    if (orderType == OrderBehavior.BUY) {
-                        orderMessage.direction = OrderMessage.DIRECTION_BID
-                        orderMessage.tokenSell = orderInfoResponse.data.baseToken
-                        orderMessage.tokenBuy = quoteToken
-                        orderMessage.amountSell = amountBuy
-                        orderMessage.amountBuy = amount
-                        orderMessage.vaultIdBuy = vaultIds[1]
-                        orderMessage.vaultIdSell = vaultIds[0]
-                    } else {
-                        orderMessage.direction = OrderMessage.DIRECTION_ASK
-                        orderMessage.tokenSell = quoteToken
-                        orderMessage.tokenBuy = orderInfoResponse.data.baseToken
-                        orderMessage.amountSell = amount
-                        orderMessage.amountBuy = amountBuy
-                        orderMessage.vaultIdBuy = vaultIds[0]
-                        orderMessage.vaultIdSell = vaultIds[1]
-                    }
-                    orderMessage.signature = starkExSigner.signOrderMsgWithFee(
-                        orderMessage.vaultIdSell,
-                        orderMessage.vaultIdBuy,
-                        orderMessage.amountSell,
-                        orderMessage.amountBuy,
-                        orderMessage.tokenSell,
-                        orderMessage.tokenBuy,
-                        orderMessage.nonce,
-                        orderMessage.expirationTimestamp,
-                        orderMessage.feeInfo.tokenId,
-                        orderMessage.feeInfo.sourceVaultId,
-                        orderMessage.feeInfo.feeLimit
-                    )
-
                     // setup stop limit order as IOC
                     orderMessage.setStopLimitTimeInForce(stopLimitTimeInForce)
                     restClient.order(orderMessage).await()
@@ -736,46 +578,25 @@ class DefaultReddioClient(
         }
 
         override fun transferETH(
-            amount: String,
-            receiver: String,
-            expirationTimeStamp: Long
+            amount: String, receiver: String, expirationTimeStamp: Long
         ): CompletableFuture<ResponseWrapper<TransferResponse>> {
             val starkKey = this.starkExSigner.getStarkKey();
             return this.transfer(
-                starkKey,
-                amount,
-                "ETH",
-                "",
-                ReddioClient.TOKEN_TYPE_ETH,
-                receiver,
-                expirationTimeStamp
+                starkKey, amount, "ETH", "", ReddioClient.TOKEN_TYPE_ETH, receiver, expirationTimeStamp
             )
         }
 
         override fun transferERC20(
-            amount: String,
-            contractAddress: String,
-            receiver: String,
-            expirationTimeStamp: Long
+            amount: String, contractAddress: String, receiver: String, expirationTimeStamp: Long
         ): CompletableFuture<ResponseWrapper<TransferResponse>> {
             val starkKey = this.starkExSigner.getStarkKey();
             return this.transfer(
-                starkKey,
-                amount,
-                contractAddress,
-                "",
-                ReddioClient.TOKEN_TYPE_ERC20,
-                receiver,
-                expirationTimeStamp
+                starkKey, amount, contractAddress, "", ReddioClient.TOKEN_TYPE_ERC20, receiver, expirationTimeStamp
             )
         }
 
         override fun transferERC721(
-            amount: String,
-            contractAddress: String,
-            tokenId: String,
-            receiver: String,
-            expirationTimeStamp: Long
+            amount: String, contractAddress: String, tokenId: String, receiver: String, expirationTimeStamp: Long
         ): CompletableFuture<ResponseWrapper<TransferResponse>> {
             val starkKey = this.starkExSigner.getStarkKey();
             return this.transfer(
