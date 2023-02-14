@@ -115,7 +115,6 @@ class DefaultReddioClient(
     ) : ReddioClient.WithStarkExSigner {
 
         override fun withdrawalMessage(
-            starkKey: String,
             amount: String,
             contractAddress: String,
             tokenId: String,
@@ -123,6 +122,7 @@ class DefaultReddioClient(
             receiver: String,
             expirationTimeStamp: Long
         ): WithdrawalToMessage {
+            val starkKey = starkExSigner.getStarkKey()
             return runBlocking {
                 val quantizedAmount = quantizedHelper.quantizedAmount(amount, type, contractAddress).toString()
                 val assetId = getAssetId(contractAddress, tokenId, type)
@@ -154,9 +154,7 @@ class DefaultReddioClient(
             receiver: String,
             expirationTimeStamp: Long
         ): WithdrawalToMessage {
-            val starkKey = starkExSigner.getStarkKey()
             return withdrawalMessage(
-                starkKey,
                 amount,
                 "ETH",
                 "",
@@ -172,9 +170,7 @@ class DefaultReddioClient(
             receiver: String,
             expirationTimeStamp: Long
         ): WithdrawalToMessage {
-            val starkKey = starkExSigner.getStarkKey()
             return withdrawalMessage(
-                starkKey,
                 amount,
                 contractAddress,
                 "",
@@ -191,9 +187,7 @@ class DefaultReddioClient(
             receiver: String,
             expirationTimeStamp: Long
         ): WithdrawalToMessage {
-            val starkKey = starkExSigner.getStarkKey()
             return withdrawalMessage(
-                starkKey,
                 amount,
                 contractAddress,
                 tokenId,
