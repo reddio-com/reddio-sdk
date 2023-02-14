@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public interface ReddioClient {
+public interface ReddioClient extends AutoCloseable {
 
     String TOKEN_TYPE_ETH = "ETH";
     String TOKEN_TYPE_ERC20 = "ERC20";
@@ -16,7 +16,7 @@ public interface ReddioClient {
     String RUSD_TESTNET_CONTRACT_ADDRESS = "0x241f280f13Ff42bbd884d039804c1E5648392A4B";
 
 
-    interface WithStarkExSigner {
+    interface WithStarkExSigner extends AutoCloseable {
 
         CompletableFuture<ResponseWrapper<TransferResponse>> transfer(String starkKey, String amount, String contractAddress, String tokenId, String tokenType, String receiver, long expirationTimeStamp);
 

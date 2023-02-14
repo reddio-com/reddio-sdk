@@ -33,14 +33,16 @@ public class DefaultReddioRestClient implements ReddioRestClient {
     public DefaultReddioRestClient(String baseUrl, String apiKey) {
         this.apiKey = apiKey;
         this.baseEndpoint = baseUrl;
-        this.httpClient = new OkHttpClient.Builder()
-                .addInterceptor(ReddioUAInterceptor.create())
-                .addInterceptor(ReddioApiKeyInterceptor.create(this.apiKey))
-                .build();
+        this.httpClient = new OkHttpClient.Builder().addInterceptor(ReddioUAInterceptor.create()).addInterceptor(ReddioApiKeyInterceptor.create(this.apiKey)).build();
     }
 
     public DefaultReddioRestClient(String baseUrl) {
         this(baseUrl, "");
+    }
+
+    @Override
+    public void close() throws Exception {
+        // noop
     }
 
     @Override
@@ -136,9 +138,7 @@ public class DefaultReddioRestClient implements ReddioRestClient {
 
     @Override
     public CompletableFuture<ResponseWrapper<WithdrawalStatusResponse>> withdrawalStatus(WithdrawalStatusMessage withdrawalStatusMessage) {
-        String endpoint = baseEndpoint + "/v1/withdrawal/status?" +
-                "stage=" + withdrawalStatusMessage.getStage() +
-                "&ethaddress=" + withdrawalStatusMessage.getEthAddress();
+        String endpoint = baseEndpoint + "/v1/withdrawal/status?" + "stage=" + withdrawalStatusMessage.getStage() + "&ethaddress=" + withdrawalStatusMessage.getEthAddress();
         Request request = new Request.Builder().url(endpoint).get().build();
         Call call = this.httpClient.newCall(request);
         return asFuture(call, new TypeReference<ResponseWrapper<WithdrawalStatusResponse>>() {

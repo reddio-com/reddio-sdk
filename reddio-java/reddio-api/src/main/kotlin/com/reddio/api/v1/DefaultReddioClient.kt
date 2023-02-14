@@ -107,6 +107,9 @@ class DefaultReddioClient(
         private val restClient: ReddioRestClient,
         private val starkExSigner: StarkExSigner,
     ) : ReddioClient.WithStarkExSigner {
+        override fun close() {
+            // noop
+        }
 
         override fun withdrawalMessage(
             amount: String,
@@ -250,7 +253,7 @@ class DefaultReddioClient(
         ): CompletableFuture<ResponseWrapper<OrderResponse>> {
             return CompletableFuture.supplyAsync {
                 runBlocking {
-                   val orderMessage= orderMessage(
+                    val orderMessage = orderMessage(
                         starkKey,
                         "ETH",
                         "ETH",
@@ -606,6 +609,9 @@ class DefaultReddioClient(
         }
     }
 
+    override fun close() {
+        // noop
+    }
 
     private suspend fun getAssetId(
         contractAddress: String,
