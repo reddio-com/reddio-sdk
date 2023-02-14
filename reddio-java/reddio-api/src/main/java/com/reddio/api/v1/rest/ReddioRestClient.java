@@ -53,6 +53,8 @@ public interface ReddioRestClient {
      */
     CompletableFuture<ResponseWrapper<GetRecordResponse>> getRecord(GetRecordMessage getRecordMessage);
 
+    CompletableFuture<ResponseWrapper<GetRecordBySignatureResponse>> getRecordBySignature(Signature signature);
+
     CompletableFuture<ResponseWrapper<GetTxnResponse>> getTxn(GetTxnMessage getTxnMessage);
 
     /**
