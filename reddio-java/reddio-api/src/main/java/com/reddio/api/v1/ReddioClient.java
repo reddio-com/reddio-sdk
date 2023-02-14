@@ -24,7 +24,7 @@ public interface ReddioClient extends AutoCloseable {
 
         CompletableFuture<ResponseWrapper<TransferResponse>> transferERC20(String amount, String contractAddress, String receiver, long expirationTimeStamp);
 
-        CompletableFuture<ResponseWrapper<TransferResponse>> transferERC721( String contractAddress, String tokenId, String receiver, long expirationTimeStamp);
+        CompletableFuture<ResponseWrapper<TransferResponse>> transferERC721(String contractAddress, String tokenId, String receiver, long expirationTimeStamp);
 
 
         WithdrawalToMessage withdrawalMessage(String amount, String contractAddress, String tokenId, String type, String receiver, long expirationTimeStamp);
@@ -81,6 +81,12 @@ public interface ReddioClient extends AutoCloseable {
     CompletableFuture<ResponseWrapper<Order>> getOrder(long orderId);
 
     CompletableFuture<ResponseWrapper<GetRecordResponse>> getRecord(String starkKey, long sequenceId);
+
+    CompletableFuture<ResponseWrapper<GetRecordResponse>> getRecordBySignature(String r, String s);
+
+    CompletableFuture<ResponseWrapper<GetRecordResponse>> getRecordBySignature(Signature signature);
+
+    CompletableFuture<ResponseWrapper<ListRecordsResponse>> listRecords(String starkKey, Long limit, Long page, String contractAddress);
 
     CompletableFuture<ResponseWrapper<GetTxnResponse>> getTxn(long sequenceId);
 

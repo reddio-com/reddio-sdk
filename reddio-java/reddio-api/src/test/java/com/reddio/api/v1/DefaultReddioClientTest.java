@@ -119,7 +119,6 @@ public class DefaultReddioClientTest {
     }
 
     @Test
-    @Ignore("example, not a test")
     public void testGetOrder() throws ExecutionException, InterruptedException {
         DefaultReddioClient client = DefaultReddioClient.testnet();
         ResponseWrapper<Order> getOrderResponse = client.getOrder(304282).get();
@@ -130,7 +129,7 @@ public class DefaultReddioClientTest {
         Assert.assertEquals("1000", data.getPrice());
         Assert.assertEquals(0, data.getDirection().longValue());
         Assert.assertEquals("1", data.getAmount());
-        Assert.assertEquals("1", data.getUnFilled());
+        Assert.assertEquals("0", data.getUnFilled());
 
         Assert.assertEquals("0x352f9ffd821a525051de2d71126113505a7b0a73d98dbc0ac0ff343cfbdef5e", data.getSymbol().getBaseTokenAssetId());
         Assert.assertEquals("0x22d8810dfe28c2c083463d64b886b7e7fbe2b455c9a03ea2f0afd1457abd57d", data.getSymbol().getQuoteTokenAssetId());
@@ -145,8 +144,18 @@ public class DefaultReddioClientTest {
         Assert.assertEquals("ERC721", data.getTokenType());
         Assert.assertEquals("1026", data.getTokenId());
         Assert.assertEquals("0.001", data.getDisplayPrice());
-        Assert.assertEquals(OrderState.Placed, data.getOrderState());
+        Assert.assertEquals(OrderState.Filled, data.getOrderState());
 
+    }
+
+    @Test
+    public void testListOrders() throws ExecutionException, InterruptedException {
+        ReddioClient reddioClient = DefaultReddioClient.testnet();
+        ResponseWrapper<ListRecordsResponse> wrapper = reddioClient.listRecords("0x6736f7449da3bf44bf0f7bdd6463818e1ef272641d43021e8bca17b32ec2df0", 3L, 2L, null).get();
+        Assert.assertEquals("OK", wrapper.getStatus());
+        Assert.assertEquals(3, wrapper.getData().getPageSize().longValue());
+        Assert.assertEquals(2, wrapper.getData().getCurrentPage().longValue());
+        Assert.assertEquals(3, wrapper.getData().getList().size());
     }
 
     @Test

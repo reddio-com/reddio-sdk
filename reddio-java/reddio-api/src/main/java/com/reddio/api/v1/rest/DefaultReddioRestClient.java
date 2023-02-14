@@ -109,6 +109,29 @@ public class DefaultReddioRestClient implements ReddioRestClient {
     }
 
     @Override
+    public CompletableFuture<ResponseWrapper<ListRecordsResponse>> listRecords(ListRecordsMessage listRecordsMessage) {
+        final HttpUrl.Builder builder = Objects.requireNonNull(HttpUrl.parse(baseEndpoint + "/v1/records")).newBuilder();
+        if (listRecordsMessage.getStarkKey() != null) {
+            builder.addQueryParameter("stark_key", listRecordsMessage.getStarkKey());
+        }
+        if (listRecordsMessage.getContractAddress() != null) {
+            builder.addQueryParameter("contract_address", listRecordsMessage.getContractAddress());
+        }
+        if (listRecordsMessage.getLimit() != null) {
+            builder.addQueryParameter("limit", listRecordsMessage.getLimit().toString());
+        }
+        if (listRecordsMessage.getPage() != null) {
+            builder.addQueryParameter("page", listRecordsMessage.getPage().toString());
+        }
+
+        final HttpUrl endpoint = builder.build();
+        Request request = new Request.Builder().url(endpoint).get().build();
+        Call call = this.httpClient.newCall(request);
+        return asFuture(call, new TypeReference<ResponseWrapper<ListRecordsResponse>>() {
+        }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint.toString()));
+    }
+
+    @Override
     public CompletableFuture<ResponseWrapper<GetTxnResponse>> getTxn(GetTxnMessage getTxnMessage) {
         String endpoint = baseEndpoint + "/v1/txn?" + "sequence_id=" + getTxnMessage.getSequenceId();
 
