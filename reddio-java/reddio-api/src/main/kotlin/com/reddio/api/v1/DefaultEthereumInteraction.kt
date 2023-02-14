@@ -358,6 +358,7 @@ class DefaultEthereumInteraction(
                     cancelSubscription(uuid)
                 }
             })
+            uuid = registerSubscription(result)
 
             result
         }
