@@ -2,7 +2,7 @@ package com.reddio.api.v1.rest;
 
 import java.util.concurrent.CompletableFuture;
 
-public interface ReddioRestClient {
+public interface ReddioRestClient extends AutoCloseable {
     /**
      * Transfer assets from sender to receiver on layer 2.
      * <p>

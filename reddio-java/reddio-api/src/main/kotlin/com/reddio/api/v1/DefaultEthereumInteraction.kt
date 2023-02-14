@@ -2,6 +2,7 @@ package com.reddio.api.v1
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.reddio.ReddioException
 import com.reddio.abi.Deposits
 import com.reddio.abi.Withdrawals
 import com.reddio.api.v1.rest.GetAssetIdMessage
@@ -29,6 +30,7 @@ import org.web3j.utils.Numeric
 import java.math.BigInteger
 import java.util.*
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.function.Consumer
 
 
@@ -41,6 +43,11 @@ class DefaultEthereumInteraction(
 
     private val web3j = Web3j.build(web3jService);
     private val quantizedHelper = QuantizedHelper(restClient)
+
+    // TODO: optimize it for concurrent access
+    private val subscriptions = mutableMapOf<UUID, Disposable>();
+
+    private val closed = AtomicBoolean(false);
 
     override fun depositETH(
         starkKey: String,
@@ -330,14 +337,29 @@ class DefaultEthereumInteraction(
         startBlockNumber: BigInteger,
         requiredBlockConfirmation: Long
     ): Disposable {
+        requireNotClosed()
         return runBlocking {
             val deposits = Deposits.load(reddioStarexContractAddress(), web3j, credentials, null)
             val blockConfirmationRequiredEvents = BlockConfirmationRequiredEvents(
                 deposits::logDepositEventFlowable, requiredBlockConfirmation, web3j
             )
-            blockConfirmationRequiredEvents.eventFlowableWithEthBlock(startBlockNumber).subscribe {
+
+            var uuid: UUID? = null
+
+            val result = blockConfirmationRequiredEvents.eventFlowableWithEthBlock(startBlockNumber).subscribe({
                 consumer.accept(it)
-            }
+            }, {
+                uuid?.let { uuid ->
+                    cancelSubscription(uuid)
+                }
+                throw it
+            }, {
+                uuid?.let { uuid ->
+                    cancelSubscription(uuid)
+                }
+            })
+
+            result
         }
     }
 
@@ -360,14 +382,30 @@ class DefaultEthereumInteraction(
         startBlockNumber: BigInteger,
         requiredBlockConfirmation: Long
     ): Disposable {
+        requireNotClosed()
         return runBlocking {
             val deposits = Deposits.load(reddioStarexContractAddress(), web3j, credentials, null)
             val blockConfirmationRequiredEvents = BlockConfirmationRequiredEvents(
                 deposits::logNftDepositEventFlowable, requiredBlockConfirmation, web3j
             )
-            blockConfirmationRequiredEvents.eventFlowableWithEthBlock(startBlockNumber).subscribe {
+
+            var uuid: UUID? = null
+
+            val result = blockConfirmationRequiredEvents.eventFlowableWithEthBlock(startBlockNumber).subscribe({
                 consumer.accept(it)
-            }
+            }, {
+                uuid?.let { uuid ->
+                    cancelSubscription(uuid)
+                }
+                throw it
+            }, {
+                uuid?.let { uuid ->
+                    cancelSubscription(uuid)
+                }
+            })
+            uuid = registerSubscription(result)
+
+            result
         }
     }
 
@@ -382,6 +420,37 @@ class DefaultEthereumInteraction(
         )
     }
 
+    @Synchronized
+    override fun close() {
+        this.closed.set(true)
+        this.cancelAllSubscriptions()
+    }
+
+    @Synchronized
+    private fun registerSubscription(subscription: Disposable): UUID {
+        val uuid = UUID.randomUUID()
+        this.subscriptions[uuid] = (subscription);
+        return uuid
+    }
+
+    @Synchronized
+    private fun cancelSubscription(uuid: UUID) {
+        this.subscriptions[uuid]?.dispose()
+        this.subscriptions.remove(uuid)
+    }
+
+    @Synchronized
+    private fun cancelAllSubscriptions() {
+        this.subscriptions.forEach { (_, value) -> value.dispose() }
+        this.subscriptions.clear()
+    }
+
+    @Synchronized
+    private fun requireNotClosed() {
+        if (this.closed.get()) {
+            throw ReddioException("Reddio DefaultEthereumInteraction is closed")
+        }
+    }
 
     companion object {
         private const val SIGN_MESSAGE = "Generate layer 2 key"
@@ -500,8 +569,7 @@ class DefaultEthereumInteraction(
             val starkPrivateKey = getStarkPrivateKey(ethPrivateKey, chainId)
             val starkKey = CryptoService.getPublicKey(starkPrivateKey)
             return StarkKeys.of(
-                "0x" + starkKey.toString(16),
-                "0x" + starkPrivateKey.toString(16)
+                "0x" + starkKey.toString(16), "0x" + starkPrivateKey.toString(16)
             )
         }
 

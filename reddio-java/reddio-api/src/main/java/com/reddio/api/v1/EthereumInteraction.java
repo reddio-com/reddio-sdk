@@ -11,7 +11,7 @@ import java.math.BigInteger;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-public interface EthereumInteraction {
+public interface EthereumInteraction extends AutoCloseable {
 
     CompletableFuture<LogDeposit> depositETH(
             String starkKey,
