@@ -5,7 +5,6 @@ import com.reddio.sign.PaymentSign
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
-import org.web3j.utils.Convert
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.CompletableFuture
@@ -486,26 +485,22 @@ class DefaultReddioClient(
             amount: String,
             marketplaceUuid: String
         ): CompletableFuture<ResponseWrapper<OrderResponse>> {
-            val baseTokenType = "ETH";
-            val baseTokenContract = "ETH";
-            val orderType = OrderBehavior.BUY;
-            val stopLimitTimeInForce = OrderMessage.STOP_LIMIT_TIME_IN_FORCE_IOC;
-
             return CompletableFuture.supplyAsync {
                 runBlocking {
                     val orderMessage = orderMessage(
                         starkKey,
-                        baseTokenType,
-                        baseTokenContract,
+                        "ETH",
+                        "ETH",
                         contractType,
                         contractAddress,
                         tokenId,
                         price,
                         amount,
-                        orderType
+                        OrderBehavior.BUY
                     )
+
                     // setup stop limit order as IOC
-                    orderMessage.setStopLimitTimeInForce(stopLimitTimeInForce)
+                    orderMessage.setStopLimitTimeInForce(OrderMessage.STOP_LIMIT_TIME_IN_FORCE_IOC)
                     restClient.order(orderMessage).await()
                 }
             }
