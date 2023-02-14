@@ -100,11 +100,11 @@ public class DefaultReddioRestClient implements ReddioRestClient {
     }
 
     @Override
-    public CompletableFuture<ResponseWrapper<GetRecordBySignatureResponse>> getRecordBySignature(Signature signature) {
-        String endpoint = baseEndpoint + "/v1/record/by/signature?r=" + Objects.requireNonNull(signature.getS()) + "&s=" + Objects.requireNonNull(signature.getR());
+    public CompletableFuture<ResponseWrapper<GetRecordResponse>> getRecordBySignature(Signature signature) {
+        String endpoint = baseEndpoint + "/v1/record/by/signature?r=" + Objects.requireNonNull(signature.getR()) + "&s=" + Objects.requireNonNull(signature.getS());
         Request request = new Request.Builder().url(endpoint).get().build();
         Call call = this.httpClient.newCall(request);
-        return asFuture(call, new TypeReference<ResponseWrapper<GetRecordBySignatureResponse>>() {
+        return asFuture(call, new TypeReference<ResponseWrapper<GetRecordResponse>>() {
         }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint));
     }
 

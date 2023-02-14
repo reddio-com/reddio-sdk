@@ -53,7 +53,7 @@ public interface ReddioRestClient extends AutoCloseable {
      */
     CompletableFuture<ResponseWrapper<GetRecordResponse>> getRecord(GetRecordMessage getRecordMessage);
 
-    CompletableFuture<ResponseWrapper<GetRecordBySignatureResponse>> getRecordBySignature(Signature signature);
+    CompletableFuture<ResponseWrapper<GetRecordResponse>> getRecordBySignature(Signature signature);
 
     CompletableFuture<ResponseWrapper<GetTxnResponse>> getTxn(GetTxnMessage getTxnMessage);
 

@@ -5,36 +5,63 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
+@Data
+@NoArgsConstructor
+@AllArgsConstructor(staticName = "of")
+public class SequenceRecord {
+    public static final int SEQUENCE_STATUS_SUBMITTED = 0;
+    public static final int SEQUENCE_STATUS_ACCEPTED = 1;
+    public static final int SEQUENCE_STATUS_FAILED = 2;
+    public static final int SEQUENCE_STATUS_PROVED = 3;
+    public static final int SEQUENCE_STATUS_PROVED_ERROR = 4;
 
-public class GetRecordBySignatureResponse extends ArrayList<GetRecordBySignatureResponse.Record> {
+    @JsonProperty("amount")
+    public String amount;
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor(staticName = "of")
-    public static class Record {
+    @JsonProperty("asset_id")
+    public String assetId;
 
-        @JsonProperty("amount")
-        private String amount;
+    @JsonProperty("asset_name")
+    public String assetName;
 
-        @JsonProperty("order")
-        private GetRecordBySignatureResponse.Order order;
+    @JsonProperty("asset_type")
+    public String assetType;
 
-        @JsonProperty("record_type")
-        private Long recordType;
+    @JsonProperty("contract_address")
+    public String contractAddress;
 
-        @JsonProperty("sequence_id")
-        private Long sequenceId;
+    @JsonProperty("display_value")
+    public String displayValue;
 
-        @JsonProperty("stark_key")
-        private String starkKey;
+    @JsonProperty("from")
+    public String from;
 
-        @JsonProperty("status")
-        private int status;
+    @JsonProperty("order")
+    private Order order;
 
-        @JsonProperty("time")
-        private Long time;
-    }
+    @JsonProperty("record_type")
+    public RecordType recordType;
+
+    @JsonProperty("sequence_id")
+    public long sequenceId;
+
+    @JsonProperty("stark_key")
+    public String starkKey;
+
+    @JsonProperty("status")
+    public RecordStatus status;
+
+    @JsonProperty("resp")
+    public String resp;
+
+    @JsonProperty("time")
+    public long time;
+
+    @JsonProperty("to")
+    public String to;
+
+    @JsonProperty("token_id")
+    public String tokenId;
 
     @Data
     @NoArgsConstructor

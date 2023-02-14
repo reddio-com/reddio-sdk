@@ -63,11 +63,11 @@ class DefaultReddioClient(
                         throw InterruptedException("timed out")
                     }
                     val record = restClient.getRecord(GetRecordMessage.of(starkKey, sequenceId)).await()
-                    if (GetRecordResponse.SequenceRecord.SEQUENCE_STATUS_ACCEPTED == record.getData()[0].getStatus()) {
+                    if (RecordStatus.AcceptedByReddio == record.getData()[0].getStatus()) {
                         result = record
                         break
                     }
-                    if (GetRecordResponse.SequenceRecord.SEQUENCE_STATUS_FAILED == record.getData()[0].getStatus()) {
+                    if (RecordStatus.FailedOnReddio == record.getData()[0].getStatus()) {
                         throw TransferFailedException("transfer failed", record.getData())
                     }
                     delay(interval.toMillis())

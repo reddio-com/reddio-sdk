@@ -17,9 +17,9 @@ public enum OrderState {
         this.value = value;
     }
 
-    @JsonValue
-    public int value;
+    private int value;
 
+    @JsonValue
     public int getValue() {
         return value;
     }
