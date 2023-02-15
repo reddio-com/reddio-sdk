@@ -15,14 +15,14 @@ public interface ReddioApiRequest<RequestType, ResponseType> {
      *
      * @return The response.
      */
-    ResponseType send();
+    ResponseType call();
 
     /**
      * Sends the request asynchronously.
      *
      * @return A CompletableFuture that will be completed with the response.
      */
-    CompletableFuture<ResponseType> sendAsync();
+    CompletableFuture<ResponseType> callAsync();
 
     /**
      * Returns the raw request.
