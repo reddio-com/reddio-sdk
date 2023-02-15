@@ -180,6 +180,7 @@ public class DefaultEthereumInteractionTest {
     }
 
     @Test
+    @Ignore
     public void testDeployERC721M() throws Exception {
         Web3j web3j = Web3j.build(new HttpService("https://eth-goerli.g.alchemy.com/v2/yyabgQ1GlM0xxqDC4ZBbR1lBcBKQmnxT"));
         Credentials credentials = Credentials.create("552ad9b756acfeb2e32cfd3354b653b1f95177b851a44155d6178d244b80e08b");
