@@ -8,10 +8,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.Function;
 
 /**
@@ -37,34 +34,93 @@ public class RecordPoller {
         this.sequenceId = sequenceId;
     }
 
+    /**
+     * Get the stark key of the record.
+     *
+     * @return the stark key of the record.
+     */
     public String getStarkKey() {
         return starkKey;
     }
 
+    /**
+     * Get the sequence id of the record.
+     *
+     * @return the sequence id of the record.
+     */
     public Long getSequenceId() {
         return sequenceId;
     }
 
-    public SequenceRecord poll(RecordStatus... targetRecordStatus){
+    /**
+     * Poll the record until it reach the desired {@link RecordStatus}, with default wait time and max attempts.
+     *
+     * @param targetRecordStatus An array of desired {@link RecordStatus}.
+     * @return The record with desired {@link RecordStatus}.
+     * @throws CompletionException the polling exceed the max attempts.
+     */
+    public SequenceRecord poll(RecordStatus... targetRecordStatus) {
         return this.pollAsync(targetRecordStatus).join();
     }
 
+    /**
+     * Poll the record until it reach the desired {@link RecordStatus}.
+     *
+     * @param wait               The wait time between each polling.
+     * @param maxAttempts        The max attempts to poll.
+     * @param targetRecordStatus An array of desired {@link RecordStatus}.
+     * @return The record with desired {@link RecordStatus}.
+     * @throws CompletionException the polling exceed the max attempts.
+     */
     public SequenceRecord poll(Duration wait, Integer maxAttempts, RecordStatus... targetRecordStatus) {
         return this.pollAsync(wait, maxAttempts, targetRecordStatus).join();
     }
 
+    /**
+     * Poll the record with custom stop condition.
+     *
+     * @param wait          The wait time between each polling.
+     * @param maxAttempts   The max attempts to poll.
+     * @param stopCondition The stop condition function, if the condition function returns true, the polling will stop.
+     * @return The record with desired {@link RecordStatus}.
+     * @throws CompletionException the polling exceed the max attempts.
+     */
     public SequenceRecord poll(Duration wait, Integer maxAttempts, Function<SequenceRecord, Boolean> stopCondition) {
         return this.pollAsync(wait, maxAttempts, stopCondition).join();
     }
-    public CompletableFuture<SequenceRecord> pollAsync(RecordStatus... desiredRecordStatus){
+
+    /**
+     * Poll the record asynchronously, until it reach the desired {@link RecordStatus}, with default wait time and max attempts.
+     *
+     * @param desiredRecordStatus An array of desired {@link RecordStatus}.
+     * @return A {@link CompletableFuture} of the record with desired {@link RecordStatus}.
+     */
+    public CompletableFuture<SequenceRecord> pollAsync(RecordStatus... desiredRecordStatus) {
         return this.pollAsync(DEFAULT_WAIT, DEFAULT_MAX_ATTEMPTS, desiredRecordStatus);
     }
 
+    /**
+     * Poll the record asynchronously, until it reach the desired {@link RecordStatus}.
+     *
+     * @param wait                The wait time between each polling.
+     * @param maxAttempts         The max attempts to poll.
+     * @param desiredRecordStatus An array of desired {@link RecordStatus}.
+     * @return A {@link CompletableFuture} of the record with desired {@link RecordStatus}.
+     */
+
     public CompletableFuture<SequenceRecord> pollAsync(Duration wait, Integer maxAttempts, RecordStatus... desiredRecordStatus) {
         Set<RecordStatus> set = new HashSet<>(Arrays.asList(desiredRecordStatus));
-        return this.pollAsync(wait, maxAttempts, record -> record != null && record.getStatus() != null && set.contains(null));
+        return this.pollAsync(wait, maxAttempts, record -> record != null && record.getStatus() != null && set.contains(record.getStatus()));
     }
 
+    /**
+     * Poll the record asynchronously with custom stop condition.
+     *
+     * @param wait          The wait time between each polling.
+     * @param maxAttempts   The max attempts to poll.
+     * @param stopCondition The stop condition function, if the condition function returns true, the polling will stop.
+     * @return A {@link CompletableFuture} of the record with desired {@link RecordStatus}.
+     */
     public CompletableFuture<SequenceRecord> pollAsync(Duration wait, Integer maxAttempts, Function<SequenceRecord, Boolean> stopCondition) {
         CompletableFuture<SequenceRecord> result = new CompletableFuture<>();
         final PollingTask task = new PollingTask(this.restClient, this.starkKey, this.sequenceId, wait, maxAttempts, stopCondition, 0, result);

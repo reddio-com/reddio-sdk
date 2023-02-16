@@ -8,10 +8,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.Function;
 
 /**
@@ -35,31 +32,84 @@ public class OrderPoller {
         this.sequenceId = sequenceId;
     }
 
+    /**
+     * Get the sequence id of the order.
+     *
+     * @return the sequence id of the order.
+     */
     public Long getSequenceId() {
         return this.sequenceId;
     }
 
+    /**
+     * Poll the order until it reach the desired {@link com.reddio.api.v1.rest.OrderState}, with default wait time and max attempts.
+     *
+     * @param desiredOrderState An array of desired {@link com.reddio.api.v1.rest.OrderState}.
+     * @return The order with desired {@link com.reddio.api.v1.rest.OrderState}.
+     * @throws CompletionException the polling exceed the max attempts.
+     */
     public Order poll(OrderState... desiredOrderState) {
         return this.pollAsync(desiredOrderState).join();
     }
 
+    /**
+     * Poll the order until it reach the desired {@link com.reddio.api.v1.rest.OrderState}.
+     *
+     * @param wait              the wait time between each poll.
+     * @param maxAttempts       the max attempts to poll.
+     * @param desiredOrderState An array of desired {@link com.reddio.api.v1.rest.OrderState}.
+     * @return The order with desired {@link com.reddio.api.v1.rest.OrderState}.
+     * @throws CompletionException the polling exceed the max attempts.
+     */
     public Order poll(Duration wait, Integer maxAttempts, OrderState... desiredOrderState) {
         return this.pollAsync(wait, maxAttempts, desiredOrderState).join();
     }
 
+    /**
+     * Poll the order with custom stop condition.
+     *
+     * @param wait          the wait time between each poll.
+     * @param maxAttempts   the max attempts to poll.
+     * @param stopCondition the stop condition.
+     * @return The order with desired {@link com.reddio.api.v1.rest.OrderState}.
+     * @throws CompletionException the polling exceed the max attempts.
+     */
     public Order poll(Duration wait, Integer maxAttempts, Function<Order, Boolean> stopCondition) {
         return this.pollAsync(wait, maxAttempts, stopCondition).join();
     }
 
+    /**
+     * Poll the order asynchronously, until it reach the desired {@link com.reddio.api.v1.rest.OrderState}, with default wait time and max attempts.
+     *
+     * @param desiredOrderState An array of desired {@link com.reddio.api.v1.rest.OrderState}.
+     * @return A {@link CompletableFuture} of the order with desired {@link com.reddio.api.v1.rest.OrderState}.
+     */
     public CompletableFuture<Order> pollAsync(OrderState... desiredOrderState) {
         return this.pollAsync(DEFAULT_WAIT, DEFAULT_MAX_ATTEMPTS, desiredOrderState);
     }
 
+    /**
+     * Poll the order asynchronously, until it reach the desired {@link com.reddio.api.v1.rest.OrderState}.
+     *
+     * @param wait              the wait time between each poll.
+     * @param maxAttempts       the max attempts to poll.
+     * @param desiredOrderState An array of desired {@link com.reddio.api.v1.rest.OrderState}.
+     * @return A {@link CompletableFuture} of the order with desired {@link com.reddio.api.v1.rest.OrderState}.
+     */
     public CompletableFuture<Order> pollAsync(Duration wait, Integer maxAttempts, OrderState... desiredOrderState) {
         Set<OrderState> set = new HashSet<>(Arrays.asList(desiredOrderState));
         return this.pollAsync(wait, maxAttempts, order -> order != null && order.getOrderState() != null && set.contains(order.getOrderState()));
     }
 
+    /**
+     * Poll the order asynchronously with custom stop condition.
+     *
+     * @param wait          the wait time between each poll.
+     * @param maxAttempts   the max attempts to poll.
+     * @param stopCondition the stop condition.
+     * @return A {@link CompletableFuture} of the order with desired {@link com.reddio.api.v1.rest.OrderState}.
+     * @throws CompletionException the polling exceed the max attempts.
+     */
     public CompletableFuture<Order> pollAsync(Duration wait, Integer maxAttempts, Function<Order, Boolean> stopCondition) {
         CompletableFuture<Order> result = new CompletableFuture<>();
         final PollingTask task = new PollingTask(this.restClient, this.sequenceId, wait, maxAttempts, stopCondition, 0, result);
