@@ -97,6 +97,9 @@ public class OrderPoller {
      * @return A {@link CompletableFuture} of the order with desired {@link com.reddio.api.v1.rest.OrderState}.
      */
     public CompletableFuture<Order> pollAsync(Duration wait, Integer maxAttempts, OrderState... desiredOrderState) {
+        if (desiredOrderState.length == 0) {
+            throw new ReddioException("Desired order state is required when polling the order.");
+        }
         Set<OrderState> set = new HashSet<>(Arrays.asList(desiredOrderState));
         return this.pollAsync(wait, maxAttempts, order -> order != null && order.getOrderState() != null && set.contains(order.getOrderState()));
     }

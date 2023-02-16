@@ -109,6 +109,10 @@ public class RecordPoller {
      */
 
     public CompletableFuture<SequenceRecord> pollAsync(Duration wait, Integer maxAttempts, RecordStatus... desiredRecordStatus) {
+        if (desiredRecordStatus.length == 0) {
+            throw new ReddioException("Desired record status is required when polling the record.");
+        }
+
         Set<RecordStatus> set = new HashSet<>(Arrays.asList(desiredRecordStatus));
         return this.pollAsync(wait, maxAttempts, record -> record != null && record.getStatus() != null && set.contains(record.getStatus()));
     }
