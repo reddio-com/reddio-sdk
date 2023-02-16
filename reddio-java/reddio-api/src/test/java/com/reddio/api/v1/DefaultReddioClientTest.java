@@ -166,7 +166,7 @@ public class DefaultReddioClientTest {
         CompletableFuture<ResponseWrapper<GetBalancesResponse>> balancesFuture = restClient.getBalances(GetBalancesMessage.of(
                 "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
                 REDDIO721_CONTRACT_ADDRESS,
-                10L,
+                100L,
                 1L)
         );
         ResponseWrapper<GetBalancesResponse> balances = balancesFuture.get();
