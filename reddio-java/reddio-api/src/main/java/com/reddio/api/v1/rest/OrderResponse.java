@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(staticName = "of")
 public class OrderResponse {
     @JsonProperty("sequence_id")
-    public String sequenceId;
+    public Long sequenceId;
 }

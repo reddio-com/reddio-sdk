@@ -32,8 +32,9 @@ public class GetBalancesResponse  {
         public String symbol;
         @JsonProperty("quantum")
         public String quantum;
-        @JsonProperty("displayValue")
+        @JsonProperty("display_value")
         public String displayValue;
+
         @JsonProperty("token_id")
         public String tokenId;
     }

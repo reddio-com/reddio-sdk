@@ -9,23 +9,23 @@ import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.CompletableFuture
 
-class ReddioWithdrawalToApi private constructor(
-    private val localRestClient: ReddioRestClient, private val request: WithdrawalToMessage
-) : SignedReddioApiRequest<WithdrawalToMessage, ResponseWrapper<WithdrawalToResponse>> {
-    override fun call(): ResponseWrapper<WithdrawalToResponse> {
-        return this.callAsync().get()
+class ReddioTransferToApi private constructor(
+    private val localRestClient: ReddioRestClient, private val request: TransferMessage
+) : SignedReddioApiRequest<TransferMessage, ResponseWrapper<TransferResponse>> {
+    override fun call(): ResponseWrapper<TransferResponse> {
+        return this.callAsync().join()
     }
 
-    override fun callAsync(): CompletableFuture<ResponseWrapper<WithdrawalToResponse>> {
-        return this.localRestClient.withdrawalTo(this.request)
+    override fun callAsync(): CompletableFuture<ResponseWrapper<TransferResponse>> {
+        return this.localRestClient.transfer(this.request)
     }
 
-    override fun getRequest(): WithdrawalToMessage {
-        return request
+    override fun getRequest(): TransferMessage {
+        return this.request
     }
 
     override fun getSignature(): Signature {
-        return request.getSignature()
+        return this.request.getSignature()
     }
 
     /**
@@ -49,41 +49,44 @@ class ReddioWithdrawalToApi private constructor(
 
     companion object {
         @JvmStatic
-        fun build(localRestClient: ReddioRestClient, request: WithdrawalToMessage): ReddioWithdrawalToApi {
-            return ReddioWithdrawalToApi(localRestClient, request)
+        fun build(localRestClient: ReddioRestClient, request: TransferMessage): ReddioTransferToApi {
+            return ReddioTransferToApi(localRestClient, request)
         }
 
         /**
-         * Build the request for withdrawal asset.
+         * Build the request for transfer asset.
          *
          * @param restClient the reddio rest client
          * @param starkPrivateKey the stark private key for signing the request
-         * @param amount the amount of asset to withdraw, use 1 for ERC721
-         * @param contractAddress the contract address of the asset, use literal "ETH" for ETH
-         * @param tokenId the token id of the ERC721, use empty string for ETH and ERC20
-         * @param type the type of the asset, use literal "ERC20" for ERC20, "ERC721" for ERC721, "ETH" for ETH
-         * @param receiver the eth address to send the asset to
-         * @param expirationTimeStamp the timestamp when the request expires in seconds, max value is 4194303L
+         * @param amount the amount of asset to transfer, use 1 for ERC721
+         * @param contractAddress the contract address of the asset to transfer
+         * @param tokenId the token id of the asset to transfer, use empty string for ETH and ERC20
+         * @param tokenType the token type of the asset to transfer, use literal "ERC20" for ERC20 and "ERC721" for ERC721
+         * @param receiver the receiver's stark key
+         * @param expirationTimestamp the expiration timestamp of the request in seconds, max value is 4194303L
          */
-        fun withdrawal(
+        @JvmStatic
+        fun transfer(
             restClient: ReddioRestClient,
             starkPrivateKey: String,
             amount: String,
             contractAddress: String,
             tokenId: String,
-            type: String,
+            tokenType: String,
             receiver: String,
-            expirationTimeStamp: Long
-        ): ReddioWithdrawalToApi {
+            expirationTimestamp: Long,
+        ): ReddioTransferToApi {
+
             val quantizedHelper = QuantizedHelper(restClient)
             val starkExSigner = StarkExSigner(starkPrivateKey)
             val starkKey = starkExSigner.getStarkKey()
-            val message = runBlocking {
-                val quantizedAmount = quantizedHelper.quantizedAmount(amount, type, contractAddress).toString()
-                val assetId = AssetVaultHelper.getAssetId(restClient, contractAddress, tokenId, type)
-                val vaultsIds = AssetVaultHelper.getVaultsIds(restClient, assetId, starkKey, receiver)
 
+            val message = runBlocking {
+                val quantizedAmount = quantizedHelper.quantizedAmount(amount, tokenType, contractAddress).toString()
+                val assetId = AssetVaultHelper.getAssetId(restClient, contractAddress, tokenId, tokenType)
+                val vaultsIds = AssetVaultHelper.getVaultsIds(restClient, assetId, starkKey, receiver)
                 val nonce = restClient.getNonce(GetNonceMessage.of(starkKey)).await().getData().getNonce()
+
                 val signature = starkExSigner.signTransferMessage(
                     quantizedAmount,
                     nonce,
@@ -91,43 +94,32 @@ class ReddioWithdrawalToApi private constructor(
                     assetId,
                     vaultsIds.receiverVaultId,
                     receiver,
-                    expirationTimeStamp
+                    expirationTimestamp
                 )
-
-                WithdrawalToMessage.of(
-                    contractAddress,
+                TransferMessage.of(
                     assetId,
                     starkKey,
                     quantizedAmount,
-                    tokenId,
                     nonce,
                     vaultsIds.senderVaultId,
                     receiver,
                     vaultsIds.receiverVaultId,
-                    expirationTimeStamp,
+                    expirationTimestamp,
                     signature
                 )
             }
             return build(restClient, message)
         }
 
-        /**
-         * Build the request for withdrawal of ETH.
-         *
-         * @param restClient the rest client
-         * @param amount the amount of ETH to withdraw
-         * @param receiver the eth address to send the ETH to
-         * @param expirationTimestamp the timestamp when the request expires in seconds, max value is 4194303L
-         */
         @JvmStatic
-        fun withdrawalETH(
+        fun transferETH(
             restClient: ReddioRestClient,
             starkPrivateKey: String,
             amount: String,
             receiver: String,
-            expirationTimestamp: Long
-        ): ReddioWithdrawalToApi {
-            return withdrawal(
+            expirationTimestamp: Long,
+        ): ReddioTransferToApi {
+            return transfer(
                 restClient,
                 starkPrivateKey,
                 amount,
@@ -140,15 +132,15 @@ class ReddioWithdrawalToApi private constructor(
         }
 
         @JvmStatic
-        fun withdrawalERC20(
+        fun transferERC20(
             restClient: ReddioRestClient,
             starkPrivateKey: String,
             amount: String,
             contractAddress: String,
             receiver: String,
-            expirationTimestamp: Long
-        ): ReddioWithdrawalToApi {
-            return withdrawal(
+            expirationTimestamp: Long,
+        ): ReddioTransferToApi {
+            return transfer(
                 restClient,
                 starkPrivateKey,
                 amount,
@@ -161,15 +153,15 @@ class ReddioWithdrawalToApi private constructor(
         }
 
         @JvmStatic
-        fun withdrawalERC721(
+        fun transferERC721(
             restClient: ReddioRestClient,
             starkPrivateKey: String,
             contractAddress: String,
             tokenId: String,
             receiver: String,
             expirationTimestamp: Long
-        ): ReddioWithdrawalToApi {
-            return withdrawal(
+        ): ReddioTransferToApi {
+            return transfer(
                 restClient,
                 starkPrivateKey,
                 "1",
