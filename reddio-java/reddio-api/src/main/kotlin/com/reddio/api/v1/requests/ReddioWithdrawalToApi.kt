@@ -3,6 +3,7 @@ package com.reddio.api.v1.requests
 import com.reddio.api.v1.QuantizedHelper
 import com.reddio.api.v1.ReddioClient
 import com.reddio.api.v1.StarkExSigner
+import com.reddio.api.v1.requests.polling.RecordPoller
 import com.reddio.api.v1.rest.*
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
@@ -25,6 +26,25 @@ class ReddioWithdrawalToApi private constructor(
 
     override fun getSignature(): Signature {
         return request.getSignature()
+    }
+
+    /**
+     * Call the request and poll the record until it reaches one of the desired status.
+     */
+    fun callAndPollRecord(vararg desiredRecordStatus: RecordStatus): SequenceRecord {
+        val response = this.call()
+        return RecordPoller(
+            this.localRestClient, this.request.getStarkKey(), response.getData().getSequenceId()
+        ).poll(*desiredRecordStatus)
+    }
+
+    /**
+     * Call the request and poll the record until it reaches one of the desired status asynchronously.
+     */
+    fun callAndPollRecordAsync(vararg desiredRecordStatus: RecordStatus): CompletableFuture<SequenceRecord> {
+        return this.callAsync().thenApplyAsync { response ->
+            RecordPoller(this.localRestClient, this.request.getStarkKey(), response.getData().getSequenceId())
+        }.thenComposeAsync { it.pollAsync(*desiredRecordStatus) }
     }
 
     companion object {
