@@ -29,6 +29,13 @@ class ReddioWithdrawalToApi private constructor(
     }
 
     /**
+     * Call the request and poll the record until it reaches one of the desired status, which are SubmittedToReddio, AcceptedByReddio, FailedOnReddio by default.
+     */
+    fun callAndPollRecord(): SequenceRecord {
+        return callAndPollRecord(*defaultDesiredRecordStatus)
+    }
+
+    /**
      * Call the request and poll the record until it reaches one of the desired status.
      */
     fun callAndPollRecord(vararg desiredRecordStatus: RecordStatus): SequenceRecord {
@@ -36,6 +43,13 @@ class ReddioWithdrawalToApi private constructor(
         return RecordPoller(
             this.localRestClient, this.request.getStarkKey(), response.getData().getSequenceId()
         ).poll(*desiredRecordStatus)
+    }
+
+    /**
+     * Call the request and poll the record until it reaches one of the desired status asynchronously, which are SubmittedToReddio, AcceptedByReddio, FailedOnReddio by default.
+     */
+    fun callAndPollRecordAsync(): CompletableFuture<SequenceRecord> {
+        return callAndPollRecordAsync(*defaultDesiredRecordStatus)
     }
 
     /**
@@ -48,6 +62,13 @@ class ReddioWithdrawalToApi private constructor(
     }
 
     companion object {
+
+        private val defaultDesiredRecordStatus = arrayOf(
+            RecordStatus.SubmittedToReddio,
+            RecordStatus.AcceptedByReddio,
+            RecordStatus.FailedOnReddio,
+        )
+
         @JvmStatic
         fun build(localRestClient: ReddioRestClient, request: WithdrawalToMessage): ReddioWithdrawalToApi {
             return ReddioWithdrawalToApi(localRestClient, request)
