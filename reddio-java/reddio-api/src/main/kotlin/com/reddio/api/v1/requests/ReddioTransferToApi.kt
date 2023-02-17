@@ -28,6 +28,14 @@ class ReddioTransferToApi private constructor(
         return this.request.getSignature()
     }
 
+
+    /**
+     * Call the request and poll the record until it reaches one of the desired status, which are SubmittedToReddio, AcceptedByReddio, FailedOnReddio by default.
+     */
+    fun callAndPollRecord(): SequenceRecord {
+        return callAndPollRecord(*defaultDesiredRecordStatus)
+    }
+
     /**
      * Call the request and poll the record until it reaches one of the desired status.
      */
@@ -36,6 +44,13 @@ class ReddioTransferToApi private constructor(
         return RecordPoller(
             this.localRestClient, this.request.getStarkKey(), response.getData().getSequenceId()
         ).poll(*desiredRecordStatus)
+    }
+
+    /**
+     * Call the request and poll the record until it reaches one of the desired status asynchronously, which are SubmittedToReddio, AcceptedByReddio, FailedOnReddio by default.
+     */
+    fun callAndPollRecordAsync(): CompletableFuture<SequenceRecord> {
+        return callAndPollRecordAsync(*defaultDesiredRecordStatus)
     }
 
     /**
@@ -48,6 +63,13 @@ class ReddioTransferToApi private constructor(
     }
 
     companion object {
+
+        private val defaultDesiredRecordStatus = arrayOf(
+            RecordStatus.SubmittedToReddio,
+            RecordStatus.AcceptedByReddio,
+            RecordStatus.FailedOnReddio,
+        )
+
         @JvmStatic
         fun build(localRestClient: ReddioRestClient, request: TransferMessage): ReddioTransferToApi {
             return ReddioTransferToApi(localRestClient, request)

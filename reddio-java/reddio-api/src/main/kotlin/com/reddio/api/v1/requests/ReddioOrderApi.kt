@@ -33,6 +33,13 @@ class ReddioOrderApi private constructor(
     }
 
     /**
+     * Call the request and poll the record until it reaches one of the desired status, which are: SubmittedToReddio, AcceptedByReddio, FailedOnReddio by default.
+     */
+    fun callAndPollRecord(): SequenceRecord {
+        return callAndPollRecord(*defaultDesiredRecordStatus)
+    }
+
+    /**
      * Call the request and poll the record until it reaches one of the desired status.
      */
     fun callAndPollRecord(vararg desiredRecordStatus: RecordStatus): SequenceRecord {
@@ -40,6 +47,14 @@ class ReddioOrderApi private constructor(
         return RecordPoller(
             this.localRestClient, this.request.getStarkKey(), response.getData().getSequenceId()
         ).poll(*desiredRecordStatus)
+    }
+
+
+    /**
+     * Call the request and poll the record until it reaches one of the desired status asynchronously, which are: SubmittedToReddio, AcceptedByReddio, FailedOnReddio by default.
+     */
+    fun callAndPollRecordAsync(): CompletableFuture<SequenceRecord> {
+        return callAndPollRecordAsync(*defaultDesiredRecordStatus)
     }
 
     /**
@@ -52,6 +67,16 @@ class ReddioOrderApi private constructor(
     }
 
     /**
+     * Call the request and poll the order until it reaches one of the order state, which are: Placed, Filled, Canceled by default.
+     */
+    fun callAndPollOrder(): Order {
+        val response = this.call()
+        return OrderPoller(
+            this.localRestClient, response.getData().getSequenceId()
+        ).poll(*defaultDesiredOrderState)
+    }
+
+    /**
      * Call the request and poll the order until it reaches one of the order state.
      */
     fun callAndPollOrder(vararg desiredOrderState: OrderState): Order {
@@ -59,6 +84,14 @@ class ReddioOrderApi private constructor(
         return OrderPoller(
             this.localRestClient, response.getData().getSequenceId()
         ).poll(*desiredOrderState)
+    }
+
+
+    /**
+     * Call the request and poll the order until it reaches one of the desired order state asynchronously, which are: Placed, Filled, Canceled by default.
+     */
+    fun callAndPollOrderAsync(): CompletableFuture<Order> {
+        return callAndPollOrderAsync(*defaultDesiredOrderState)
     }
 
     /**
@@ -71,6 +104,19 @@ class ReddioOrderApi private constructor(
     }
 
     companion object {
+
+        private val defaultDesiredRecordStatus = arrayOf(
+            RecordStatus.SubmittedToReddio,
+            RecordStatus.AcceptedByReddio,
+            RecordStatus.FailedOnReddio,
+        )
+
+        private val defaultDesiredOrderState = arrayOf(
+            OrderState.Placed,
+            OrderState.Filled,
+            OrderState.Canceled,
+        )
+
         @JvmStatic
         fun build(
             localRestClient: ReddioRestClient, request: OrderMessage
