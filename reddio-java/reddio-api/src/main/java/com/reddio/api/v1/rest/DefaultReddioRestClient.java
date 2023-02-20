@@ -354,12 +354,16 @@ public class DefaultReddioRestClient implements ReddioRestClient {
 
         @Override
         public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-            if (!response.isSuccessful()) {
-                this.future.completeExceptionally(new IOException("response is not successful, code: " + response.code()));
-                return;
+            try {
+                if (!response.isSuccessful()) {
+                    this.future.completeExceptionally(new IOException("response is not successful, code: " + response.code()));
+                    return;
+                }
+                String jsonString = Objects.requireNonNull(response.body()).string();
+                this.future.complete(objectMapper.readValue(jsonString, typeReference));
+            } catch (Throwable e) {
+                this.future.completeExceptionally(e);
             }
-            String jsonString = Objects.requireNonNull(response.body()).string();
-            this.future.complete(objectMapper.readValue(jsonString, typeReference));
         }
     }
 
