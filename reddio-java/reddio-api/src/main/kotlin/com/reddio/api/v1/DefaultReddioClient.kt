@@ -38,12 +38,16 @@ class DefaultReddioClient(
     }
 
     override fun listRecords(
-        starkKey: String,
+        starkKey: String?,
         limit: Long?,
         page: Long?,
         contractAddress: String?
     ): CompletableFuture<ResponseWrapper<ListRecordsResponse>> {
         return this.restClient.listRecords(ListRecordsMessage.of(starkKey, limit, page, contractAddress))
+    }
+
+    override fun listRecords(sequenceIds: MutableList<Long>?): CompletableFuture<ResponseWrapper<ListRecordsResponse>> {
+        return this.restClient.listRecords(ListRecordsMessage.of(sequenceIds))
     }
 
     override fun getTxn(sequenceId: Long): CompletableFuture<ResponseWrapper<GetTxnResponse>> {

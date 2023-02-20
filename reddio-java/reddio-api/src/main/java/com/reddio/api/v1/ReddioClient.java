@@ -88,6 +88,8 @@ public interface ReddioClient extends AutoCloseable {
 
     CompletableFuture<ResponseWrapper<ListRecordsResponse>> listRecords(String starkKey, Long limit, Long page, String contractAddress);
 
+    CompletableFuture<ResponseWrapper<ListRecordsResponse>> listRecords(List<Long> sequenceIds);
+
     CompletableFuture<ResponseWrapper<GetTxnResponse>> getTxn(long sequenceId);
 
     CompletableFuture<ResponseWrapper<GetRecordResponse>> waitingTransferGetApproved(String starkKey, long sequenceId);

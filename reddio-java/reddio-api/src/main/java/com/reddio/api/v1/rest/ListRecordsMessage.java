@@ -5,20 +5,33 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "of")
 public class ListRecordsMessage {
 
     @JsonProperty("stark_key")
-    public String starkKey;
+    private String starkKey;
 
     @JsonProperty("limit")
-    public Long limit;
+    private Long limit;
 
     @JsonProperty("page")
-    public Long page;
+    private Long page;
 
     @JsonProperty("contract_address")
-    public String contractAddress;
+    private String contractAddress;
+
+    @JsonProperty("sequence_ids")
+    private List<Long> sequenceIds;
+
+    public static ListRecordsMessage of(String starkKey, Long limit, Long page, String contractAddress) {
+        return new ListRecordsMessage(starkKey, limit, page, contractAddress, null);
+    }
+
+    public static ListRecordsMessage of(List<Long> sequenceIds) {
+        return new ListRecordsMessage(null, null, null, null, sequenceIds);
+    }
 }
