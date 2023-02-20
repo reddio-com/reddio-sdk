@@ -159,6 +159,20 @@ public class DefaultReddioClientTest {
     }
 
     @Test
+    public void testListOrdersWithSequenceIds() throws ExecutionException, InterruptedException {
+        ReddioClient reddioClient = DefaultReddioClient.testnet();
+        List<Long> sequenceIds = new ArrayList<>();
+        sequenceIds.add(303531L);
+        sequenceIds.add(303530L);
+        ResponseWrapper<ListRecordsResponse> wrapper = reddioClient.listRecords(sequenceIds).get();
+        Assert.assertEquals("OK", wrapper.getStatus());
+        Assert.assertEquals(2, wrapper.getData().getList().size());
+        Assert.assertEquals(2, wrapper.getData().getTotal().longValue());
+        Assert.assertEquals(303531L, wrapper.getData().getList().get(0).getSequenceId());
+        Assert.assertEquals(303530L, wrapper.getData().getList().get(1).getSequenceId());
+    }
+
+    @Test
     @Ignore("not reproducible test")
     public void testOrderWithERC20() throws ExecutionException, InterruptedException, JsonProcessingException {
         DefaultReddioClient client = DefaultReddioClient.testnet();

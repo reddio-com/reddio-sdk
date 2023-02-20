@@ -123,6 +123,9 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         if (listRecordsMessage.getPage() != null) {
             builder.addQueryParameter("page", listRecordsMessage.getPage().toString());
         }
+        if (listRecordsMessage.getSequenceIds() != null) {
+            builder.addQueryParameter("sequence_ids", listRecordsMessage.getSequenceIds().stream().map(Objects::toString).collect(Collectors.joining(",")));
+        }
 
         final HttpUrl endpoint = builder.build();
         Request request = new Request.Builder().url(endpoint).get().build();
