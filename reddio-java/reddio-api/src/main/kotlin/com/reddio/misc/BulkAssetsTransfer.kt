@@ -75,7 +75,7 @@ class BulkAssetsTransfer(
         return ReddioTransferToApi.transfer(
             this.restClient,
             this.senderStarkPrivateKey,
-            balanceRecord.balanceAvailable.toString(),
+            balanceRecord.displayValue,
             balanceRecord.contractAddress,
             balanceRecord.tokenId,
             balanceRecord.type,
