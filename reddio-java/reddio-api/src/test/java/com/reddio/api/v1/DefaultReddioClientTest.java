@@ -100,7 +100,7 @@ public class DefaultReddioClientTest {
         ResponseWrapper<GetBalancesResponse> balances = balancesFuture.get();
         Assert.assertEquals("OK", balances.status);
         GetBalancesResponse.BalanceRecord toSell = balances.getData().getList().stream().filter((it) ->
-                it.balanceAvailable > 0
+                it.getBalanceAvailable() > 0
         ).collect(Collectors.toList()).get(0);
         ReddioClient.WithStarkExSigner clientWithSigner = client.withStarkExSigner("0x4d55b547af138c5b6200495d86ab6aed3e06c25fdd75b4b6a00e48515df2b3d");
         CompletableFuture<ResponseWrapper<OrderResponse>> future = clientWithSigner.order(
@@ -186,7 +186,7 @@ public class DefaultReddioClientTest {
         ResponseWrapper<GetBalancesResponse> balances = balancesFuture.get();
         Assert.assertEquals("OK", balances.status);
         GetBalancesResponse.BalanceRecord toSell = balances.getData().getList().stream().filter((it) ->
-                it.balanceAvailable > 0
+                it.getBalanceAvailable() > 0
         ).collect(Collectors.toList()).get(0);
         ReddioClient.WithStarkExSigner clientWithSigner = client.withStarkExSigner("0x4d55b547af138c5b6200495d86ab6aed3e06c25fdd75b4b6a00e48515df2b3d");
         CompletableFuture<ResponseWrapper<OrderResponse>> future = clientWithSigner.order(
