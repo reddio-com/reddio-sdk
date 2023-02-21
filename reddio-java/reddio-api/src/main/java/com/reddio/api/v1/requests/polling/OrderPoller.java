@@ -169,7 +169,7 @@ public class OrderPoller {
 
         private void scheduleNextPoll() {
             if (this.currentAttempt >= this.maxAttempts) {
-                this.resultHolder.completeExceptionally(new ReddioException("Polling records exceeds max attempts"));
+                this.resultHolder.completeExceptionally(new ReddioException("Polling order exceeds max attempts, max attempts: " + this.maxAttempts + ", sequence id: " + this.sequenceId));
                 return;
             }
             final PollingTask nextTask = new PollingTask(this.restClient, this.sequenceId, this.wait, this.maxAttempts, this.stopCondition, this.currentAttempt + 1, this.resultHolder);

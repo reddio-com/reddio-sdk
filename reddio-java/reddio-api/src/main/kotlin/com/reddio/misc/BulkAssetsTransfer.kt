@@ -45,6 +45,9 @@ class BulkAssetsTransfer(
             }.map {
                 try {
                     val transferRecord = transferAsset(it);
+                    if (transferRecord.getStatus() == RecordStatus.FailedOnReddio) {
+                        throw ReddioException("failed to transfer asset, sequence id: ${transferRecord.sequenceId}, status: ${transferRecord.status}, resp: ${transferRecord.resp}")
+                    }
                     BulkAssetsTransferResultEntry(true, it, transferRecord, null)
                 } catch (t: Throwable) {
                     BulkAssetsTransferResultEntry(false, it, null, t)
@@ -69,7 +72,7 @@ class BulkAssetsTransfer(
 
         if (balanceRecord.balanceFrozen > 0L) {
             // TODO: use certain type of exception
-            throw ReddioException("balance is frozen, cannot transfer")
+            throw ReddioException("balance is frozen, cannot transfer, type: ${balanceRecord.type}, contract address: ${balanceRecord.contractAddress}, token id: ${balanceRecord.tokenId}, balance frozen: ${balanceRecord.balanceFrozen}")
         }
 
         return ReddioTransferToApi.transfer(
