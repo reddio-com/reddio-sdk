@@ -11,31 +11,54 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "of")
-public class GetBalancesResponse  {
+public class GetBalancesResponse {
     @JsonProperty("list")
     public List<BalanceRecord> list;
+
+    @JsonProperty("total")
+    private Long total;
+
+    @JsonProperty("current_page")
+    private Long currentPage;
+
+    @JsonProperty("page_size")
+    private Long pageSize;
+
+    @JsonProperty("total_page")
+    private Long totalPage;
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor(staticName = "of")
     public static class BalanceRecord {
         @JsonProperty("asset_id")
-        public String assetId;
+        private String assetId;
+
         @JsonProperty("contract_address")
-        public String contractAddress;
+        private String contractAddress;
+
         @JsonProperty("balance_available")
-        public Long balanceAvailable;
+        private Long balanceAvailable;
+
+        @JsonProperty("balance_frozen")
+        private Long balanceFrozen;
+
         @JsonProperty("type")
-        public String type;
+        private String type;
+
         @JsonProperty("decimals")
-        public Long decimals;
+        private Long decimals;
+
         @JsonProperty("symbol")
-        public String symbol;
+        private String symbol;
+
         @JsonProperty("quantum")
-        public String quantum;
+        private String quantum;
+
         @JsonProperty("display_value")
-        public String displayValue;
+        private String displayValue;
 
         @JsonProperty("token_id")
-        public String tokenId;
+        private String tokenId;
     }
 }
