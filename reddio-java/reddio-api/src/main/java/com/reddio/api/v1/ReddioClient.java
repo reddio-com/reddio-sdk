@@ -12,6 +12,7 @@ public interface ReddioClient extends AutoCloseable {
     String TOKEN_TYPE_ETH = "ETH";
     String TOKEN_TYPE_ERC20 = "ERC20";
     String TOKEN_TYPE_ERC721 = "ERC721";
+    String TOKEN_TYPE_ERC721M = "ERC721M";
 
     String RUSD_TESTNET_CONTRACT_ADDRESS = "0x241f280f13Ff42bbd884d039804c1E5648392A4B";
 
@@ -25,6 +26,8 @@ public interface ReddioClient extends AutoCloseable {
         CompletableFuture<ResponseWrapper<TransferResponse>> transferERC20(String amount, String contractAddress, String receiver, long expirationTimeStamp);
 
         CompletableFuture<ResponseWrapper<TransferResponse>> transferERC721(String contractAddress, String tokenId, String receiver, long expirationTimeStamp);
+
+        CompletableFuture<ResponseWrapper<TransferResponse>> transferERC721M(String contractAddress, String tokenId, String receiver, long expirationTimeStamp);
 
 
         WithdrawalToMessage withdrawalMessage(String amount, String contractAddress, String tokenId, String type, String receiver, long expirationTimeStamp);
@@ -58,6 +61,8 @@ public interface ReddioClient extends AutoCloseable {
         CompletableFuture<ResponseWrapper<WithdrawalToResponse>> withdrawalERC20(String amount, String contractAddress, String receiver, long expirationTimeStamp);
 
         CompletableFuture<ResponseWrapper<WithdrawalToResponse>> withdrawalERC721(String contractAddress, String tokenId, String receiver, long expirationTimeStamp);
+
+        CompletableFuture<ResponseWrapper<WithdrawalToResponse>> withdrawalERC721M(String contractAddress, String tokenId, String receiver, long expirationTimeStamp);
 
         @Deprecated
         CompletableFuture<ResponseWrapper<OrderResponse>> order(String starkKey, String price, String amount, String tokenAddress, String tokenId, String marketplaceUuid, String tokenType, OrderBehavior orderType);

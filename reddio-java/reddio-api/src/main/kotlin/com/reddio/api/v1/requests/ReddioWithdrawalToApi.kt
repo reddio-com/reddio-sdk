@@ -203,5 +203,26 @@ class ReddioWithdrawalToApi private constructor(
                 expirationTimestamp
             )
         }
+
+        @JvmStatic
+        fun withdrawalERC721M(
+            restClient: ReddioRestClient,
+            starkPrivateKey: String,
+            contractAddress: String,
+            tokenId: String,
+            receiver: String,
+            expirationTimestamp: Long
+        ): ReddioWithdrawalToApi {
+            return withdrawal(
+                restClient,
+                starkPrivateKey,
+                "1",
+                contractAddress,
+                tokenId,
+                ReddioClient.TOKEN_TYPE_ERC721M,
+                receiver,
+                expirationTimestamp
+            )
+        }
     }
 }
