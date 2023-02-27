@@ -196,5 +196,26 @@ class ReddioTransferToApi private constructor(
                 expirationTimestamp
             )
         }
+
+        @JvmStatic
+        fun transferERC721M(
+            restClient: ReddioRestClient,
+            starkPrivateKey: String,
+            contractAddress: String,
+            tokenId: String,
+            receiver: String,
+            expirationTimestamp: Long
+        ): ReddioTransferToApi {
+            return transfer(
+                restClient,
+                starkPrivateKey,
+                "1",
+                contractAddress,
+                tokenId,
+                ReddioClient.TOKEN_TYPE_ERC721M,
+                receiver,
+                expirationTimestamp
+            )
+        }
     }
 }
