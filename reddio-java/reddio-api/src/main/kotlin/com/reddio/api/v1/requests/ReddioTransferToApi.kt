@@ -13,7 +13,9 @@ class ReddioTransferToApi private constructor(
     private val localRestClient: ReddioRestClient, private val request: TransferMessage
 ) : SignedReddioApiRequest<TransferMessage, ResponseWrapper<TransferResponse>> {
     override fun call(): ResponseWrapper<TransferResponse> {
-        return this.callAsync().join()
+        return unwrapCompletionException {
+            this.callAsync().join()
+        }
     }
 
     override fun callAsync(): CompletableFuture<ResponseWrapper<TransferResponse>> {

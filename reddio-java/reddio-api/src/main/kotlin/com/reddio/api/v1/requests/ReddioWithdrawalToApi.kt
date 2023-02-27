@@ -13,7 +13,9 @@ class ReddioWithdrawalToApi private constructor(
     private val localRestClient: ReddioRestClient, private val request: WithdrawalToMessage
 ) : SignedReddioApiRequest<WithdrawalToMessage, ResponseWrapper<WithdrawalToResponse>> {
     override fun call(): ResponseWrapper<WithdrawalToResponse> {
-        return this.callAsync().get()
+        return unwrapCompletionException {
+            this.callAsync().join()
+        }
     }
 
     override fun callAsync(): CompletableFuture<ResponseWrapper<WithdrawalToResponse>> {

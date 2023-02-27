@@ -1,6 +1,7 @@
 package com.reddio.api.v1.requests.polling;
 
 import com.reddio.ReddioException;
+import com.reddio.api.v1.requests.UnwrapCompletionExceptionKt;
 import com.reddio.api.v1.rest.*;
 import lombok.SneakyThrows;
 
@@ -49,7 +50,7 @@ public class OrderPoller {
      * @throws CompletionException the polling exceed the max attempts.
      */
     public Order poll(OrderState... desiredOrderState) {
-        return this.pollAsync(desiredOrderState).join();
+        return UnwrapCompletionExceptionKt.unwrapCompletionException(() -> this.pollAsync(desiredOrderState).join());
     }
 
     /**
@@ -62,7 +63,7 @@ public class OrderPoller {
      * @throws CompletionException the polling exceed the max attempts.
      */
     public Order poll(Duration wait, Integer maxAttempts, OrderState... desiredOrderState) {
-        return this.pollAsync(wait, maxAttempts, desiredOrderState).join();
+        return UnwrapCompletionExceptionKt.unwrapCompletionException(() -> this.pollAsync(wait, maxAttempts, desiredOrderState).join());
     }
 
     /**
@@ -75,7 +76,7 @@ public class OrderPoller {
      * @throws CompletionException the polling exceed the max attempts.
      */
     public Order poll(Duration wait, Integer maxAttempts, Function<Order, Boolean> stopCondition) {
-        return this.pollAsync(wait, maxAttempts, stopCondition).join();
+        return UnwrapCompletionExceptionKt.unwrapCompletionException(() -> this.pollAsync(wait, maxAttempts, stopCondition).join());
     }
 
     /**
