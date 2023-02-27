@@ -1,6 +1,7 @@
 package com.reddio.api.v1.requests.polling;
 
 import com.reddio.ReddioException;
+import com.reddio.api.v1.requests.UnwrapCompletionExceptionKt;
 import com.reddio.api.v1.rest.*;
 import lombok.SneakyThrows;
 
@@ -60,7 +61,7 @@ public class RecordPoller {
      * @throws CompletionException the polling exceed the max attempts.
      */
     public SequenceRecord poll(RecordStatus... targetRecordStatus) {
-        return this.pollAsync(targetRecordStatus).join();
+        return UnwrapCompletionExceptionKt.unwrapCompletionException(() -> this.pollAsync(targetRecordStatus).join());
     }
 
     /**
@@ -73,7 +74,7 @@ public class RecordPoller {
      * @throws CompletionException the polling exceed the max attempts.
      */
     public SequenceRecord poll(Duration wait, Integer maxAttempts, RecordStatus... targetRecordStatus) {
-        return this.pollAsync(wait, maxAttempts, targetRecordStatus).join();
+        return UnwrapCompletionExceptionKt.unwrapCompletionException(() -> this.pollAsync(wait, maxAttempts, targetRecordStatus).join());
     }
 
     /**
@@ -86,7 +87,7 @@ public class RecordPoller {
      * @throws CompletionException the polling exceed the max attempts.
      */
     public SequenceRecord poll(Duration wait, Integer maxAttempts, Function<SequenceRecord, Boolean> stopCondition) {
-        return this.pollAsync(wait, maxAttempts, stopCondition).join();
+        return UnwrapCompletionExceptionKt.unwrapCompletionException(() -> this.pollAsync(wait, maxAttempts, stopCondition).join());
     }
 
     /**

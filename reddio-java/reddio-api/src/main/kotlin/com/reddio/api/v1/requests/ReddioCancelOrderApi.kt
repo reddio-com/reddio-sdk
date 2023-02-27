@@ -4,13 +4,16 @@ import com.reddio.api.v1.StarkExSigner
 import com.reddio.api.v1.requests.polling.OrderPoller
 import com.reddio.api.v1.rest.*
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletionException
 
 class ReddioCancelOrderApi private constructor(
     private val localRestClient: ReddioRestClient, private val orderId: Long, private val request: CancelOrderMessage
 ) : SignedReddioApiRequest<CancelOrderMessage, ResponseWrapper<CancelOrderResponse>> {
 
     override fun call(): ResponseWrapper<CancelOrderResponse> {
-        return callAsync().join()
+        return unwrapCompletionException {
+            callAsync().join()
+        }
     }
 
     override fun callAsync(): CompletableFuture<ResponseWrapper<CancelOrderResponse>> {

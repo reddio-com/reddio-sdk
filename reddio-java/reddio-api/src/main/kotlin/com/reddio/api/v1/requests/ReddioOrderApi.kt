@@ -17,7 +17,9 @@ class ReddioOrderApi private constructor(
     private val localRestClient: ReddioRestClient, private val request: OrderMessage
 ) : SignedReddioApiRequest<OrderMessage, ResponseWrapper<OrderResponse>> {
     override fun call(): ResponseWrapper<OrderResponse> {
-        return this.callAsync().join()
+        return unwrapCompletionException {
+            callAsync().join()
+        }
     }
 
     override fun callAsync(): CompletableFuture<ResponseWrapper<OrderResponse>> {
