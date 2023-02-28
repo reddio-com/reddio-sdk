@@ -1,5 +1,6 @@
 package com.reddio.api.v1.requests
 
+import com.reddio.ReddioException
 import com.reddio.api.v1.QuantizedHelper
 import com.reddio.api.v1.ReddioClient
 import com.reddio.api.v1.StarkExSigner
@@ -138,6 +139,7 @@ class ReddioWithdrawalToApi private constructor(
          * Build the request for withdrawal of ETH.
          *
          * @param restClient the rest client
+         * @param starkPrivateKey the stark private key for signing the request
          * @param amount the amount of ETH to withdraw
          * @param receiver the eth address to send the ETH to
          * @param expirationTimestamp the timestamp when the request expires in seconds, max value is 4194303L
@@ -162,6 +164,16 @@ class ReddioWithdrawalToApi private constructor(
             )
         }
 
+        /**
+         * Build the request for withdrawal of ERC20.
+         *
+         * @param restClient the rest client
+         * @param starkPrivateKey the stark private key for signing the request
+         * @param amount the amount of ETH to withdraw
+         * @param contractAddress the contract address of the ERC20
+         * @param receiver the eth address to send the ETH to
+         * @param expirationTimestamp the timestamp when the request expires in seconds, max value is 4194303L
+         */
         @JvmStatic
         fun withdrawalERC20(
             restClient: ReddioRestClient,
@@ -183,46 +195,42 @@ class ReddioWithdrawalToApi private constructor(
             )
         }
 
+        /**
+         * Build the request for withdrawal of ERC721/ERC721M.
+         *
+         * @param restClient the rest client
+         * @param starkPrivateKey the stark private key for signing the request
+         * @param contractAddress the contract address of the ERC721
+         * @param tokenId the token id of the ERC721/ERC721M
+         * @param tokenType the token type of the ERC721/ERC721M to withdrawal, use [ReddioClient.TOKEN_TYPE_ERC721] for ERC721 and [ReddioClient.TOKEN_TYPE_ERC721M] for ERC721M
+         * @param receiver the eth address to send the ERC721/ERC721M to
+         * @param expirationTimestamp the timestamp when the request expires in seconds, max value is 4194303L
+         */
         @JvmStatic
         fun withdrawalERC721(
             restClient: ReddioRestClient,
             starkPrivateKey: String,
             contractAddress: String,
             tokenId: String,
+            tokenType: String,
             receiver: String,
             expirationTimestamp: Long
         ): ReddioWithdrawalToApi {
+            if (ReddioClient.TOKEN_TYPE_ERC721M != tokenType && ReddioClient.TOKEN_TYPE_ERC721 != tokenType) {
+                throw ReddioException("tokenType must be ERC721 or ERC721M for ERC721/ERC721M withdrawal")
+            }
+
             return withdrawal(
                 restClient,
                 starkPrivateKey,
                 "1",
                 contractAddress,
                 tokenId,
-                ReddioClient.TOKEN_TYPE_ERC721,
+                tokenType,
                 receiver,
                 expirationTimestamp
             )
         }
 
-        @JvmStatic
-        fun withdrawalERC721M(
-            restClient: ReddioRestClient,
-            starkPrivateKey: String,
-            contractAddress: String,
-            tokenId: String,
-            receiver: String,
-            expirationTimestamp: Long
-        ): ReddioWithdrawalToApi {
-            return withdrawal(
-                restClient,
-                starkPrivateKey,
-                "1",
-                contractAddress,
-                tokenId,
-                ReddioClient.TOKEN_TYPE_ERC721M,
-                receiver,
-                expirationTimestamp
-            )
-        }
     }
 }
