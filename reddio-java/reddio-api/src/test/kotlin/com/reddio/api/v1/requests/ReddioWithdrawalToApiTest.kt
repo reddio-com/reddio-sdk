@@ -1,12 +1,15 @@
 package com.reddio.api.v1.requests
 
+import com.reddio.IntegrationTest
 import com.reddio.api.v1.rest.DefaultReddioRestClient
 import com.reddio.api.v1.rest.RecordStatus
 import org.junit.Assert.*
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
 class ReddioWithdrawalToApiTest {
     @Test
+    @Category(IntegrationTest::class)
     fun testWithdrawalETH() {
         val restClient = DefaultReddioRestClient.testnet()
         val withdrawalETHRequest = ReddioWithdrawalToApi.withdrawalETH(
@@ -25,6 +28,7 @@ class ReddioWithdrawalToApiTest {
     }
 
     @Test
+    @Category(IntegrationTest::class)
     fun testWithdrawalETHThenGetRecordBySignature() {
         val restClient = DefaultReddioRestClient.testnet()
         val withdrawalETHRequest = ReddioWithdrawalToApi.withdrawalETH(
@@ -47,6 +51,7 @@ class ReddioWithdrawalToApiTest {
     }
 
     @Test
+    @Category(IntegrationTest::class)
     fun testWithdrawalETHThenPolling() {
         val restClient = DefaultReddioRestClient.testnet()
         val withdrawalETHRequest = ReddioWithdrawalToApi.withdrawalETH(

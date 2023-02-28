@@ -2,6 +2,7 @@ package com.reddio.api.v1;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.reddio.IntegrationTest;
 import com.reddio.api.v1.requests.ReddioOrderApi;
 import com.reddio.api.v1.requests.ReddioTransferToApi;
 import com.reddio.api.v1.requests.ReddioWithdrawalToApi;
@@ -14,6 +15,7 @@ import com.reddio.sign.PaymentSHA3;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -27,6 +29,7 @@ import static com.reddio.api.v1.DefaultEthereumInteractionTest.*;
 
 public class DefaultReddioClientTest {
     @Test
+    @Category(IntegrationTest.class)
     public void testTransfer() throws ExecutionException, InterruptedException, JsonProcessingException {
         DefaultReddioClient client = DefaultReddioClient.testnet();
         ReddioClient.WithStarkExSigner clientWithSigner = client.withStarkExSigner("0xa7b68cf2ee72b2a0789914daa8ae928aec21b6b0bf020e394833f4c732d99d");
@@ -37,6 +40,7 @@ public class DefaultReddioClientTest {
     }
 
     @Test
+    @Category(IntegrationTest.class)
     public void testWaitingRecordGetApproved() throws ExecutionException, InterruptedException, JsonProcessingException {
         DefaultReddioClient client = DefaultReddioClient.testnet();
         CompletableFuture<ResponseWrapper<GetRecordResponse>> future = client.waitingTransferGetApproved("0x6736f7449da3bf44bf0f7bdd6463818e1ef272641d43021e8bca17b32ec2df0", 300523);
@@ -46,6 +50,7 @@ public class DefaultReddioClientTest {
     }
 
     @Test
+    @Category(IntegrationTest.class)
     public void testWithdrawalGoerliETH() throws ExecutionException, InterruptedException, JsonProcessingException {
         DefaultReddioClient client = DefaultReddioClient.testnet();
         ReddioClient.WithStarkExSigner clientWithSigner = client.withStarkExSigner("0x4d55b547af138c5b6200495d86ab6aed3e06c25fdd75b4b6a00e48515df2b3d");
@@ -56,7 +61,7 @@ public class DefaultReddioClientTest {
     }
 
     @Test
-    @Ignore("this test is not reproducible because it depends on the real stock of the NFT on layer2")
+    @Category(IntegrationTest.class)
     public void testWithdrawalNTFERC721() throws ExecutionException, InterruptedException, JsonProcessingException {
         DefaultReddioClient client = DefaultReddioClient.testnet();
         ReddioClient.WithStarkExSigner clientWithSigner = client.withStarkExSigner("0x4d55b547af138c5b6200495d86ab6aed3e06c25fdd75b4b6a00e48515df2b3d");
@@ -67,7 +72,7 @@ public class DefaultReddioClientTest {
     }
 
     @Test
-    @Ignore("this test is not reproducible because it depends on the real stock of the NFT on layer2")
+    @Category(IntegrationTest.class)
     public void testWithdrawalNTFERC721M() throws ExecutionException, InterruptedException, JsonProcessingException {
         DefaultReddioClient client = DefaultReddioClient.testnet();
         ReddioClient.WithStarkExSigner clientWithSigner = client.withStarkExSigner("0x4d55b547af138c5b6200495d86ab6aed3e06c25fdd75b4b6a00e48515df2b3d");
@@ -78,7 +83,7 @@ public class DefaultReddioClientTest {
     }
 
     @Test
-    @Ignore("not reproducible test")
+    @Category(IntegrationTest.class)
     public void testOrder() throws ExecutionException, InterruptedException, JsonProcessingException {
         DefaultReddioClient client = DefaultReddioClient.testnet();
         DefaultReddioRestClient restClient = DefaultReddioRestClient.testnet();
@@ -94,6 +99,7 @@ public class DefaultReddioClientTest {
     }
 
     @Test
+    @Category(IntegrationTest.class)
     public void testGetOrder() throws ExecutionException, InterruptedException {
         DefaultReddioClient client = DefaultReddioClient.testnet();
         ResponseWrapper<Order> getOrderResponse = client.getOrder(304282).get();
@@ -124,6 +130,7 @@ public class DefaultReddioClientTest {
     }
 
     @Test
+    @Category(IntegrationTest.class)
     public void testListOrders() throws ExecutionException, InterruptedException {
         ReddioClient reddioClient = DefaultReddioClient.testnet();
         ResponseWrapper<ListRecordsResponse> wrapper = reddioClient.listRecords("0x6736f7449da3bf44bf0f7bdd6463818e1ef272641d43021e8bca17b32ec2df0", 3L, 2L, null).get();
@@ -134,6 +141,7 @@ public class DefaultReddioClientTest {
     }
 
     @Test
+    @Category(IntegrationTest.class)
     public void testListOrdersWithSequenceIds() throws ExecutionException, InterruptedException {
         ReddioClient reddioClient = DefaultReddioClient.testnet();
         List<Long> sequenceIds = new ArrayList<>();
@@ -148,7 +156,7 @@ public class DefaultReddioClientTest {
     }
 
     @Test
-    @Ignore("not reproducible test")
+    @Category(IntegrationTest.class)
     public void testOrderWithERC20() throws ExecutionException, InterruptedException, JsonProcessingException {
         DefaultReddioClient client = DefaultReddioClient.testnet();
         DefaultReddioRestClient restClient = DefaultReddioRestClient.testnet();
@@ -164,7 +172,7 @@ public class DefaultReddioClientTest {
     }
 
     @Test
-    @Ignore("not reproducible test")
+    @Category(IntegrationTest.class)
     public void testSellOrderWithRUSD() throws ExecutionException, InterruptedException, JsonProcessingException {
         DefaultReddioClient client = DefaultReddioClient.testnet();
         DefaultReddioRestClient restClient = DefaultReddioRestClient.testnet();
@@ -176,7 +184,7 @@ public class DefaultReddioClientTest {
     }
 
     @Test
-    @Ignore("not reproducible test")
+    @Category(IntegrationTest.class)
     public void testBuyOrderWithPayInfoBaseTokenRUSD() throws ExecutionException, InterruptedException, JsonProcessingException {
         DefaultReddioClient client = DefaultReddioClient.testnet();
         DefaultReddioRestClient restClient = DefaultReddioRestClient.testnet();
@@ -188,7 +196,7 @@ public class DefaultReddioClientTest {
     }
 
     @Test
-    @Ignore("example usages, not a test")
+    @Category(IntegrationTest.class)
     public void testGetSign() {
         BigInteger hash = PaymentSHA3.getPaymentHash(Payment.of(Payment.PayInfo.of("123456789"), ""), 2);
         System.out.println("hash: 0x" + hash.toString(16));
@@ -198,7 +206,7 @@ public class DefaultReddioClientTest {
     }
 
     @Test
-    @Ignore("example usages, not a test")
+    @Category(IntegrationTest.class)
     public void testCancelOrder() throws ExecutionException, InterruptedException, JsonProcessingException {
         DefaultReddioClient client = DefaultReddioClient.testnet();
         ReddioClient.WithStarkExSigner withStarkExSigner = client.withStarkExSigner("0x4d55b547af138c5b6200495d86ab6aed3e06c25fdd75b4b6a00e48515df2b3d");
@@ -209,7 +217,7 @@ public class DefaultReddioClientTest {
     }
 
     @Test
-    @Ignore("example usages, not a test, require api key")
+    @Category(IntegrationTest.class)
     public void testMints() throws ExecutionException, InterruptedException, JsonProcessingException {
         DefaultReddioClient client = DefaultReddioClient.testnet("<truncated-api-key>");
         CompletableFuture<ResponseWrapper<MintResponse>> future = client.mints("0x113536494406bc039586c1ad9b8f51af664d6ef8", "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4", 1);
@@ -219,6 +227,7 @@ public class DefaultReddioClientTest {
     }
 
     @Test
+    @Category(IntegrationTest.class)
     public void testMintWithInvalidAmount() {
         DefaultReddioClient client = DefaultReddioClient.testnet("rk-1236d5fc-f4c1-4a19-a2ff-9c29e3a70e37");
         try {
@@ -231,6 +240,7 @@ public class DefaultReddioClientTest {
     }
 
     @Test
+    @Category(IntegrationTest.class)
     public void testMintMintAgainWithSameTokenId() throws ExecutionException, InterruptedException, JsonProcessingException {
         DefaultReddioClient client = DefaultReddioClient.testnet("rk-1236d5fc-f4c1-4a19-a2ff-9c29e3a70e37");
         List<Long> tokenIds = new ArrayList<>();
@@ -245,6 +255,7 @@ public class DefaultReddioClientTest {
     }
 
     @Test
+    @Category(IntegrationTest.class)
     public void testTransferForNotSuchToken() {
         final BigInteger senderPrivateKey = CryptoService.getRandomPrivateKey();
         final BigInteger receiverPrivateKey = CryptoService.getRandomPrivateKey();
@@ -265,6 +276,7 @@ public class DefaultReddioClientTest {
     }
 
     @Test
+    @Category(IntegrationTest.class)
     public void testWithdrawalForNotSuchToken() {
         final BigInteger senderPrivateKey = CryptoService.getRandomPrivateKey();
         final BigInteger receiverPrivateKey = CryptoService.getRandomPrivateKey();
@@ -285,6 +297,7 @@ public class DefaultReddioClientTest {
     }
 
     @Test
+    @Category(IntegrationTest.class)
     public void testOrderForNoSuchToken() {
         final BigInteger buyerPrivateKey = CryptoService.getRandomPrivateKey();
         final BigInteger receiverPrivateKey = CryptoService.getRandomPrivateKey();

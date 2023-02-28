@@ -1,15 +1,16 @@
 package com.reddio.api.v1.requests
 
+import com.reddio.IntegrationTest
 import com.reddio.api.v1.ReddioClient
 import com.reddio.api.v1.rest.DefaultReddioRestClient
 import com.reddio.api.v1.rest.RecordStatus
 import org.junit.Assert.*
-import org.junit.Ignore
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
 class ReddioTransferToApiTest {
     @Test
-    @Ignore("not reproducible tests")
+    @Category(IntegrationTest::class)
     fun testTransferERC721() {
         val restClient = DefaultReddioRestClient.testnet()
         val response = ReddioTransferToApi.transferERC721(
@@ -25,7 +26,7 @@ class ReddioTransferToApiTest {
     }
 
     @Test
-    @Ignore("not reproducible tests")
+    @Category(IntegrationTest::class)
     fun testTransferERC721ThenPolling() {
         val restClient = DefaultReddioRestClient.testnet()
         val record = ReddioTransferToApi.transferERC721(
