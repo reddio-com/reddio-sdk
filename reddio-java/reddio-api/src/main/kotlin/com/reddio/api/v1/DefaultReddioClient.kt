@@ -1,6 +1,6 @@
 package com.reddio.api.v1
 
-import com.reddio.ReddioException
+import com.reddio.exception.ReddioException
 import com.reddio.api.v1.rest.*
 import com.reddio.sign.PaymentSign
 import kotlinx.coroutines.delay

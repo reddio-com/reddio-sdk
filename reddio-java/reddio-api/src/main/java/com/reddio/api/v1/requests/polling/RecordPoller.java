@@ -1,6 +1,6 @@
 package com.reddio.api.v1.requests.polling;
 
-import com.reddio.ReddioException;
+import com.reddio.exception.ReddioException;
 import com.reddio.api.v1.requests.UnwrapCompletionExceptionKt;
 import com.reddio.api.v1.rest.*;
 import lombok.SneakyThrows;

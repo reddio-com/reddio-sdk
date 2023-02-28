@@ -37,14 +37,14 @@ public class DefaultReddioRestClientTest extends TestCase {
                 null,
                 null));
         ResponseWrapper<OrderListResponse> result = future.get();
-        Assert.assertEquals("OK", result.status);
+        Assert.assertEquals("OK", result.getStatus());
     }
 
     public void testStarexContract() throws JsonProcessingException, ExecutionException, InterruptedException {
         DefaultReddioRestClient client = DefaultReddioRestClient.testnet();
         CompletableFuture<ResponseWrapper<StarexContractsResponse>> future = client.starexContracts();
         ResponseWrapper<StarexContractsResponse> result = future.get();
-        Assert.assertEquals("OK", result.status);
+        Assert.assertEquals("OK", result.getStatus());
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonContent = objectMapper.writeValueAsString(result);
         System.out.println(jsonContent);

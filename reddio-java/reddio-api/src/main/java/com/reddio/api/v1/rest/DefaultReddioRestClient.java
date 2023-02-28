@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.reddio.ReddioException;
+import com.reddio.exception.ReddioException;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -335,7 +335,7 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         if ("OK".equals(responseWrapper.getStatus())) {
             return responseWrapper;
         }
-        throw new ReddioException("response status is not OK, status: " + responseWrapper.getStatus() + ", error: " + responseWrapper.error + ", messages: " + String.join(",", messages));
+        throw new ReddioException("response status is not OK, status: " + responseWrapper.getStatus() + ", error: " + responseWrapper.getError() + ", messages: " + String.join(",", messages));
     }
 
     private static class ToCompletableFutureCallback<T> implements Callback {

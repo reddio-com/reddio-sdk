@@ -34,7 +34,7 @@ public class DefaultReddioClientTest {
                 4194303L
         );
         ResponseWrapper<TransferResponse> result = future.get();
-        Assert.assertEquals("OK", result.status);
+        Assert.assertEquals("OK", result.getStatus());
         System.out.println(new ObjectMapper().writeValueAsString(result));
     }
 
@@ -43,7 +43,7 @@ public class DefaultReddioClientTest {
         DefaultReddioClient client = DefaultReddioClient.testnet();
         CompletableFuture<ResponseWrapper<GetRecordResponse>> future = client.waitingTransferGetApproved("0x6736f7449da3bf44bf0f7bdd6463818e1ef272641d43021e8bca17b32ec2df0", 300523);
         ResponseWrapper<GetRecordResponse> result = future.get();
-        Assert.assertEquals("OK", result.status);
+        Assert.assertEquals("OK", result.getStatus());
         System.out.println(new ObjectMapper().writeValueAsString(result));
     }
 
@@ -60,7 +60,7 @@ public class DefaultReddioClientTest {
                 4194303L
         );
         ResponseWrapper<WithdrawalToResponse> result = future.get();
-        Assert.assertEquals("OK", result.status);
+        Assert.assertEquals("OK", result.getStatus());
         System.out.println(new ObjectMapper().writeValueAsString(result));
     }
 
@@ -71,7 +71,7 @@ public class DefaultReddioClientTest {
         ReddioClient.WithStarkExSigner clientWithSigner = client.withStarkExSigner("0x4d55b547af138c5b6200495d86ab6aed3e06c25fdd75b4b6a00e48515df2b3d");
         CompletableFuture<ResponseWrapper<WithdrawalToResponse>> future = clientWithSigner.withdrawal("0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4", "1", REDDIO721_CONTRACT_ADDRESS, "1022", "ERC721", "0x76f2Fc7ed90039d986e3eb4DB294f05E160c8F03", 4194303L);
         ResponseWrapper<WithdrawalToResponse> result = future.get();
-        Assert.assertEquals("OK", result.status);
+        Assert.assertEquals("OK", result.getStatus());
         System.out.println(new ObjectMapper().writeValueAsString(result));
     }
 
@@ -82,7 +82,7 @@ public class DefaultReddioClientTest {
         ReddioClient.WithStarkExSigner clientWithSigner = client.withStarkExSigner("0x4d55b547af138c5b6200495d86ab6aed3e06c25fdd75b4b6a00e48515df2b3d");
         CompletableFuture<ResponseWrapper<WithdrawalToResponse>> future = clientWithSigner.withdrawal("0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4", "1", REDDIO721M_CONTRACT_ADDRESS, "7", "ERC721M", "0x76f2Fc7ed90039d986e3eb4DB294f05E160c8F03", 4194303L);
         ResponseWrapper<WithdrawalToResponse> result = future.get();
-        Assert.assertEquals("OK", result.status);
+        Assert.assertEquals("OK", result.getStatus());
         System.out.println(new ObjectMapper().writeValueAsString(result));
     }
 
@@ -98,7 +98,7 @@ public class DefaultReddioClientTest {
                 1L)
         );
         ResponseWrapper<GetBalancesResponse> balances = balancesFuture.get();
-        Assert.assertEquals("OK", balances.status);
+        Assert.assertEquals("OK", balances.getStatus());
         GetBalancesResponse.BalanceRecord toSell = balances.getData().getList().stream().filter((it) ->
                 it.getBalanceAvailable() > 0
         ).collect(Collectors.toList()).get(0);
@@ -115,7 +115,7 @@ public class DefaultReddioClientTest {
         );
         ResponseWrapper<OrderResponse> result = future.get();
         System.out.println(new ObjectMapper().writeValueAsString(result));
-        Assert.assertEquals("OK", result.status);
+        Assert.assertEquals("OK", result.getStatus());
     }
 
     @Test
@@ -168,8 +168,8 @@ public class DefaultReddioClientTest {
         Assert.assertEquals("OK", wrapper.getStatus());
         Assert.assertEquals(2, wrapper.getData().getList().size());
         Assert.assertEquals(2, wrapper.getData().getTotal().longValue());
-        Assert.assertEquals(303531L, wrapper.getData().getList().get(0).getSequenceId());
-        Assert.assertEquals(303530L, wrapper.getData().getList().get(1).getSequenceId());
+        Assert.assertEquals(303531L, wrapper.getData().getList().get(0).getSequenceId().longValue());
+        Assert.assertEquals(303530L, wrapper.getData().getList().get(1).getSequenceId().longValue());
     }
 
     @Test
@@ -184,7 +184,7 @@ public class DefaultReddioClientTest {
                 1L)
         );
         ResponseWrapper<GetBalancesResponse> balances = balancesFuture.get();
-        Assert.assertEquals("OK", balances.status);
+        Assert.assertEquals("OK", balances.getStatus());
         GetBalancesResponse.BalanceRecord toSell = balances.getData().getList().stream().filter((it) ->
                 it.getBalanceAvailable() > 0
         ).collect(Collectors.toList()).get(0);
@@ -203,7 +203,7 @@ public class DefaultReddioClientTest {
         );
         ResponseWrapper<OrderResponse> result = future.get();
         System.out.println(new ObjectMapper().writeValueAsString(result));
-        Assert.assertEquals("OK", result.status);
+        Assert.assertEquals("OK", result.getStatus());
     }
 
     @Test
@@ -220,7 +220,7 @@ public class DefaultReddioClientTest {
                 "1", "");
         ResponseWrapper<OrderResponse> result = future.get();
         System.out.println(new ObjectMapper().writeValueAsString(result));
-        Assert.assertEquals("OK", result.status);
+        Assert.assertEquals("OK", result.getStatus());
     }
 
     @Test
@@ -242,7 +242,7 @@ public class DefaultReddioClientTest {
         );
         ResponseWrapper<OrderResponse> result = future.get();
         System.out.println(new ObjectMapper().writeValueAsString(result));
-        Assert.assertEquals("OK", result.status);
+        Assert.assertEquals("OK", result.getStatus());
     }
 
     @Test
@@ -274,7 +274,7 @@ public class DefaultReddioClientTest {
         CompletableFuture<ResponseWrapper<CancelOrderResponse>> future = withStarkExSigner.cancelOrder("0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4", 303590);
         ResponseWrapper<CancelOrderResponse> result = future.get();
         System.out.println(new ObjectMapper().writeValueAsString(result));
-        Assert.assertEquals("OK", result.status);
+        Assert.assertEquals("OK", result.getStatus());
     }
 
     @Test
@@ -284,7 +284,7 @@ public class DefaultReddioClientTest {
         CompletableFuture<ResponseWrapper<MintResponse>> future = client.mints("0x113536494406bc039586c1ad9b8f51af664d6ef8", "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4", 1);
         ResponseWrapper<MintResponse> result = future.get();
         System.out.println(new ObjectMapper().writeValueAsString(result));
-        Assert.assertEquals("OK", result.status);
+        Assert.assertEquals("OK", result.getStatus());
     }
 
     @Test
@@ -298,6 +298,6 @@ public class DefaultReddioClientTest {
         CompletableFuture<ResponseWrapper<MintResponse>> future = client.mints("0x113536494406bc039586c1ad9b8f51af664d6ef8", "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4", tokenIds);
         ResponseWrapper<MintResponse> result = future.get();
         System.out.println(new ObjectMapper().writeValueAsString(result));
-        Assert.assertEquals("OK", result.status);
+        Assert.assertEquals("OK", result.getStatus());
     }
 }

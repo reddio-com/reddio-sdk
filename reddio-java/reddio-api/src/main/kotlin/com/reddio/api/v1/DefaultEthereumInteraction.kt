@@ -2,7 +2,7 @@ package com.reddio.api.v1
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.reddio.ReddioException
+import com.reddio.exception.ReddioException
 import com.reddio.abi.Deposits
 import com.reddio.abi.Withdrawals
 import com.reddio.api.v1.rest.GetAssetIdMessage

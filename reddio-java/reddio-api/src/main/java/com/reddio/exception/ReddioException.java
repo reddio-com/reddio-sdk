@@ -1,6 +1,10 @@
-package com.reddio;
+package com.reddio.exception;
 
 public class ReddioException extends RuntimeException {
+
+    public ReddioException() {
+        super();
+    }
 
     public ReddioException(String message) {
         super(message);
