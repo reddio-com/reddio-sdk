@@ -222,7 +222,7 @@ class ReddioTransferToApi private constructor(
                 "1",
                 contractAddress,
                 tokenId,
-                ReddioClient.TOKEN_TYPE_ERC721,
+                tokenType,
                 receiver,
                 expirationTimestamp
             )
