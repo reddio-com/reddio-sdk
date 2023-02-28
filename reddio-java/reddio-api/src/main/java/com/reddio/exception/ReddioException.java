@@ -1,5 +1,8 @@
 package com.reddio.exception;
 
+/**
+ *
+ */
 public class ReddioException extends RuntimeException {
 
     public ReddioException() {

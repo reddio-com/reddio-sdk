@@ -38,6 +38,18 @@ public enum ReddioErrorCode {
     }
 
     @Getter
-    private int code;
+    private final int code;
+
+    public static ReddioErrorCode fromCode(Integer code) {
+        if (code == null) {
+            return null;
+        }
+        for (ReddioErrorCode errorCode : ReddioErrorCode.values()) {
+            if (errorCode.getCode() == code) {
+                return errorCode;
+            }
+        }
+        return null;
+    }
 
 }
