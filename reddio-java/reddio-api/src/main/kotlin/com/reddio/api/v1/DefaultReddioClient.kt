@@ -1,5 +1,6 @@
 package com.reddio.api.v1
 
+import com.reddio.ReddioException
 import com.reddio.api.v1.rest.*
 import com.reddio.sign.PaymentSign
 import kotlinx.coroutines.delay
@@ -250,17 +251,26 @@ class DefaultReddioClient(
         }
 
         override fun withdrawalERC721(
-            contractAddress: String, tokenId: String, receiver: String, expirationTimeStamp: Long
+            contractAddress: String,
+            tokenId: String,
+            tokenType: String,
+            receiver: String,
+            expirationTimeStamp: Long
         ): CompletableFuture<ResponseWrapper<WithdrawalToResponse>> {
+            if (ReddioClient.TOKEN_TYPE_ERC721M != tokenType && ReddioClient.TOKEN_TYPE_ERC721 != tokenType) {
+                throw ReddioException("tokenType must be ERC721 or ERC721M for ERC721/ERC721M withdrawal")
+            }
+
             return this.withdrawal(
                 "1",
                 contractAddress,
                 tokenId,
-                ReddioClient.TOKEN_TYPE_ERC721,
+                tokenType,
                 receiver,
                 expirationTimeStamp,
             )
         }
+
 
         override fun order(
             starkKey: String,
@@ -615,19 +625,28 @@ class DefaultReddioClient(
         }
 
         override fun transferERC721(
-            contractAddress: String, tokenId: String, receiver: String, expirationTimeStamp: Long
+            contractAddress: String,
+            tokenId: String,
+            tokenType: String,
+            receiver: String,
+            expirationTimeStamp: Long
         ): CompletableFuture<ResponseWrapper<TransferResponse>> {
+            if (ReddioClient.TOKEN_TYPE_ERC721M != tokenType && ReddioClient.TOKEN_TYPE_ERC721 != tokenType) {
+                throw ReddioException("tokenType must be ERC721 or ERC721M for ERC721/ERC721M transfer")
+            }
+
             val starkKey = this.starkExSigner.getStarkKey();
             return this.transfer(
                 starkKey,
                 "1",
                 contractAddress,
                 tokenId,
-                ReddioClient.TOKEN_TYPE_ERC721,
+                tokenType,
                 receiver,
                 expirationTimeStamp
             )
         }
+
     }
 
     override fun close() {

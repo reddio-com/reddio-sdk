@@ -135,6 +135,15 @@ class ReddioTransferToApi private constructor(
             return build(restClient, message)
         }
 
+        /**
+         * Build the request for transfer ETH.
+         *
+         * @param restClient the reddio rest client
+         * @param starkPrivateKey the stark private key for signing the request
+         * @param amount the amount of ETH to transfer
+         * @param receiver the receiver's stark key
+         * @param expirationTimestamp the expiration timestamp of the request in seconds, max value is 4194303L
+         */
         @JvmStatic
         fun transferETH(
             restClient: ReddioRestClient,
@@ -155,6 +164,16 @@ class ReddioTransferToApi private constructor(
             )
         }
 
+        /**
+         * Build the request for transfer ERC20.
+         *
+         * @param restClient the reddio rest client
+         * @param starkPrivateKey the stark private key for signing the request
+         * @param amount the amount of ERC20 to transfer
+         * @param contractAddress the contract address of the ERC20 to transfer
+         * @param receiver the receiver's stark key
+         * @param expirationTimestamp the expiration timestamp of the request in seconds, max value is 4194303L
+         */
         @JvmStatic
         fun transferERC20(
             restClient: ReddioRestClient,
@@ -176,12 +195,24 @@ class ReddioTransferToApi private constructor(
             )
         }
 
+        /**
+         * Build the request for transfer ERC721/ERC721M.
+         *
+         * @param restClient the reddio rest client
+         * @param starkPrivateKey the stark private key for signing the request
+         * @param contractAddress the contract address of the ERC721/ERC721M to transfer
+         * @param tokenId the token id of the ERC721/ERC721M to transfer
+         * @param tokenType the token type of the ERC721/ERC721M to transfer, use [ReddioClient.TOKEN_TYPE_ERC721] for ERC721 and [ReddioClient.TOKEN_TYPE_ERC721M] for ERC721M
+         * @param receiver the receiver's stark key
+         * @param expirationTimestamp the expiration timestamp of the request in seconds, max value is 4194303L
+         */
         @JvmStatic
         fun transferERC721(
             restClient: ReddioRestClient,
             starkPrivateKey: String,
             contractAddress: String,
             tokenId: String,
+            tokenType: String,
             receiver: String,
             expirationTimestamp: Long
         ): ReddioTransferToApi {
