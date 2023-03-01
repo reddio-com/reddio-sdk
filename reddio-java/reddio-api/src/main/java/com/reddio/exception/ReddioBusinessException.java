@@ -15,13 +15,13 @@ public class ReddioBusinessException extends ReddioException {
      * The status in the response.
      */
     @Getter
-    private String status;
+    private final String status;
 
     /**
      * Error message.
      */
     @Getter
-    private String error;
+    private final String error;
 
     /**
      * Error code as enum, might be null if the error code is not recognized.
@@ -29,13 +29,13 @@ public class ReddioBusinessException extends ReddioException {
      * You could still get the error code from raw response {@link #getResponse()}.
      */
     @Getter
-    private ReddioErrorCode errorCode;
+    private final ReddioErrorCode errorCode;
 
     /**
      * Raw response from the reddio service.
      */
     @Getter
-    private ResponseWrapper<?> response;
+    private final ResponseWrapper<?> response;
 
     public ReddioBusinessException(String status, String error, ReddioErrorCode errorCode, ResponseWrapper<?> response) {
         this.status = status;

@@ -6,15 +6,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.reddio.exception.ReddioBusinessException;
 import com.reddio.exception.ReddioErrorCode;
 import com.reddio.exception.ReddioServiceException;
-import junit.framework.TestCase;
-import okhttp3.Call;
 import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;

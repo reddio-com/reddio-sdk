@@ -9,6 +9,7 @@ import com.reddio.exception.ReddioErrorCode;
 import com.reddio.exception.ReddioException;
 import com.reddio.exception.ReddioServiceException;
 import okhttp3.*;
+import okhttp3.internal.http2.ErrorCode;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -359,20 +360,25 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         public void onResponse(Call call, Response response) {
             try {
                 String responseBodyAsString = response.body() != null ? response.body().string() : "";
+                ReddioErrorCode errCode = tryExtractErrorCode(responseBodyAsString);
                 if (!response.isSuccessful()) {
-                    if (response.code() == 400) {
-                        this.future.completeExceptionally(new ReddioServiceException(response.code(), responseBodyAsString, "maybe the required x-api-key header is missing"));
-                    } else if (response.code() == 429) {
-                        this.future.completeExceptionally(new ReddioServiceException(response.code(), responseBodyAsString, "too many requests, rate limit exceeded"));
-                    } else {
-                        this.future.completeExceptionally(new ReddioServiceException(response.code(), responseBodyAsString, ""));
-                    }
+                    this.future.completeExceptionally(new ReddioServiceException("reddio service not respond as sucessful", response.code(), errCode, responseBodyAsString));
                     return;
                 }
-
                 this.future.complete(objectMapper.readValue(responseBodyAsString, typeReference));
             } catch (Throwable e) {
                 this.future.completeExceptionally(e);
+            }
+        }
+
+        public static ReddioErrorCode tryExtractErrorCode(String responseJsonString) {
+            try {
+                final ResponseWrapper<?> model = objectMapper.readValue(responseJsonString, new TypeReference<ResponseWrapper<?>>() {
+                });
+                return ReddioErrorCode.fromCode(model.getErrorCode());
+            } catch (Throwable e) {
+                // TODO: debug log
+                return null;
             }
         }
     }
