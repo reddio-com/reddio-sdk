@@ -4,8 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.reddio.ReddioException;
+import com.reddio.exception.ReddioBusinessException;
+import com.reddio.exception.ReddioErrorCode;
+import com.reddio.exception.ReddioException;
+import com.reddio.exception.ReddioServiceException;
 import okhttp3.*;
+import okhttp3.internal.http2.ErrorCode;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -335,10 +339,10 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         if ("OK".equals(responseWrapper.getStatus())) {
             return responseWrapper;
         }
-        throw new ReddioException("response status is not OK, status: " + responseWrapper.getStatus() + ", error: " + responseWrapper.error + ", messages: " + String.join(",", messages));
+        throw new ReddioBusinessException(responseWrapper.getStatus(), responseWrapper.getError(), ReddioErrorCode.fromCode(responseWrapper.getErrorCode()), responseWrapper);
     }
 
-    private static class ToCompletableFutureCallback<T> implements Callback {
+    static class ToCompletableFutureCallback<T> implements Callback {
         private final CompletableFuture<T> future;
         private final TypeReference<T> typeReference;
 
@@ -348,21 +352,33 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         }
 
         @Override
-        public void onFailure(@NotNull Call call, IOException e) {
+        public void onFailure(Call call, IOException e) {
             this.future.completeExceptionally(e);
         }
 
         @Override
-        public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+        public void onResponse(Call call, Response response) {
             try {
+                String responseBodyAsString = response.body() != null ? response.body().string() : "";
+                ReddioErrorCode errCode = tryExtractErrorCode(responseBodyAsString);
                 if (!response.isSuccessful()) {
-                    this.future.completeExceptionally(new IOException("response is not successful, code: " + response.code()));
+                    this.future.completeExceptionally(new ReddioServiceException("reddio service not respond as sucessful", response.code(), errCode, responseBodyAsString));
                     return;
                 }
-                String jsonString = Objects.requireNonNull(response.body()).string();
-                this.future.complete(objectMapper.readValue(jsonString, typeReference));
+                this.future.complete(objectMapper.readValue(responseBodyAsString, typeReference));
             } catch (Throwable e) {
                 this.future.completeExceptionally(e);
+            }
+        }
+
+        public static ReddioErrorCode tryExtractErrorCode(String responseJsonString) {
+            try {
+                final ResponseWrapper<?> model = objectMapper.readValue(responseJsonString, new TypeReference<ResponseWrapper<?>>() {
+                });
+                return ReddioErrorCode.fromCode(model.getErrorCode());
+            } catch (Throwable e) {
+                // TODO: debug log
+                return null;
             }
         }
     }

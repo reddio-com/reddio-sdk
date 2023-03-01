@@ -43,7 +43,7 @@ public class SequenceRecord {
     public RecordType recordType;
 
     @JsonProperty("sequence_id")
-    public long sequenceId;
+    public Long sequenceId;
 
     @JsonProperty("stark_key")
     public String starkKey;
@@ -55,7 +55,7 @@ public class SequenceRecord {
     public String resp;
 
     @JsonProperty("time")
-    public long time;
+    public Long time;
 
     @JsonProperty("to")
     public String to;

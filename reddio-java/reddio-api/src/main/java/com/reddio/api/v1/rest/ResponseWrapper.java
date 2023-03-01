@@ -10,10 +10,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(staticName = "of")
 public class ResponseWrapper<T> {
     @JsonProperty("status")
-    public String status;
+    private String status;
+
     @JsonProperty("error")
-    public String error;
+    private String error;
+
+    @JsonProperty("error_code")
+    private Integer errorCode;
+
     @JsonProperty("data")
-    public T data;
+    private T data;
 
 }

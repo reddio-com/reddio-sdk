@@ -16,7 +16,7 @@ public class TransferMessage {
     @JsonProperty("amount")
     public String amount;
     @JsonProperty("nonce")
-    public long nonce;
+    public Long nonce;
     @JsonProperty("vault_id")
     public String vaultId;
     @JsonProperty("receiver")
@@ -24,7 +24,7 @@ public class TransferMessage {
     @JsonProperty("receiver_vault_id")
     public String receiverVaultId;
     @JsonProperty("expiration_timestamp")
-    public long expirationTimestamp;
+    public Long expirationTimestamp;
     @JsonProperty("signature")
     public Signature signature;
 

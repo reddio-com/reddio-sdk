@@ -1,6 +1,6 @@
 package com.reddio.misc
 
-import com.reddio.ReddioException
+import com.reddio.exception.ReddioException
 import com.reddio.api.v1.StarkExSigner
 import com.reddio.api.v1.requests.ReddioCancelOrderApi
 import com.reddio.api.v1.requests.ReddioTransferToApi
@@ -9,7 +9,6 @@ import com.reddio.api.v1.rest.GetBalancesResponse.BalanceRecord
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
 import java.util.stream.Collectors
-import kotlin.streams.toList
 
 /**
  * BulkAssetsTransfer is a helper class which would transfer **all the assets** from sender to receiver as best effort.

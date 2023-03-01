@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 public class TransferResponse {
 
     @JsonProperty("sequence_id")
-    public long sequenceId;
+    public Long sequenceId;
 }

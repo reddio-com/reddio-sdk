@@ -1,55 +1,60 @@
 package com.reddio.api.v1.rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import junit.framework.TestCase;
+import com.reddio.exception.ReddioBusinessException;
+import com.reddio.exception.ReddioErrorCode;
+import com.reddio.exception.ReddioServiceException;
+import okhttp3.Protocol;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 
 import static com.reddio.api.v1.DefaultEthereumInteractionTest.REDDIO721_CONTRACT_ADDRESS;
 
-public class DefaultReddioRestClientTest extends TestCase {
+public class DefaultReddioRestClientTest {
 
+    @Test
     public void testGetRecord() throws ExecutionException, InterruptedException {
         DefaultReddioRestClient client = DefaultReddioRestClient.testnet();
-        ResponseWrapper<GetRecordResponse> response = client.getRecord(
-                GetRecordMessage.of("0x6736f7449da3bf44bf0f7bdd6463818e1ef272641d43021e8bca17b32ec2df0", 300523L)).get();
-        Assert.assertEquals(RecordStatus.AcceptedByReddio, response.data.get(0).status);
+        ResponseWrapper<GetRecordResponse> response = client.getRecord(GetRecordMessage.of("0x6736f7449da3bf44bf0f7bdd6463818e1ef272641d43021e8bca17b32ec2df0", 300523L)).get();
+        Assert.assertEquals(RecordStatus.AcceptedByReddio, response.getData().get(0).status);
     }
 
+    @Test
     public void testGetTxn() throws ExecutionException, InterruptedException {
         DefaultReddioRestClient client = DefaultReddioRestClient.testnet();
-        ResponseWrapper<GetTxnResponse> response = client.getTxn(
-                GetTxnMessage.of(300523L)).get();
-        Assert.assertEquals(RecordStatus.AcceptedByReddio, response.data.get(0).status);
+        ResponseWrapper<GetTxnResponse> response = client.getTxn(GetTxnMessage.of(300523L)).get();
+        Assert.assertEquals(RecordStatus.AcceptedByReddio, response.getData().get(0).status);
     }
 
+    @Test
     public void testOrderList() throws ExecutionException, InterruptedException {
         DefaultReddioRestClient client = DefaultReddioRestClient.testnet();
-        CompletableFuture<ResponseWrapper<OrderListResponse>> future = client.orderList(OrderListMessage.of(
-                "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
-                REDDIO721_CONTRACT_ADDRESS,
-                null,
-                null,
-                null,
-                null,
-                null));
+        CompletableFuture<ResponseWrapper<OrderListResponse>> future = client.orderList(OrderListMessage.of("0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4", REDDIO721_CONTRACT_ADDRESS, null, null, null, null, null));
         ResponseWrapper<OrderListResponse> result = future.get();
-        Assert.assertEquals("OK", result.status);
+        Assert.assertEquals("OK", result.getStatus());
     }
 
+    @Test
     public void testStarexContract() throws JsonProcessingException, ExecutionException, InterruptedException {
         DefaultReddioRestClient client = DefaultReddioRestClient.testnet();
         CompletableFuture<ResponseWrapper<StarexContractsResponse>> future = client.starexContracts();
         ResponseWrapper<StarexContractsResponse> result = future.get();
-        Assert.assertEquals("OK", result.status);
+        Assert.assertEquals("OK", result.getStatus());
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonContent = objectMapper.writeValueAsString(result);
         System.out.println(jsonContent);
     }
 
+    @Test
     public void testGetRecordBySignature() throws ExecutionException, InterruptedException {
         DefaultReddioRestClient restClient = DefaultReddioRestClient.testnet();
         ResponseWrapper<GetRecordResponse> wrapper = restClient.getRecordBySignature(Signature.of("0x603893549d9fbb1d710ca68f2e44aa8ae2f7c4353219cb662d94e48971dd15f", "0x7556a28be6f49fa896077b3bd96f909e07a226392e2af93852e4ecd8d56814d")).get();
@@ -59,10 +64,10 @@ public class DefaultReddioRestClientTest extends TestCase {
         SequenceRecord record = wrapper.getData().get(0);
         Assert.assertEquals("1", record.getAmount());
         Assert.assertEquals(RecordType.ASKOrderRecordType, record.getRecordType());
-        Assert.assertEquals(304287L, record.getSequenceId());
+        Assert.assertEquals(304287L, record.getSequenceId().longValue());
         Assert.assertEquals("0x1ccc27877014bc1a81919fc855ebbd1b874603283c9ea93397d970b0704e581", record.getStarkKey());
         Assert.assertEquals(RecordStatus.AcceptedByReddio, record.getStatus());
-        Assert.assertEquals(1676261428L, record.getTime());
+        Assert.assertEquals(1676261428L, record.getTime().longValue());
 
 
         SequenceRecord.Order order = record.getOrder();
@@ -85,6 +90,7 @@ public class DefaultReddioRestClientTest extends TestCase {
 
     }
 
+    @Test
     public void testGetRecordBySignature2() throws ExecutionException, InterruptedException {
         DefaultReddioRestClient restClient = DefaultReddioRestClient.testnet();
         ResponseWrapper<GetRecordResponse> wrapper = restClient.getRecordBySignature(Signature.of("0x6314640fa3955fec989b9c8e85446d3f10fffad4f2df8b3a1f90d75e9649804", "0x70514b88e78028eacdaad5583bda1ecfd93d4fbe5f65eadaeb42e94201662e9")).get();
@@ -99,12 +105,107 @@ public class DefaultReddioRestClientTest extends TestCase {
         Assert.assertEquals("0x941661bd1134dc7cc3d107bf006b8631f6e65ad5", record.getContractAddress());
         Assert.assertEquals("1", record.getDisplayValue());
         Assert.assertEquals(RecordType.WithdrawRecordType, record.getRecordType());
-        Assert.assertEquals(304312L, record.getSequenceId());
+        Assert.assertEquals(304312L, record.getSequenceId().longValue());
         Assert.assertEquals("0x7865bc66b610d6196a7cbeb9bf066c64984f6f06b5ed3b6f5788bd9a6cb099c", record.getStarkKey());
         Assert.assertEquals(RecordStatus.AcceptedOnL1, record.getStatus());
-        Assert.assertEquals(1676351391L, record.getTime());
-
+        Assert.assertEquals(1676351391L, record.getTime().longValue());
 
         Assert.assertNull(record.getOrder());
+    }
+
+    @Test
+    public void testEnsureSuccess() {
+        ResponseWrapper<?> wrapper = new ResponseWrapper<>();
+        wrapper.setStatus("OK");
+        DefaultReddioRestClient.ensureSuccess(wrapper);
+    }
+
+    @Test
+    public void testEnsureSuccessWithFailure() {
+        ResponseWrapper<?> wrapper = new ResponseWrapper<>();
+        wrapper.setStatus("FAIL");
+        wrapper.setErrorCode(ReddioErrorCode.NoMintableToken.getCode());
+        try {
+            DefaultReddioRestClient.ensureSuccess(wrapper);
+            Assert.fail();
+        } catch (ReddioBusinessException e) {
+            Assert.assertEquals(ReddioErrorCode.NoMintableToken, e.getErrorCode());
+        }
+    }
+
+    @Test
+    public void testEnsureSuccessWithUnrecognizedErrorCode() {
+        ResponseWrapper<?> wrapper = new ResponseWrapper<>();
+        wrapper.setStatus("FAIL");
+        wrapper.setErrorCode(9999);
+        try {
+            DefaultReddioRestClient.ensureSuccess(wrapper);
+            Assert.fail();
+        } catch (ReddioBusinessException e) {
+            Assert.assertNull(e.getErrorCode());
+            Assert.assertEquals(9999, e.getResponse().getErrorCode().intValue());
+        } catch (Throwable t) {
+            Assert.fail();
+        }
+    }
+
+    @Test
+    public void testToCompletableFutureCallbackOnResponse() {
+        CompletableFuture<ResponseWrapper<Object>> future = new CompletableFuture<>();
+        final DefaultReddioRestClient.ToCompletableFutureCallback<?> callback = new DefaultReddioRestClient.ToCompletableFutureCallback(future, new TypeReference<ResponseWrapper<Object>>() {
+        });
+        final Request stubRequest = new Request.Builder().url("http://fake-url").build();
+        final Response r = new Response.Builder().code(400).request(stubRequest).protocol(Protocol.HTTP_1_1).message("").build();
+        callback.onResponse(null, r);
+        try {
+            future.join();
+            Assert.fail();
+        } catch (CompletionException e) {
+            final Throwable cause = e.getCause();
+            Assert.assertTrue(cause instanceof ReddioServiceException);
+            Assert.assertEquals(400, ((ReddioServiceException) cause).getHttpStatusCode());
+        } catch (Throwable t) {
+            Assert.fail();
+        }
+    }
+
+    @Test
+    public void testToCompletableFutureCallbackOnResponseUnrecognizedCode() {
+        CompletableFuture<ResponseWrapper<Object>> future = new CompletableFuture<>();
+        final DefaultReddioRestClient.ToCompletableFutureCallback<?> callback = new DefaultReddioRestClient.ToCompletableFutureCallback(future, new TypeReference<ResponseWrapper<Object>>() {
+        });
+        final Request stubRequest = new Request.Builder().url("http://fake-url").build();
+        final Response r = new Response.Builder().code(503).request(stubRequest).protocol(Protocol.HTTP_1_1).message("").build();
+        callback.onResponse(null, r);
+        try {
+            future.join();
+            Assert.fail();
+        } catch (CompletionException e) {
+            final Throwable cause = e.getCause();
+            Assert.assertTrue(cause instanceof ReddioServiceException);
+            Assert.assertEquals(503, ((ReddioServiceException) cause).getHttpStatusCode());
+        } catch (Throwable t) {
+            Assert.fail();
+        }
+    }
+
+    @Test
+    @Ignore("Waiting backend update")
+    public void testMintWithInvalidApiKey() {
+        final DefaultReddioRestClient restClient = DefaultReddioRestClient.testnet("not a real api key");
+        try {
+            restClient.mints(
+                    MintsMessage.of(
+                            "",
+                            "",
+                            "1"
+                    )
+            ).join();
+        } catch (CompletionException e) {
+            final Throwable cause = e.getCause();
+            Assert.assertTrue(cause instanceof ReddioServiceException);
+            Assert.assertEquals(403, ((ReddioServiceException) cause).getHttpStatusCode());
+            Assert.assertEquals(ReddioErrorCode.InvalidAPIKey, ((ReddioServiceException) cause).getErrorCode());
+        }
     }
 }

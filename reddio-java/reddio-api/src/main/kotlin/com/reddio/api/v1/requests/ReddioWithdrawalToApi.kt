@@ -1,6 +1,6 @@
 package com.reddio.api.v1.requests
 
-import com.reddio.ReddioException
+import com.reddio.exception.ReddioException
 import com.reddio.api.v1.QuantizedHelper
 import com.reddio.api.v1.ReddioClient
 import com.reddio.api.v1.StarkExSigner
