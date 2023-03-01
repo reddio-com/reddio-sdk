@@ -31,6 +31,8 @@ public enum ReddioErrorCode {
     NotSuchToken(25),
     CanceledOrder(26),
     ContractAddressMissing(27),
+    InvalidAPIKey(28),
+    InvalidOwnerOfContract(29),
     SystemError(500);
 
     ReddioErrorCode(int code) {
