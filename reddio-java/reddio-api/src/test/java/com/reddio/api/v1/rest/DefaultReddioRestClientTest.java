@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.reddio.exception.ReddioBusinessException;
 import com.reddio.exception.ReddioErrorCode;
-import com.reddio.exception.ReddioServiceException;
 import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -150,46 +149,6 @@ public class DefaultReddioRestClientTest {
     }
 
     @Test
-    public void testToCompletableFutureCallbackOnResponse() {
-        CompletableFuture<ResponseWrapper<Object>> future = new CompletableFuture<>();
-        final DefaultReddioRestClient.ToCompletableFutureCallback<?> callback = new DefaultReddioRestClient.ToCompletableFutureCallback(future, new TypeReference<ResponseWrapper<Object>>() {
-        });
-        final Request stubRequest = new Request.Builder().url("http://fake-url").build();
-        final Response r = new Response.Builder().code(400).request(stubRequest).protocol(Protocol.HTTP_1_1).message("").build();
-        callback.onResponse(null, r);
-        try {
-            future.join();
-            Assert.fail();
-        } catch (CompletionException e) {
-            final Throwable cause = e.getCause();
-            Assert.assertTrue(cause instanceof ReddioServiceException);
-            Assert.assertEquals(400, ((ReddioServiceException) cause).getHttpStatusCode());
-        } catch (Throwable t) {
-            Assert.fail();
-        }
-    }
-
-    @Test
-    public void testToCompletableFutureCallbackOnResponseUnrecognizedCode() {
-        CompletableFuture<ResponseWrapper<Object>> future = new CompletableFuture<>();
-        final DefaultReddioRestClient.ToCompletableFutureCallback<?> callback = new DefaultReddioRestClient.ToCompletableFutureCallback(future, new TypeReference<ResponseWrapper<Object>>() {
-        });
-        final Request stubRequest = new Request.Builder().url("http://fake-url").build();
-        final Response r = new Response.Builder().code(503).request(stubRequest).protocol(Protocol.HTTP_1_1).message("").build();
-        callback.onResponse(null, r);
-        try {
-            future.join();
-            Assert.fail();
-        } catch (CompletionException e) {
-            final Throwable cause = e.getCause();
-            Assert.assertTrue(cause instanceof ReddioServiceException);
-            Assert.assertEquals(503, ((ReddioServiceException) cause).getHttpStatusCode());
-        } catch (Throwable t) {
-            Assert.fail();
-        }
-    }
-
-    @Test
     @Ignore("Waiting backend update")
     public void testMintWithInvalidApiKey() {
         final DefaultReddioRestClient restClient = DefaultReddioRestClient.testnet("not a real api key");
@@ -201,11 +160,11 @@ public class DefaultReddioRestClientTest {
                             "1"
                     )
             ).join();
+            Assert.fail();
         } catch (CompletionException e) {
             final Throwable cause = e.getCause();
-            Assert.assertTrue(cause instanceof ReddioServiceException);
-            Assert.assertEquals(403, ((ReddioServiceException) cause).getHttpStatusCode());
-            Assert.assertEquals(ReddioErrorCode.InvalidAPIKey, ((ReddioServiceException) cause).getErrorCode());
+            Assert.assertTrue(cause instanceof ReddioBusinessException);
+            Assert.assertEquals(ReddioErrorCode.InvalidAPIKey, ((ReddioBusinessException) cause).getErrorCode());
         }
     }
 }

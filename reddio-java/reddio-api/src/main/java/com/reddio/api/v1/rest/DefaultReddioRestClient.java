@@ -7,9 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.reddio.exception.ReddioBusinessException;
 import com.reddio.exception.ReddioErrorCode;
 import com.reddio.exception.ReddioException;
-import com.reddio.exception.ReddioServiceException;
 import okhttp3.*;
-import okhttp3.internal.http2.ErrorCode;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -360,9 +358,13 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         public void onResponse(Call call, Response response) {
             try {
                 String responseBodyAsString = response.body() != null ? response.body().string() : "";
-                ReddioErrorCode errCode = tryExtractErrorCode(responseBodyAsString);
                 if (!response.isSuccessful()) {
-                    this.future.completeExceptionally(new ReddioServiceException("reddio service not respond as sucessful", response.code(), errCode, responseBodyAsString));
+                    final ResponseWrapper<?> model = tryExtractParseResponse(responseBodyAsString);
+                    if (model != null) {
+                        this.future.completeExceptionally(new ReddioBusinessException(model.getStatus(), model.getError(), ReddioErrorCode.fromCode(model.getErrorCode()), model));
+                    } else {
+                        this.future.completeExceptionally(new ReddioException(String.format("reddio service responded with status code %d, response body: %s", response.code(), responseBodyAsString)));
+                    }
                     return;
                 }
                 this.future.complete(objectMapper.readValue(responseBodyAsString, typeReference));
@@ -371,15 +373,15 @@ public class DefaultReddioRestClient implements ReddioRestClient {
             }
         }
 
-        public static ReddioErrorCode tryExtractErrorCode(String responseJsonString) {
+        public static ResponseWrapper<Object> tryExtractParseResponse(String responseJsonString) {
             try {
-                final ResponseWrapper<?> model = objectMapper.readValue(responseJsonString, new TypeReference<ResponseWrapper<?>>() {
+                return objectMapper.readValue(responseJsonString, new TypeReference<ResponseWrapper<Object>>() {
                 });
-                return ReddioErrorCode.fromCode(model.getErrorCode());
             } catch (Throwable e) {
                 // TODO: debug log
                 return null;
             }
+
         }
     }
 
