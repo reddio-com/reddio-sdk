@@ -10,6 +10,7 @@ import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.concurrent.CompletableFuture;
@@ -167,6 +168,7 @@ public class DefaultReddioRestClientTest {
             Assert.fail();
         }
     }
+
     @Test
     public void testToCompletableFutureCallbackOnResponseUnrecognizedCode() {
         CompletableFuture<ResponseWrapper<Object>> future = new CompletableFuture<>();
@@ -184,6 +186,26 @@ public class DefaultReddioRestClientTest {
             Assert.assertEquals(503, ((ReddioServiceException) cause).getHttpStatusCode());
         } catch (Throwable t) {
             Assert.fail();
+        }
+    }
+
+    @Test
+    @Ignore("Waiting backend update")
+    public void testMintWithInvalidApiKey() {
+        final DefaultReddioRestClient restClient = DefaultReddioRestClient.testnet("not a real api key");
+        try {
+            restClient.mints(
+                    MintsMessage.of(
+                            "",
+                            "",
+                            "1"
+                    )
+            ).join();
+        } catch (CompletionException e) {
+            final Throwable cause = e.getCause();
+            Assert.assertTrue(cause instanceof ReddioServiceException);
+            Assert.assertEquals(403, ((ReddioServiceException) cause).getHttpStatusCode());
+            Assert.assertEquals(ReddioErrorCode.InvalidAPIKey, ((ReddioServiceException) cause).getErrorCode());
         }
     }
 }
