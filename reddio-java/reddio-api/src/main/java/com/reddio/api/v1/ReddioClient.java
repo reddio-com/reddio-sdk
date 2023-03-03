@@ -1,5 +1,6 @@
 package com.reddio.api.v1;
 
+import com.reddio.api.v1.requests.ReddioTransferToApi;
 import com.reddio.api.v1.rest.*;
 
 import java.time.Duration;
@@ -16,6 +17,7 @@ public interface ReddioClient extends AutoCloseable {
 
     String RUSD_TESTNET_CONTRACT_ADDRESS = "0x241f280f13Ff42bbd884d039804c1E5648392A4B";
 
+    Long MAX_EXPIRATION_TIMESTAMP = 4194303L;
 
     interface WithStarkExSigner extends AutoCloseable {
 
@@ -167,8 +169,16 @@ public interface ReddioClient extends AutoCloseable {
 
     CompletableFuture<ResponseWrapper<GetTxnResponse>> getTxn(long sequenceId);
 
+    /**
+     * @deprecated Use {@link  ReddioTransferToApi#callAndPollRecord()} instead.
+     */
+    @Deprecated
     CompletableFuture<ResponseWrapper<GetRecordResponse>> waitingTransferGetApproved(String starkKey, long sequenceId);
 
+    /**
+     * @deprecated Use {@link  ReddioTransferToApi#callAndPollRecord()} instead.
+     */
+    @Deprecated
     CompletableFuture<ResponseWrapper<GetRecordResponse>> waitingTransferGetApproved(String starkKey, long sequenceId, Duration interval, Duration deadline, AtomicBoolean shouldStop);
 
     CompletableFuture<ResponseWrapper<MintResponse>> mints(String contractAddress, String starkKey, long amount);
