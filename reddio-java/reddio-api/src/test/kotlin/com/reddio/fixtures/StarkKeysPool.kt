@@ -13,6 +13,19 @@ class StarkKeysPool {
     companion object {
 
         /**
+         * Return ths stark private key to sign the payment.
+         *
+         * From env variable PAYMENT_SIGNER_STARK_PRIVATE_KEY.
+         */
+        fun paymentSignerStarkPrivateKey(): String {
+            val paymentSignerStarkPrivateKey = System.getenv("PAYMENT_SIGNER_STARK_PRIVATE_KEY")
+            if (paymentSignerStarkPrivateKey != null) {
+                return paymentSignerStarkPrivateKey
+            }
+            throw FixtureException("The environment variable PAYMENT_SIGNER_STARK_PRIVATE_KEY is not set.")
+        }
+
+        /**
          * Generates a random StarkKeys pair.
          */
         fun randomStarkKeys(): StarkKeys {

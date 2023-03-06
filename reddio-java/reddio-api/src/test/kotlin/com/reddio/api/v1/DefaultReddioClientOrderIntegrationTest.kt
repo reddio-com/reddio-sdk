@@ -6,6 +6,7 @@ import com.reddio.api.v1.requests.polling.OrderPoller
 import com.reddio.api.v1.rest.DefaultReddioRestClient
 import com.reddio.api.v1.rest.GetBalancesMessage
 import com.reddio.api.v1.rest.OrderState
+import com.reddio.api.v1.rest.Payment
 import com.reddio.crypto.CryptoService
 import com.reddio.exception.ReddioBusinessException
 import com.reddio.exception.ReddioErrorCode
@@ -15,6 +16,7 @@ import mu.KotlinLogging
 import org.junit.Assert
 import org.junit.Test
 import org.junit.experimental.categories.Category
+import java.time.Instant
 
 
 private val logger = KotlinLogging.logger {}
@@ -125,6 +127,54 @@ class DefaultReddioClientOrderIntegrationTest {
                 ReddioClient.TOKEN_TYPE_ERC20,
                 Fixtures.ReddioTestERC20ContractAddress,
                 ""
+            ).join()
+        }
+        Assert.assertEquals("OK", buyOrder.status)
+        logger.info { "buy order created: $buyOrder" }
+
+        val order = OrderPoller(DefaultReddioRestClient.testnet(), buyOrder.data.sequenceId).poll(
+            OrderState.Canceled, OrderState.Filled
+        )
+        Assert.assertEquals(OrderState.Filled, order.getOrderState())
+
+        logger.info { "order filled: $order" }
+    }
+
+    @Test
+    fun testTradeNFTWithPayment() {
+        val price = "0.0013"
+        val (seller, erC721Ownership) = Fixtures.fetchStarkKeysWhichOwnedERC721()
+        val buyer = StarkKeysPool.starkKeysFromPoolButExpect(seller.starkKey)
+
+        logger.info {
+            "fixture prepared for trade(order sell then buy) NFT with ERC20, seller: ${seller.starkKey}, buyer: ${buyer.starkKey}, erc20 contract address: ${Fixtures.ReddioTestERC20ContractAddress}, price: $price, erC721Ownership: $erC721Ownership"
+        }
+
+        val client = DefaultReddioClient.testnet()
+        val sellOrder = with(client.withStarkExSigner(seller.starkPrivateKey)) {
+            sellNFTWithRUSD(
+                seller.starkKey,
+                ReddioClient.TOKEN_TYPE_ERC721,
+                erC721Ownership.contractAddress,
+                erC721Ownership.tokenId,
+                price,
+                "1", ""
+            ).join()
+        }
+        Assert.assertEquals("OK", sellOrder.status)
+        logger.info { "sell order created: $sellOrder" }
+
+        val buyOrder = with(client.withStarkExSigner(buyer.starkPrivateKey)) {
+            buyNFTWithPayInfoBaseTokenRUSD(
+                buyer.starkKey,
+                ReddioClient.TOKEN_TYPE_ERC721,
+                erC721Ownership.contractAddress,
+                erC721Ownership.tokenId,
+                price,
+                "1",
+                "",
+                Payment.PayInfo.of(Instant.now().toString()),
+                StarkKeysPool.paymentSignerStarkPrivateKey()
             ).join()
         }
         Assert.assertEquals("OK", buyOrder.status)

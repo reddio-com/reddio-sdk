@@ -88,51 +88,6 @@ class DefaultReddioClientIntegrationTest {
 
     @Test
     @Category(IntegrationTest::class)
-    fun testSellOrderWithRUSD() {
-        val client = DefaultReddioClient.testnet()
-        val restClient = DefaultReddioRestClient.testnet()
-        val clientWithSigner =
-            client.withStarkExSigner("0x4d55b547af138c5b6200495d86ab6aed3e06c25fdd75b4b6a00e48515df2b3d")
-        val future = clientWithSigner.sellNFTWithRUSD(
-            "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
-            "ERC721",
-            DefaultEthereumInteractionTest.REDDIO721_CONTRACT_ADDRESS,
-            "1210",
-            "0.013",
-            "1",
-            ""
-        )
-        val result = future.get()
-        println(ObjectMapper().writeValueAsString(result))
-        Assert.assertEquals("OK", result.status)
-    }
-
-    @Test
-    @Category(IntegrationTest::class)
-    fun testBuyOrderWithPayInfoBaseTokenRUSD() {
-        val client = DefaultReddioClient.testnet()
-        val restClient = DefaultReddioRestClient.testnet()
-        val clientWithSigner =
-            client.withStarkExSigner("5f6fbfbcd995e20f94a768193c42060f7e626e6ae8042cacc15e82031087a55")
-        val future = clientWithSigner.buyNFTWithPayInfoBaseTokenRUSD(
-            "0x13a69a1b7a5f033ee2358ebb8c28fd5a6b86d42e30a61845d655d3c7be4ad0e",
-            "ERC721",
-            DefaultEthereumInteractionTest.REDDIO721_CONTRACT_ADDRESS,
-            "1209",
-            "0.013",
-            "1",
-            "",
-            Payment.PayInfo.of("123456789"),
-            "0x1a35ffa8bafc5c6656271bcae1f847bb6201705d7e2895c413cfb7d757a3111"
-        )
-        val result = future.get()
-        println(ObjectMapper().writeValueAsString(result))
-        Assert.assertEquals("OK", result.status)
-    }
-
-
-    @Test
-    @Category(IntegrationTest::class)
     @Throws(
         ExecutionException::class, InterruptedException::class, JsonProcessingException::class
     )
