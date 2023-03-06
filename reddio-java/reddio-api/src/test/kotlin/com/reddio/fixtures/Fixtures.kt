@@ -1,9 +1,7 @@
 package com.reddio.fixtures
 
-import com.reddio.api.v1.DefaultReddioClient
 import com.reddio.api.v1.QuantizedHelper
 import com.reddio.api.v1.ReddioClient
-import com.reddio.api.v1.StarkKeys
 import com.reddio.api.v1.rest.DefaultReddioRestClient
 import com.reddio.api.v1.rest.GetBalancesMessage
 import kotlinx.coroutines.future.await
@@ -19,12 +17,17 @@ class Fixtures {
         /**
          * Class ETHOwnership represents the ownership of ETH on layer 2 belongs to the StarkKey.
          */
-        data class ETHOwnership(val starkKey: String, val balance: Long)
+        data class ETHOwnership(val starkKey: String, val balance: Long, val displayBalance: String)
 
         /**
          * Class ERC20Ownership represents the ownership of ERC20 token on layer 2 belongs to the StarkKey.
          */
-        data class ERC20Ownership(val starkKey: String, val contractAddress: String, val balance: Long)
+        data class ERC20Ownership(
+            val starkKey: String,
+            val contractAddress: String,
+            val balance: Long,
+            val displayBalance: String
+        )
 
 
         /**
@@ -37,6 +40,8 @@ class Fixtures {
 
         /**
          * Fetches the combination of StarkKeys private and public keys, which owns at least one NFT.
+         *
+         * And it would return the richer one to make the balance of the account tend to balance.
          */
         fun fetchStarkKeysWhichOwnedETH(amount: String): Pair<EthAndStarkKeys, ETHOwnership> {
             val quantizedAmount = runBlocking {
@@ -59,23 +64,27 @@ class Fixtures {
             }.map {
                 val owner = it.first
                 val balances = it.second
-                val ownedERC20 =
+                val ownedETH =
                     balances.data.list.parallelStream().filter { entry -> entry.balanceAvailable > quantizedAmount }
                         .findAny()
-                Pair(owner, ownedERC20)
+                Pair(owner, ownedETH)
             }.filter {
                 it.second.isPresent
+            }.sorted { first, second ->
+                second.second.get().balanceAvailable.compareTo(first.second.get().balanceAvailable)
             }.map {
                 val owner = it.first
-                val ownedERC20 = it.second.get()
-                val ownership = ETHOwnership(owner.starkKey, ownedERC20.balanceAvailable)
+                val ownedETH = it.second.get()
+                val ownership = ETHOwnership(owner.starkKey, ownedETH.balanceAvailable, ownedETH.displayValue)
                 Pair(owner, ownership)
-            }.findAny()
+            }.findFirst()
                 .orElseThrow { FixtureException("Insufficient test assets ETH for amount $amount from given stark keys") }
         }
 
         /**
          * Fetches the combination of StarkKeys private and public keys, which owns at least one NFT.
+         *
+         * And it would return the richer one to make the balance of the account tend to balance.
          */
         fun fetchStarkKeysWhichOwnedERC20(
             contractAddress: String = ReddioTestERC20ContractAddress,
@@ -108,17 +117,26 @@ class Fixtures {
                 Pair(owner, ownedERC20)
             }.filter {
                 it.second.isPresent
+            }.sorted { first, second ->
+                second.second.get().balanceAvailable.compareTo(first.second.get().balanceAvailable)
             }.map {
                 val owner = it.first
                 val ownedERC20 = it.second.get()
-                val ownership = ERC20Ownership(owner.starkKey, ownedERC20.contractAddress, ownedERC20.balanceAvailable)
+                val ownership = ERC20Ownership(
+                    owner.starkKey,
+                    ownedERC20.contractAddress,
+                    ownedERC20.balanceAvailable,
+                    ownedERC20.displayValue
+                )
                 Pair(owner, ownership)
-            }.findAny()
+            }.findFirst()
                 .orElseThrow { FixtureException("Insufficient test assets ERC20 $contractAddress for amount $amount from given stark keys") }
         }
 
         /**
          * Fetches the combination of StarkKeys private and public keys, which owns at least one NFT.
+         *
+         * And it would return the richer one to make the balance of the account tend to balance.
          */
         fun fetchStarkKeysWhichOwnedERC721(
             contractAddress: String = ReddioTestERC721ContractAddress
@@ -133,6 +151,8 @@ class Fixtures {
                     ).await()
                 }
                 Pair(it, balances)
+            }.sorted { first, second ->
+                second.second.data.list.size.compareTo(first.second.data.list.size)
             }.map {
                 val owner = it.first
                 val balances = it.second
@@ -146,8 +166,9 @@ class Fixtures {
                 val ownedERC721 = it.second.get()
                 val ownership = ERC721Ownership(owner.starkKey, ownedERC721.contractAddress, ownedERC721.tokenId)
                 Pair(owner, ownership)
-            }.findAny()
+            }.findFirst()
                 .orElseThrow { FixtureException("Insufficient test assets ERC721 $contractAddress from given stark keys") }
         }
+
     }
 }

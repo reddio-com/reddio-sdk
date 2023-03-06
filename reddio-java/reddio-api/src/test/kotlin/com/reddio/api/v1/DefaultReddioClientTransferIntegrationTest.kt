@@ -21,7 +21,7 @@ class DefaultReddioClientTransferIntegrationTest {
 
     @Test
     fun testTransferETH() {
-        val transferAmount = "0.00003"
+        val transferAmount = "0.02"
         val (sender, ethOwnership) = Fixtures.fetchStarkKeysWhichOwnedETH(transferAmount)
         val receiver = StarkKeysPool.starkKeysFromPoolButExpect(sender.starkKey)
         logger.info {
@@ -41,7 +41,7 @@ class DefaultReddioClientTransferIntegrationTest {
 
     @Test
     fun testTransferERC20() {
-        val transferAmount = "0.00003"
+        val transferAmount = "0.02"
         val (sender, erc20Ownership) = Fixtures.fetchStarkKeysWhichOwnedERC20(
             amount = transferAmount
         )
@@ -110,7 +110,7 @@ class DefaultReddioClientTransferIntegrationTest {
         }
     }
 
-    @Test(timeout = 1000 * 10)
+    @Test(timeout = 1000 * 20)
     @Category(IntegrationTest::class)
     fun testTransferThenWaitingRecordGetApproved() {
         val (sender, erc721Ownership) = Fixtures.fetchStarkKeysWhichOwnedERC721()
