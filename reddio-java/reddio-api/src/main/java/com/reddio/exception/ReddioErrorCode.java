@@ -37,8 +37,13 @@ public enum ReddioErrorCode {
     EventNotMatch(31),
     InvalidAPIKey(32),
     InvalidOwnerOfContract(33),
+    InvalidSignature(34),
+    PaymentPermissionDeny(35),
+
     FailedToVerifyParams(400),
+
     FailedToJSONUnmarshal(401),
+
     SystemError(500);
 
     ReddioErrorCode(int code) {
