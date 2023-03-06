@@ -86,48 +86,8 @@ class DefaultReddioClientIntegrationTest {
         println(ObjectMapper().writeValueAsString(result))
     }
 
-
-
     @Test
     @Category(IntegrationTest::class)
-
-    fun testOrderWithERC20() {
-        val client = DefaultReddioClient.testnet()
-        val restClient = DefaultReddioRestClient.testnet()
-        val balancesFuture = restClient.getBalances(
-            GetBalancesMessage.of(
-                "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
-                DefaultEthereumInteractionTest.REDDIO721_CONTRACT_ADDRESS,
-                100L,
-                1L
-            )
-        )
-        val balances = balancesFuture.get()
-        Assert.assertEquals("OK", balances.status)
-        val toSell = balances.data.getList().stream().filter { it: BalanceRecord -> it.balanceAvailable > 0 }
-            .collect(Collectors.toList())[0]
-        val clientWithSigner =
-            client.withStarkExSigner("0x4d55b547af138c5b6200495d86ab6aed3e06c25fdd75b4b6a00e48515df2b3d")
-        val future = clientWithSigner.order(
-            "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
-            "ERC721",
-            DefaultEthereumInteractionTest.REDDIO721_CONTRACT_ADDRESS,
-            toSell.tokenId,
-            "0.013",
-            "1",
-            OrderBehavior.SELL,
-            "ERC20",
-            DefaultEthereumInteractionTest.RDD20_CONTRACT_ADDRESS,
-            ""
-        )
-        val result = future.get()
-        println(ObjectMapper().writeValueAsString(result))
-        Assert.assertEquals("OK", result.status)
-    }
-
-    @Test
-    @Category(IntegrationTest::class)
-
     fun testSellOrderWithRUSD() {
         val client = DefaultReddioClient.testnet()
         val restClient = DefaultReddioRestClient.testnet()
@@ -149,7 +109,6 @@ class DefaultReddioClientIntegrationTest {
 
     @Test
     @Category(IntegrationTest::class)
-
     fun testBuyOrderWithPayInfoBaseTokenRUSD() {
         val client = DefaultReddioClient.testnet()
         val restClient = DefaultReddioRestClient.testnet()
@@ -171,19 +130,6 @@ class DefaultReddioClientIntegrationTest {
         Assert.assertEquals("OK", result.status)
     }
 
-
-    @Test
-    @Category(IntegrationTest::class)
-    fun testCancelOrder() {
-        val client = DefaultReddioClient.testnet()
-        val withStarkExSigner =
-            client.withStarkExSigner("0x4d55b547af138c5b6200495d86ab6aed3e06c25fdd75b4b6a00e48515df2b3d")
-        val future =
-            withStarkExSigner.cancelOrder("0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4", 303590)
-        val result = future.get()
-        println(ObjectMapper().writeValueAsString(result))
-        Assert.assertEquals("OK", result.status)
-    }
 
     @Test
     @Category(IntegrationTest::class)

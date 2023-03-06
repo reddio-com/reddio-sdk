@@ -138,6 +138,29 @@ class DefaultReddioClientOrderIntegrationTest {
         logger.info { "order filled: $order" }
     }
 
+    @Test
+    fun testCancelOrder() {
+        val price = "0.0013"
+        val (seller, erC721Ownership) = Fixtures.fetchStarkKeysWhichOwnedERC721()
+        val client = DefaultReddioClient.testnet()
+        val sellOrder = with(client.withStarkExSigner(seller.starkPrivateKey)) {
+            orderWithEth(
+                seller.starkKey,
+                ReddioClient.TOKEN_TYPE_ERC721,
+                erC721Ownership.contractAddress,
+                erC721Ownership.tokenId,
+                price,
+                "1",
+                OrderBehavior.SELL
+            ).join()
+        }
+        Assert.assertEquals("OK", sellOrder.status)
+
+        val cancelResult = with(client.withStarkExSigner(seller.starkPrivateKey)) {
+            cancelOrder(seller.starkKey, sellOrder.data.sequenceId).join()
+        }
+        Assert.assertEquals("OK", cancelResult.status)
+    }
 
     @Test
     fun testOrderForNoSuchToken() {
