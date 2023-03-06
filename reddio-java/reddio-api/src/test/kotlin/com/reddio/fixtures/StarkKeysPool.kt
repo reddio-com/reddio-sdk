@@ -1,7 +1,10 @@
 package com.reddio.fixtures
 
+import com.reddio.api.v1.DefaultEthereumInteraction
 import com.reddio.api.v1.StarkKeys
 import com.reddio.crypto.CryptoService
+import org.web3j.crypto.Credentials
+import java.util.stream.Collectors
 
 /**
  * StarkKeysPool return the usable StarkKeys for testing.
@@ -21,23 +24,31 @@ class StarkKeysPool {
         /**
          * Return the list of StarkKeys from the environment variable.
          *
-         * The environment variable STARK_PRIVATE_KEYS should be a comma separated list of stark private keys which own the test assets;
+         * The environment variable ETH_PRIVATE_KEYS should be a comma separated list of stark private keys which own the test assets;
          */
-        fun pool(): List<StarkKeys> {
-            val starkKeys = System.getenv("STARK_PRIVATE_KEYS")
-            if (starkKeys != null) {
-                return starkKeys.split(",").map { privateKey ->
-                    val publicKey = CryptoService.getPublicKey(privateKey.replace("0x", "").toBigInteger(16))
-                    StarkKeys.of("0x" + publicKey.toString(16), "0x" + privateKey.replace("0x", ""))
-                }
+        fun pool(): List<EthAndStarkKeys> {
+            val ethPrivateKeys = System.getenv("ETH_PRIVATE_KEYS")
+            if (ethPrivateKeys != null) {
+                return ethPrivateKeys.split(",").parallelStream().map { ethPrivateKeys ->
+                    ethPrivateKeys.trim()
+                }.map { ethPrivateKey ->
+                    val credential = Credentials.create(ethPrivateKey)
+                    Pair(credential.address, ethPrivateKey)
+                }.map { pair ->
+                    val ethAddress = pair.first
+                    val ethPrivateKey = pair.second
+                    val starkKeyPair =
+                        DefaultEthereumInteraction.getStarkKeys(ethPrivateKey, DefaultEthereumInteraction.GOERIL_ID)
+                    EthAndStarkKeys(ethAddress, ethPrivateKey, starkKeyPair.starkKey, starkKeyPair.starkPrivateKey)
+                }.collect(Collectors.toList())
             }
-            throw FixtureException("The environment variable STARK_PRIVATE_KEYS is not set.")
+            throw FixtureException("The environment variable ETH_PRIVATE_KEYS is not set.")
         }
 
         /**
          * Return one starkKey from the pool, but exclude the given stark keys.
          */
-        fun starkKeysFromPoolButExpect(vararg starkKey: String): StarkKeys {
+        fun starkKeysFromPoolButExpect(vararg starkKey: String): EthAndStarkKeys {
             starkKey.toList().forEach {
                 if (!it.startsWith("0x")) {
                     throw FixtureException("The starkKey should start with 0x, but got $it")
@@ -51,3 +62,10 @@ class StarkKeysPool {
         }
     }
 }
+
+data class EthAndStarkKeys(
+    val ethAddress: String,
+    val ethPrivateKey: String,
+    val starkKey: String,
+    val starkPrivateKey: String
+)

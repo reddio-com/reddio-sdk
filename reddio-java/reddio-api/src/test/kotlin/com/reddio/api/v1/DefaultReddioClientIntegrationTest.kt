@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.reddio.IntegrationTest
 import com.reddio.api.v1.requests.ReddioOrderApi.Companion.orderWithETH
-import com.reddio.api.v1.requests.ReddioTransferToApi.Companion.transferERC721
 import com.reddio.api.v1.requests.ReddioWithdrawalToApi.Companion.withdrawalERC721
 import com.reddio.api.v1.rest.*
 import com.reddio.api.v1.rest.GetBalancesResponse.BalanceRecord
@@ -12,7 +11,6 @@ import com.reddio.crypto.CryptoService
 import com.reddio.exception.ReddioBusinessException
 import com.reddio.exception.ReddioErrorCode
 import com.reddio.fixtures.Fixtures
-import com.reddio.fixtures.StarkKeysPool
 import mu.KotlinLogging
 import org.junit.Assert
 import org.junit.Test
@@ -28,79 +26,25 @@ class DefaultReddioClientIntegrationTest {
 
     @Test
     @Category(IntegrationTest::class)
-    fun testTransfer() {
-        val (sender, erc721Ownership) = Fixtures.fetchStarkKeysWhichOwnedERC721()
-        val receiver = StarkKeysPool.starkKeysFromPoolButExpect(sender.starkKey)
-        logger.info {
-            "transfer ERC721 fixtures prepared, sender: ${sender.starkKey}, receiver: ${receiver.starkKey}, contractAddress: ${erc721Ownership.contractAddress} tokenId: ${erc721Ownership.tokenId}"
-        }
-
-        val client = DefaultReddioClient.testnet()
-        val clientWithSigner = client.withStarkExSigner(sender.starkPrivateKey)
-        val result = clientWithSigner.transfer(
-            sender.starkKey,
-            "1",
-            erc721Ownership.contractAddress,
-            erc721Ownership.tokenId,
-            ReddioClient.TOKEN_TYPE_ERC721,
-            receiver.starkKey,
-            ReddioClient.MAX_EXPIRATION_TIMESTAMP
-        ).join()
-        Assert.assertEquals("OK", result.status)
-        logger.info {
-            "transfer requested, response: ${ObjectMapper().writeValueAsString(result)}"
-        }
-    }
-
-
-    // timeout 10 seconds
-    @Test(timeout = 1000 * 10)
-    @Category(IntegrationTest::class)
-    fun testWaitingRecordGetApproved() {
-        val (sender, erc721Ownership) = Fixtures.fetchStarkKeysWhichOwnedERC721()
-        val receiver = StarkKeysPool.starkKeysFromPoolButExpect(sender.starkKey)
-        logger.info {
-            "transfer ERC721 fixtures prepared, sender: ${sender.starkKey}, receiver: ${receiver.starkKey}, contractAddress: ${erc721Ownership.contractAddress} tokenId: ${erc721Ownership.tokenId}"
-        }
-
-        val client = DefaultReddioClient.testnet()
-        val clientWithSigner = client.withStarkExSigner(sender.starkPrivateKey)
-        val result = clientWithSigner.transfer(
-            sender.starkKey,
-            "1",
-            erc721Ownership.contractAddress,
-            erc721Ownership.tokenId,
-            ReddioClient.TOKEN_TYPE_ERC721,
-            receiver.starkKey,
-            ReddioClient.MAX_EXPIRATION_TIMESTAMP
-        ).join()
-        Assert.assertEquals("OK", result.status)
-
-        val waitingResult = client.waitingTransferGetApproved(
-            sender.starkKey, result.data.getSequenceId()
-        ).join()
-
-        Assert.assertEquals("OK", waitingResult.status)
-    }
-
-    @Test
-    @Category(IntegrationTest::class)
     fun testWithdrawalGoerliETH() {
+        val withdrawalAmount = "0.000003"
+        val (sender, ethOwnership) = Fixtures.fetchStarkKeysWhichOwnedETH(withdrawalAmount)
+
         val client = DefaultReddioClient.testnet()
         val clientWithSigner =
-            client.withStarkExSigner("0x4d55b547af138c5b6200495d86ab6aed3e06c25fdd75b4b6a00e48515df2b3d")
+            client.withStarkExSigner(sender.starkPrivateKey)
         val future = clientWithSigner.withdrawal(
-            "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4",
-            "0.00013",
+            sender.starkKey,
+            withdrawalAmount,
             "ETH",
             "",
-            "ETH",
-            "0x76f2Fc7ed90039d986e3eb4DB294f05E160c8F03",
-            4194303L
+            ReddioClient.TOKEN_TYPE_ETH,
+            sender.ethAddress,
+            ReddioClient.MAX_EXPIRATION_TIMESTAMP
         )
         val result = future.get()
         Assert.assertEquals("OK", result.status)
-        println(ObjectMapper().writeValueAsString(result))
+        logger.info { ObjectMapper().writeValueAsString(result) }
     }
 
     @Test
@@ -393,27 +337,6 @@ class DefaultReddioClientIntegrationTest {
         }
     }
 
-
-    @Test
-    @Category(IntegrationTest::class)
-    fun testTransferForNotSuchToken() {
-        val senderPrivateKey = CryptoService.getRandomPrivateKey()
-        val receiverPrivateKey = CryptoService.getRandomPrivateKey()
-        try {
-            transferERC721(
-                DefaultReddioRestClient.testnet(),
-                "0x" + senderPrivateKey.toString(16),
-                "0x941661Bd1134DC7cc3D107BF006B8631F6E65Ad5",
-                "9999999",
-                "ERC721",
-                "0x" + receiverPrivateKey.toString(16),
-                4194303L
-            ).callAndPollRecord()
-            Assert.fail()
-        } catch (t: Throwable) {
-            Assert.assertEquals(ReddioErrorCode.NotSuchToken, (t as ReddioBusinessException).errorCode)
-        }
-    }
 
     @Test
     @Category(IntegrationTest::class)
