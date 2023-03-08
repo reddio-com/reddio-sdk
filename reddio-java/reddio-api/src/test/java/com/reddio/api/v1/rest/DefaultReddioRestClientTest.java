@@ -1,16 +1,12 @@
 package com.reddio.api.v1.rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.reddio.IntegrationTest;
+import com.reddio.api.v1.DefaultEthereumInteractionTest;
 import com.reddio.exception.ReddioBusinessException;
 import com.reddio.exception.ReddioErrorCode;
-import okhttp3.Protocol;
-import okhttp3.Request;
-import okhttp3.Response;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -18,7 +14,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 
-import static com.reddio.api.v1.DefaultEthereumInteractionTest.REDDIO721_CONTRACT_ADDRESS;
 
 public class DefaultReddioRestClientTest {
 
@@ -42,7 +37,7 @@ public class DefaultReddioRestClientTest {
     @Category(IntegrationTest.class)
     public void testOrderList() throws ExecutionException, InterruptedException {
         DefaultReddioRestClient client = DefaultReddioRestClient.testnet();
-        CompletableFuture<ResponseWrapper<OrderListResponse>> future = client.orderList(OrderListMessage.of("0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4", REDDIO721_CONTRACT_ADDRESS, null, null, null, null, null));
+        CompletableFuture<ResponseWrapper<OrderListResponse>> future = client.orderList(OrderListMessage.of("0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4", DefaultEthereumInteractionTest.REDDIO721_CONTRACT_ADDRESS, null, null, null, null, null));
         ResponseWrapper<OrderListResponse> result = future.get();
         Assert.assertEquals("OK", result.getStatus());
     }

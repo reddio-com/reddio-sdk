@@ -22,7 +22,7 @@ class DefaultReddioClientTransferIntegrationTest {
     @Test
     fun testTransferETH() {
         val transferAmount = "0.02"
-        val (sender, ethOwnership) = Fixtures.fetchStarkKeysWhichOwnedETH(transferAmount)
+        val (sender, ethOwnership) = Fixtures.fetchStarkKeysWhichOwnETHOnLayer2(transferAmount)
         val receiver = StarkKeysPool.starkKeysFromPoolButExpect(sender.starkKey)
         logger.info {
             "transfer ETH fixtures prepared, sender: ${sender.starkKey}, receiver: ${receiver.starkKey}, eth balance: ${ethOwnership.balance}, transfer eth amount: $transferAmount"
@@ -42,7 +42,7 @@ class DefaultReddioClientTransferIntegrationTest {
     @Test
     fun testTransferERC20() {
         val transferAmount = "0.02"
-        val (sender, erc20Ownership) = Fixtures.fetchStarkKeysWhichOwnedERC20(
+        val (sender, erc20Ownership) = Fixtures.fetchStarkKeysWhichOwnERC20OnLayer2(
             amount = transferAmount
         )
         val receiver = StarkKeysPool.starkKeysFromPoolButExpect(sender.starkKey)
@@ -63,7 +63,7 @@ class DefaultReddioClientTransferIntegrationTest {
 
     @Test
     fun testTransferERC721() {
-        val (sender, erc721Ownership) = Fixtures.fetchStarkKeysWhichOwnedERC721()
+        val (sender, erc721Ownership) = Fixtures.fetchStarkKeysWhichOwnERC721OnLayer2()
         val receiver = StarkKeysPool.starkKeysFromPoolButExpect(sender.starkKey)
         logger.info {
             "transfer ETH fixtures prepared, sender: ${sender.starkKey}, receiver: ${receiver.starkKey}, ERC721 contract address:${erc721Ownership.contractAddress}, ERC721 token id: ${erc721Ownership.tokenId}"
@@ -87,7 +87,7 @@ class DefaultReddioClientTransferIntegrationTest {
 
     @Test
     fun testTransfer() {
-        val (sender, erc721Ownership) = Fixtures.fetchStarkKeysWhichOwnedERC721()
+        val (sender, erc721Ownership) = Fixtures.fetchStarkKeysWhichOwnERC721OnLayer2()
         val receiver = StarkKeysPool.starkKeysFromPoolButExpect(sender.starkKey)
         logger.info {
             "transfer ERC721 fixtures prepared, sender: ${sender.starkKey}, receiver: ${receiver.starkKey}, contractAddress: ${erc721Ownership.contractAddress} tokenId: ${erc721Ownership.tokenId}"
@@ -113,7 +113,7 @@ class DefaultReddioClientTransferIntegrationTest {
     @Test(timeout = 1000 * 20)
     @Category(IntegrationTest::class)
     fun testTransferThenWaitingRecordGetApproved() {
-        val (sender, erc721Ownership) = Fixtures.fetchStarkKeysWhichOwnedERC721()
+        val (sender, erc721Ownership) = Fixtures.fetchStarkKeysWhichOwnERC721OnLayer2()
         val receiver = StarkKeysPool.starkKeysFromPoolButExpect(sender.starkKey)
         logger.info {
             "transfer ERC721 fixtures prepared, sender: ${sender.starkKey}, receiver: ${receiver.starkKey}, contractAddress: ${erc721Ownership.contractAddress} tokenId: ${erc721Ownership.tokenId}"

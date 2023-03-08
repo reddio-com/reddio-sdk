@@ -11,7 +11,7 @@ class FixturesIntegrationTest {
 
     @Test
     fun getStarkKeysWhichOwnAtLeastOneNFT() {
-        val (_, ownership) = Fixtures.fetchStarkKeysWhichOwnedERC721()
+        val (_, ownership) = Fixtures.fetchStarkKeysWhichOwnERC721OnLayer2()
         println("ownership: $ownership")
     }
 }

@@ -27,7 +27,7 @@ class DefaultReddioClientOrderIntegrationTest {
     @Test
     fun testTradeNFTWithETH() {
         val price = "0.0013"
-        val (seller, erC721Ownership) = Fixtures.fetchStarkKeysWhichOwnedERC721()
+        val (seller, erC721Ownership) = Fixtures.fetchStarkKeysWhichOwnERC721OnLayer2()
         val buyer = StarkKeysPool.starkKeysFromPoolButExpect(seller.starkKey)
 
         val restClient = DefaultReddioRestClient.testnet()
@@ -80,7 +80,7 @@ class DefaultReddioClientOrderIntegrationTest {
     @Test
     fun testTradeNFTWithERC20() {
         val price = "0.0013"
-        val (seller, erC721Ownership) = Fixtures.fetchStarkKeysWhichOwnedERC721()
+        val (seller, erC721Ownership) = Fixtures.fetchStarkKeysWhichOwnERC721OnLayer2()
         val buyer = StarkKeysPool.starkKeysFromPoolButExpect(seller.starkKey)
 
         val restClient = DefaultReddioRestClient.testnet()
@@ -143,7 +143,7 @@ class DefaultReddioClientOrderIntegrationTest {
     @Test
     fun testTradeNFTWithPayment() {
         val price = "0.0013"
-        val (seller, erC721Ownership) = Fixtures.fetchStarkKeysWhichOwnedERC721()
+        val (seller, erC721Ownership) = Fixtures.fetchStarkKeysWhichOwnERC721OnLayer2()
         val buyer = StarkKeysPool.starkKeysFromPoolButExpect(seller.starkKey)
 
         logger.info {
@@ -191,7 +191,7 @@ class DefaultReddioClientOrderIntegrationTest {
     @Test
     fun testCancelOrder() {
         val price = "0.0013"
-        val (seller, erC721Ownership) = Fixtures.fetchStarkKeysWhichOwnedERC721()
+        val (seller, erC721Ownership) = Fixtures.fetchStarkKeysWhichOwnERC721OnLayer2()
         val client = DefaultReddioClient.testnet()
         val sellOrder = with(client.withStarkExSigner(seller.starkPrivateKey)) {
             orderWithEth(

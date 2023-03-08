@@ -26,6 +26,7 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.protocol.http.HttpService
 import org.web3j.tuples.generated.Tuple2
 import org.web3j.tx.gas.ContractGasProvider
+import org.web3j.utils.Convert
 import org.web3j.utils.Numeric
 import java.math.BigInteger
 import java.util.*
@@ -84,12 +85,12 @@ class DefaultEthereumInteraction(
         web3j: Web3j,
         gasProvider: ContractGasProvider,
     ): ERC20.ApprovalEventResponse {
-
-        val nonQuantizedAmount = quantizedHelper.nonQuantizedAmount(amount, "ERC20", erc20ContractAddress)
         val erc20Contract = ERC20.load(erc20ContractAddress, web3j, credentials, gasProvider)
+        val decimals = erc20Contract.decimals().send()
+        val amountAfterDecimals = amount.toBigDecimal().movePointRight(decimals.toInt())
         val call = erc20Contract.approve(
             this.reddioStarexContractAddress(),
-            nonQuantizedAmount.toBigInteger(),
+            amountAfterDecimals.toBigInteger(),
         )
         call.send()
         return EthNextEventSubscriber.create(erc20Contract::approvalEventFlowable, web3j).subscribeNextEvent()
@@ -133,13 +134,12 @@ class DefaultEthereumInteraction(
         val deposits = Deposits.load(
             this.reddioStarexContractAddress(), web3j, credentials, gasProvider
         )
-
-        val quantizedAmount = quantizedHelper.quantizedAmount(amount, "ETH", "ETH")
+        val amountInWei = Convert.toWei(amount, Convert.Unit.ETHER)
         val call = deposits.depositEth(
             BigInteger(starkKey.toLowerCase().replace("0x", ""), 16),
             BigInteger(assetType.toLowerCase().replace("0x", ""), 16),
             BigInteger(vaultId, 10),
-            quantizedAmount.toBigInteger(),
+            amountInWei.toBigInteger(),
         );
 
         call.send();

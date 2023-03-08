@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.reddio.IntegrationTest
 import com.reddio.api.v1.requests.ReddioWithdrawalToApi.Companion.withdrawalERC721
 import com.reddio.api.v1.rest.*
-import com.reddio.api.v1.rest.GetBalancesResponse.BalanceRecord
 import com.reddio.crypto.CryptoService
 import com.reddio.exception.ReddioBusinessException
 import com.reddio.exception.ReddioErrorCode
@@ -16,7 +15,6 @@ import org.junit.Test
 import org.junit.experimental.categories.Category
 import java.util.concurrent.CompletionException
 import java.util.concurrent.ExecutionException
-import java.util.stream.Collectors
 
 private val logger = KotlinLogging.logger {}
 
@@ -27,7 +25,7 @@ class DefaultReddioClientIntegrationTest {
     @Category(IntegrationTest::class)
     fun testWithdrawalGoerliETH() {
         val withdrawalAmount = "0.000003"
-        val (sender, ethOwnership) = Fixtures.fetchStarkKeysWhichOwnedETH(withdrawalAmount)
+        val (sender, ethOwnership) = Fixtures.fetchStarkKeysWhichOwnETHOnLayer2(withdrawalAmount)
 
         val client = DefaultReddioClient.testnet()
         val clientWithSigner =

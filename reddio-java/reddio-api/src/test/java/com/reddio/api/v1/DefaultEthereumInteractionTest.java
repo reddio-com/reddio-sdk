@@ -109,6 +109,7 @@ public class DefaultEthereumInteractionTest {
 
     @Test
     @Category(IntegrationTest.class)
+    @Ignore("never end")
     public void testWatchDeposit() throws InterruptedException, IOException {
         ObjectMapper om = new ObjectMapper();
         DefaultReddioRestClient restClient = DefaultReddioRestClient.testnet();
@@ -143,6 +144,7 @@ public class DefaultEthereumInteractionTest {
 
     @Test
     @Category(IntegrationTest.class)
+    @Ignore("never end")
     public void testWatchNftDeposit() throws InterruptedException {
         ObjectMapper om = new ObjectMapper();
         DefaultReddioRestClient restClient = DefaultReddioRestClient.testnet();

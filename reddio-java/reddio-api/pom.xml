@@ -119,7 +119,6 @@
                         </goals>
                         <configuration>
                             <groups>com.reddio.IntegrationTest</groups>
-                            <excludedGroups>none</excludedGroups>
                         </configuration>
                     </execution>
                 </executions>

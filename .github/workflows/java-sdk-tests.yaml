@@ -30,3 +30,25 @@ jobs:
       - name: mvn test
         run: |
           cd reddio-java && mvn -B test
+  mvn_integration_test_linux:
+    name: mvn integration-test (linux)
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Java and Maven
+        uses: actions/setup-java@v3
+        with:
+          distribution: "adopt-hotspot"
+          java-version: "8"
+          cache: "maven"
+      - name: Setup Rust toolchain x86_64-unknown-linux-gnu
+        uses: actions-rs/toolchain@v1
+        with:
+          target: x86_64-unknown-linux-gnu
+      - name: Compile Native Library
+        run: |
+          make
+      - name: mvn test
+        run: |
+          cd reddio-java && mvn -B integration-test
