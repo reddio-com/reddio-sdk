@@ -49,6 +49,6 @@ jobs:
       - name: Compile Native Library
         run: |
           make
-      - name: mvn test
+      - name: mvn integration-test
         run: |
           cd reddio-java && mvn -B integration-test

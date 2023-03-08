@@ -39,7 +39,7 @@ class EtherscanNFTFetcher {
         private val httpClient = OkHttpClient()
 
         fun fetchEtherscanAPIKey(): String {
-            return System.getenv("ETHERSCAN_API_KEY") ?: ""
+            return System.getenv("INTEGRATION_TEST_ETHERSCAN_API_KEY") ?: ""
         }
 
         fun listERC721OwnedByEthAddress(

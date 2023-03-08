@@ -15,14 +15,14 @@ class StarkKeysPool {
         /**
          * Return ths stark private key to sign the payment.
          *
-         * From env variable PAYMENT_SIGNER_STARK_PRIVATE_KEY.
+         * From env variable INTEGRATION_TEST_PAYMENT_SIGNER_STARK_PRIVATE_KEY.
          */
         fun paymentSignerStarkPrivateKey(): String {
-            val paymentSignerStarkPrivateKey = System.getenv("PAYMENT_SIGNER_STARK_PRIVATE_KEY")
+            val paymentSignerStarkPrivateKey = System.getenv("INTEGRATION_TEST_PAYMENT_SIGNER_STARK_PRIVATE_KEY")
             if (paymentSignerStarkPrivateKey != null) {
                 return paymentSignerStarkPrivateKey
             }
-            throw FixtureException("The environment variable PAYMENT_SIGNER_STARK_PRIVATE_KEY is not set.")
+            throw FixtureException("The environment variable INTEGRATION_TEST_PAYMENT_SIGNER_STARK_PRIVATE_KEY is not set.")
         }
 
         /**
@@ -37,10 +37,10 @@ class StarkKeysPool {
         /**
          * Return the list of StarkKeys from the environment variable.
          *
-         * The environment variable ETH_PRIVATE_KEYS should be a comma separated list of stark private keys which own the test assets;
+         * The environment variable INTEGRATION_TEST_ETH_PRIVATE_KEYS should be a comma separated list of stark private keys which own the test assets;
          */
         fun pool(): List<EthAndStarkKeys> {
-            val ethPrivateKeys = System.getenv("ETH_PRIVATE_KEYS")
+            val ethPrivateKeys = System.getenv("INTEGRATION_TEST_ETH_PRIVATE_KEYS")
             if (ethPrivateKeys != null) {
                 return ethPrivateKeys.split(",").parallelStream().map { ethPrivateKeys ->
                     ethPrivateKeys.trim()
@@ -55,7 +55,7 @@ class StarkKeysPool {
                     EthAndStarkKeys(ethAddress, ethPrivateKey, starkKeyPair.starkKey, starkKeyPair.starkPrivateKey)
                 }.collect(Collectors.toList())
             }
-            throw FixtureException("The environment variable ETH_PRIVATE_KEYS is not set.")
+            throw FixtureException("The environment variable INTEGRATION_TEST_ETH_PRIVATE_KEYS is not set.")
         }
 
         /**

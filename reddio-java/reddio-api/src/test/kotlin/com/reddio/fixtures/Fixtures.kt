@@ -182,11 +182,11 @@ class Fixtures {
 
 
         /**
-         * return the ETH json rpc node url restored from the environment variable ETH_JSON_RPC_NODE
+         * return the ETH json rpc node url restored from the environment variable INTEGRATION_TEST_ETH_JSON_RPC_NODE
          */
         fun fetchETHJsonRPCNode(): String {
-            return System.getenv("ETH_JSON_RPC_NODE")
-                ?: throw FixtureException("environment variable ETH_JSON_RPC_NODE is not set")
+            return System.getenv("INTEGRATION_TEST_ETH_JSON_RPC_NODE")
+                ?: throw FixtureException("environment variable INTEGRATION_TEST_ETH_JSON_RPC_NODE is not set")
         }
 
         fun displayValueOfETHOrERC20(amount: BigInteger, decimals: Int): String {
