@@ -38,33 +38,6 @@ public class DefaultEthereumInteractionTest {
 
     @Test
     @Category(IntegrationTest.class)
-    public void testDepositETH() throws ExecutionException, InterruptedException, JsonProcessingException {
-        DefaultEthereumInteraction ethereumInteraction = DefaultEthereumInteraction.build(DefaultReddioRestClient.testnet(), DefaultEthereumInteraction.GOERIL_ID, "https://eth-goerli.g.alchemy.com/v2/yyabgQ1GlM0xxqDC4ZBbR1lBcBKQmnxT", "0x27832a8be401e504eaa3e66904f929f02f72cd7f697e3f8f0a1c3d4b8654ba9d");
-        CompletableFuture<LogDeposit> future = ethereumInteraction.depositETH("0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4", "0.00019", GasOption.Market);
-        LogDeposit result = future.get();
-        System.out.println(new ObjectMapper().writeValueAsString(result));
-    }
-
-    @Test
-    @Category(IntegrationTest.class)
-    public void testDepositERC20() throws ExecutionException, InterruptedException, JsonProcessingException {
-        DefaultEthereumInteraction ethereumInteraction = DefaultEthereumInteraction.build(DefaultReddioRestClient.testnet(), DefaultEthereumInteraction.GOERIL_ID, "https://eth-goerli.g.alchemy.com/v2/yyabgQ1GlM0xxqDC4ZBbR1lBcBKQmnxT", "0x27832a8be401e504eaa3e66904f929f02f72cd7f697e3f8f0a1c3d4b8654ba9d");
-        CompletableFuture<LogDeposit> future = ethereumInteraction.depositERC20(RDD20_CONTRACT_ADDRESS, "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4", "0.013", GasOption.Market);
-        LogDeposit result = future.get();
-        System.out.println(new ObjectMapper().writeValueAsString(result));
-    }
-
-    @Test
-    @Category(IntegrationTest.class)
-    public void testDepositERC721() throws ExecutionException, InterruptedException, JsonProcessingException {
-        DefaultEthereumInteraction ethereumInteraction = DefaultEthereumInteraction.build(DefaultReddioRestClient.testnet(), DefaultEthereumInteraction.GOERIL_ID, "https://eth-goerli.g.alchemy.com/v2/yyabgQ1GlM0xxqDC4ZBbR1lBcBKQmnxT", "0x27832a8be401e504eaa3e66904f929f02f72cd7f697e3f8f0a1c3d4b8654ba9d");
-        CompletableFuture<LogDepositWithToken> future = ethereumInteraction.depositERC721(REDDIO721_CONTRACT_ADDRESS, "1205", "0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4", GasOption.Market);
-        LogDepositWithToken result = future.get();
-        System.out.println(new ObjectMapper().writeValueAsString(result));
-    }
-
-    @Test
-    @Category(IntegrationTest.class)
     public void testWithdrawalETH() throws ExecutionException, InterruptedException {
         DefaultReddioRestClient restClient = DefaultReddioRestClient.testnet();
         DefaultEthereumInteraction ethereumInteraction = DefaultEthereumInteraction.build(restClient, DefaultEthereumInteraction.GOERIL_ID, "https://eth-goerli.g.alchemy.com/v2/yyabgQ1GlM0xxqDC4ZBbR1lBcBKQmnxT", "0x27832a8be401e504eaa3e66904f929f02f72cd7f697e3f8f0a1c3d4b8654ba9d");

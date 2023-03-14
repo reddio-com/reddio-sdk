@@ -52,7 +52,7 @@ class DefaultEthereumInteraction(
 
     override fun depositETH(
         starkKey: String,
-        quantizedAmount: String,
+        amount: String,
         gasOption: GasOption,
     ): CompletableFuture<LogDeposit> {
         val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
@@ -60,7 +60,7 @@ class DefaultEthereumInteraction(
         )
         return CompletableFuture.supplyAsync {
             runBlocking {
-                asyncDepositETH(starkKey, quantizedAmount, gasProvider)
+                asyncDepositETH(starkKey, amount, gasProvider)
             }
         }
     }
@@ -233,27 +233,81 @@ class DefaultEthereumInteraction(
         }
     }
 
-    override fun withdrawalERC721(
-        ethAddress: String, assetType: String, tokenId: String, gasOption: GasOption
+    override fun withdrawalETH(
+        ethAddress: String, gasOption: GasOption
     ): CompletableFuture<TransactionReceipt> {
         val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
             this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
         )
         return CompletableFuture.supplyAsync {
             runBlocking {
+                val assetType =
+                    restClient.getContractInfo(
+                        GetContractInfoMessage.of(
+                            ReddioClient.TOKEN_TYPE_ETH,
+                            "ETH"
+                        )
+                    ).await().data.getAssetType()
+                asyncWithdrawal(ethAddress, assetType, gasProvider)
+            }
+        }
+    }
+
+    override fun withdrawalERC20(
+        ethAddress: String, contractAddress: String, gasOption: GasOption
+    ): CompletableFuture<TransactionReceipt> {
+        val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
+            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+        )
+        return CompletableFuture.supplyAsync {
+            runBlocking {
+                val assetType =
+                    restClient.getContractInfo(
+                        GetContractInfoMessage.of(
+                            ReddioClient.TOKEN_TYPE_ERC20,
+                            contractAddress
+                        )
+                    ).await().data.getAssetType()
+                asyncWithdrawal(ethAddress, assetType, gasProvider)
+            }
+        }
+    }
+
+    override fun withdrawalERC721(
+        ethAddress: String, contractAddress: String, tokenId: String, gasOption: GasOption
+    ): CompletableFuture<TransactionReceipt> {
+        val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
+            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+        )
+        return CompletableFuture.supplyAsync {
+            runBlocking {
+                val assetType =
+                    restClient.getContractInfo(
+                        GetContractInfoMessage.of(
+                            ReddioClient.TOKEN_TYPE_ERC721,
+                            contractAddress
+                        )
+                    ).await().data.getAssetType()
                 asyncWithdrawalERC721(ethAddress, assetType, tokenId, gasProvider)
             }
         }
     }
 
     override fun withdrawalERC721M(
-        ethAddress: String, assetType: String, tokenId: String, gasOption: GasOption
+        ethAddress: String, contractAddress: String, tokenId: String, gasOption: GasOption
     ): CompletableFuture<TransactionReceipt> {
         val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
             this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
         )
         return CompletableFuture.supplyAsync {
             runBlocking {
+                val assetType =
+                    restClient.getContractInfo(
+                        GetContractInfoMessage.of(
+                            ReddioClient.TOKEN_TYPE_ERC721M,
+                            contractAddress
+                        )
+                    ).await().data.getAssetType()
                 asyncWithdrawalERC721M(ethAddress, assetType, tokenId, gasProvider)
             }
         }
