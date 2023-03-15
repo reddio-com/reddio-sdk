@@ -5,9 +5,12 @@ import com.reddio.api.v1.rest.WithdrawalStatusMessage
 import com.reddio.crypto.CryptoService.Reddio
 import com.reddio.fixtures.Fixtures
 import com.reddio.fixtures.StarkKeysPool
+import mu.KotlinLogging
 import org.junit.Assert
 import org.junit.Test
 import org.junit.experimental.categories.Category
+
+private val logger = KotlinLogging.logger {}
 
 @Category(IntegrationTest::class)
 class DefaultReddioClientWithdrawalIntegrationTest {
@@ -18,11 +21,10 @@ class DefaultReddioClientWithdrawalIntegrationTest {
         val (account, _) = Fixtures.fetchStarkKeysWhichOwnETHOnLayer2(withdrawalAmount)
         val client = DefaultReddioClient.testnet()
         val response = client.withStarkExSigner(account.starkPrivateKey).withdrawalETH(
-            withdrawalAmount,
-            account.ethAddress,
-            ReddioClient.MAX_EXPIRATION_TIMESTAMP
+            withdrawalAmount, account.ethAddress, ReddioClient.MAX_EXPIRATION_TIMESTAMP
         ).join()
         Assert.assertEquals("OK", response.status)
+        logger.info { "Withdrawal ETH: $response" }
     }
 
     @Test
@@ -37,6 +39,10 @@ class DefaultReddioClientWithdrawalIntegrationTest {
             ReddioClient.MAX_EXPIRATION_TIMESTAMP
         ).join()
         Assert.assertEquals("OK", response.status)
+        logger.info {
+            "Withdrawal ERC20: $response"
+        }
+
     }
 
     @Test
@@ -52,6 +58,9 @@ class DefaultReddioClientWithdrawalIntegrationTest {
             ReddioClient.MAX_EXPIRATION_TIMESTAMP
         ).join()
         Assert.assertEquals("OK", response.status)
+        logger.info {
+            "Withdrawal ERC721: $response"
+        }
     }
 
     @Test
@@ -67,6 +76,9 @@ class DefaultReddioClientWithdrawalIntegrationTest {
             ReddioClient.MAX_EXPIRATION_TIMESTAMP
         ).join()
         Assert.assertEquals("OK", response.status)
+        logger.info {
+            "Withdrawal ERC721M: $response"
+        }
     }
 
     @Test

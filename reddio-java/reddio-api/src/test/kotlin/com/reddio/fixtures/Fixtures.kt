@@ -350,6 +350,91 @@ class Fixtures {
             }
         }
 
+        fun fetchStarkKeysWhichCouldWithdrawalERC20OnLayer1(contractAddress: String = ReddioTestERC20ContractAddress): Pair<EthAndStarkKeys, WithdrawalStatusRecord> {
+            return StarkKeysPool.pool().stream().map {
+                val restClient = DefaultReddioRestClient.testnet()
+                val response = restClient.withdrawalStatus(
+                    WithdrawalStatusMessage.of(
+                        WithdrawalStatusMessage.STAGE_WITHDRAWAREA, it.ethAddress
+                    )
+                ).join()
+                Pair(it, response)
+            }.flatMap {
+                val keys = it.first
+                val response = it.second
+                response.data.stream().map { item ->
+                    Pair(keys, item)
+                }
+            }.filter {
+                val withdrawalAsset = it.second
+                withdrawalAsset.getType().toLowerCase() == "erc20" &&
+                        withdrawalAsset.getContractAddress().equals(contractAddress, ignoreCase = true)
+            }.findAny().orElseThrow {
+                FixtureException("Insufficient test assets ETH for withdrawal from given stark keys")
+            }.let { result ->
+                val keys = result.first
+                val withdrawalAsset = result.second
+                Pair(keys, withdrawalAsset)
+            }
+        }
+
+        fun fetchStarkKeysWhichCouldWithdrawalERC721OnLayer1(contractAddress: String = ReddioTestERC721ContractAddress): Pair<EthAndStarkKeys, WithdrawalStatusRecord> {
+            return StarkKeysPool.pool().stream().map {
+                val restClient = DefaultReddioRestClient.testnet()
+                val response = restClient.withdrawalStatus(
+                    WithdrawalStatusMessage.of(
+                        WithdrawalStatusMessage.STAGE_WITHDRAWAREA, it.ethAddress
+                    )
+                ).join()
+                Pair(it, response)
+            }.flatMap {
+                val keys = it.first
+                val response = it.second
+                response.data.stream().map { item ->
+                    Pair(keys, item)
+                }
+            }.filter {
+                val withdrawalAsset = it.second
+                withdrawalAsset.getType().toLowerCase() == "erc721" &&
+                        withdrawalAsset.getContractAddress().equals(contractAddress, ignoreCase = true)
+            }.findAny().orElseThrow {
+                FixtureException("Insufficient test assets ETH for withdrawal from given stark keys")
+            }.let { result ->
+                val keys = result.first
+                val withdrawalAsset = result.second
+                Pair(keys, withdrawalAsset)
+            }
+        }
+
+        fun fetchStarkKeysWhichCouldWithdrawalERC721MOnLayer1(contractAddress: String = ReddioTestERC721MContractAddress): Pair<EthAndStarkKeys, WithdrawalStatusRecord> {
+            return StarkKeysPool.pool().stream().map {
+                val restClient = DefaultReddioRestClient.testnet()
+                val response = restClient.withdrawalStatus(
+                    WithdrawalStatusMessage.of(
+                        WithdrawalStatusMessage.STAGE_WITHDRAWAREA, it.ethAddress
+                    )
+                ).join()
+                Pair(it, response)
+            }.flatMap {
+                val keys = it.first
+                val response = it.second
+                response.data.stream().map { item ->
+                    Pair(keys, item)
+                }
+            }.filter {
+                val withdrawalAsset = it.second
+                withdrawalAsset.getType().toLowerCase() == "erc721m" &&
+                        withdrawalAsset.getContractAddress().equals(contractAddress, ignoreCase = true)
+            }.findAny().orElseThrow {
+                FixtureException("Insufficient test assets ETH for withdrawal from given stark keys")
+            }.let { result ->
+                val keys = result.first
+                val withdrawalAsset = result.second
+                Pair(keys, withdrawalAsset)
+            }
+        }
+
+
         fun fetchReddioAPIKey(): String {
             return System.getenv("INTEGRATION_TEST_REDDIO_API_KEY")
                 ?: throw FixtureException("environment variable INTEGRATION_TEST_REDDIO_API_KEY is not set")

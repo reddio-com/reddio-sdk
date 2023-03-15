@@ -24,23 +24,17 @@ class DefaultEthereumWithdrawalInteractionTest {
             val (account, record) = Fixtures.fetchStarkKeysWhichCouldWithdrawalETHOnLayer1()
             val restClient = DefaultReddioRestClient.testnet()
             val ethereumInteraction = DefaultEthereumInteraction.build(
-                restClient,
-                DefaultEthereumInteraction.GOERIL_ID,
-                Fixtures.fetchETHJsonRPCNode(),
-                account.ethPrivateKey
+                restClient, DefaultEthereumInteraction.GOERIL_ID, Fixtures.fetchETHJsonRPCNode(), account.ethPrivateKey
             )
             val contractInfo: ResponseWrapper<GetContractInfoResponse> = restClient.getContractInfo(
                 GetContractInfoMessage.of(
-                    "ETH",
-                    "ETH"
+                    "ETH", "ETH"
                 )
             ).join()
             val assetType = contractInfo.data.getAssetType()
 
             val log = ethereumInteraction.withdrawETHOrERC20(
-                account.ethAddress,
-                assetType,
-                GasOption.Market
+                account.ethAddress, assetType, GasOption.Market
             ).join()
             logger.info {
                 "ETH deposit: $log"
@@ -50,4 +44,84 @@ class DefaultEthereumWithdrawalInteractionTest {
         }
     }
 
+    @Test
+    fun testWithdrawERC20() {
+        try {
+            val (account, record) = Fixtures.fetchStarkKeysWhichCouldWithdrawalERC20OnLayer1()
+            val restClient = DefaultReddioRestClient.testnet()
+            val ethereumInteraction = DefaultEthereumInteraction.build(
+                restClient, DefaultEthereumInteraction.GOERIL_ID, Fixtures.fetchETHJsonRPCNode(), account.ethPrivateKey
+            )
+            val contractInfo: ResponseWrapper<GetContractInfoResponse> = restClient.getContractInfo(
+                GetContractInfoMessage.of(
+                    ReddioClient.TOKEN_TYPE_ERC20,
+                    record.contractAddress
+                )
+            ).join()
+            val assetType = contractInfo.data.getAssetType()
+
+            val log = ethereumInteraction.withdrawalERC20(
+                account.ethAddress, record.contractAddress, GasOption.Market
+            ).join()
+            logger.info {
+                "ERC20 deposit: $log"
+            }
+        } catch (e: FixtureException) {
+            Assume.assumeNoException("Skipping test: No ETH withdrawal fixtures found.", e)
+        }
+    }
+
+    @Test
+    fun testWithdrawERC721() {
+        try {
+            val (account, record) = Fixtures.fetchStarkKeysWhichCouldWithdrawalERC721OnLayer1()
+            val restClient = DefaultReddioRestClient.testnet()
+            val ethereumInteraction = DefaultEthereumInteraction.build(
+                restClient, DefaultEthereumInteraction.GOERIL_ID, Fixtures.fetchETHJsonRPCNode(), account.ethPrivateKey
+            )
+            val contractInfo: ResponseWrapper<GetContractInfoResponse> = restClient.getContractInfo(
+                GetContractInfoMessage.of(
+                    ReddioClient.TOKEN_TYPE_ERC721,
+                    record.contractAddress
+                )
+            ).join()
+            val assetType = contractInfo.data.getAssetType()
+
+            val log = ethereumInteraction.withdrawalERC721(
+                account.ethAddress, assetType, record.tokenId, GasOption.Market
+            ).join()
+            logger.info {
+                "ERC721 deposit: $log"
+            }
+        } catch (e: FixtureException) {
+            Assume.assumeNoException("Skipping test: No ETH withdrawal fixtures found.", e)
+        }
+    }
+
+    @Test
+    fun testWithdrawERC721M() {
+        try {
+            val (account, record) = Fixtures.fetchStarkKeysWhichCouldWithdrawalERC721MOnLayer1()
+            val restClient = DefaultReddioRestClient.testnet()
+            val ethereumInteraction = DefaultEthereumInteraction.build(
+                restClient, DefaultEthereumInteraction.GOERIL_ID, Fixtures.fetchETHJsonRPCNode(), account.ethPrivateKey
+            )
+            val contractInfo: ResponseWrapper<GetContractInfoResponse> = restClient.getContractInfo(
+                GetContractInfoMessage.of(
+                    ReddioClient.TOKEN_TYPE_ERC721M,
+                    record.contractAddress
+                )
+            ).join()
+            val assetType = contractInfo.data.getAssetType()
+
+            val log = ethereumInteraction.withdrawalERC721M(
+                account.ethAddress, assetType, record.tokenId, GasOption.Market
+            ).join()
+            logger.info {
+                "ERC721M deposit: $log"
+            }
+        } catch (e: FixtureException) {
+            Assume.assumeNoException("Skipping test: No ETH withdrawal fixtures found.", e)
+        }
+    }
 }
