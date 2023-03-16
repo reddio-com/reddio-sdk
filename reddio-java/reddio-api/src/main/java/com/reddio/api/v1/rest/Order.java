@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "of")
@@ -30,7 +32,6 @@ public class Order {
     @JsonProperty("symbol")
     public Symbol symbol;
 
-
     @JsonProperty("fee_rate")
     public String feeRate;
 
@@ -48,4 +49,7 @@ public class Order {
 
     @JsonProperty("resp")
     public String resp;
+
+    @JsonProperty("order_created_at")
+    private Instant orderCreatedAt;
 }

@@ -24,6 +24,7 @@ public class DefaultReddioRestClient implements ReddioRestClient {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     {
+        objectMapper.findAndRegisterModules();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
