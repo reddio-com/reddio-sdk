@@ -15,8 +15,8 @@ public class PaymentSHA3 {
     public static final int BYTEBUFFER_SIZE = 4096;
 
     public static BigInteger getPaymentHash(Payment message, long nonce) {
-        byte[] orderIdBytes = String.format("%s", message.payInfo.orderId).getBytes(StandardCharsets.UTF_8);
-        byte[] stateBytes32 = message.state.getBytes(StandardCharsets.UTF_8);
+        byte[] orderIdBytes = String.format("%s", message.getPayInfo().getOrderId()).getBytes(StandardCharsets.UTF_8);
+        byte[] stateBytes32 = message.getState().getBytes(StandardCharsets.UTF_8);
         byte[] nonceBytes = Numeric.toBytesPadded(BigInteger.valueOf(nonce), 32);
 
         ByteBuffer buffer = ByteBuffer.allocate(BYTEBUFFER_SIZE);

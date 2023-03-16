@@ -12,8 +12,7 @@ import java.util.List;
 @AllArgsConstructor(staticName = "of")
 public class GetVaultIdMessage {
     @JsonProperty("asset_id")
-    public String assetId;
+    private String assetId;
     @JsonProperty("stark_keys")
-    public List<String> starkKeys;
-
+    private List<String> starkKeys;
 }

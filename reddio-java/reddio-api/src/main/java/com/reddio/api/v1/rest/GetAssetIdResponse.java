@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(staticName = "of")
 public class GetAssetIdResponse {
     @JsonProperty("asset_id")
-    public String assetId;
+    private String assetId;
 }

@@ -12,18 +12,17 @@ import java.util.List;
 @AllArgsConstructor(staticName = "of")
 public class OrderListMessage {
     @JsonProperty("stark_key")
-    public String starkKey;
+    private String starkKey;
     @JsonProperty("contract_address")
-    public String contractAddress;
+    private String contractAddress;
     @JsonProperty("limit")
-    public Long limit;
+    private Long limit;
     @JsonProperty("page")
-    public Long page;
+    private Long page;
     @JsonProperty("direction")
-    public Integer direction;
+    private Integer direction;
     @JsonProperty("token_ids")
-    public List<Long> tokenIds;
-
+    private List<Long> tokenIds;
     @JsonProperty("order_state")
-    public OrderState orderState;
+    private OrderState orderState;
 }

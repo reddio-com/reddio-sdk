@@ -10,15 +10,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(staticName = "of")
 public class Contract {
     @JsonProperty("contract_address")
-    public String contractAddress;
+    private String contractAddress;
     @JsonProperty("symbol")
-    public String symbol;
+    private String symbol;
     @JsonProperty("decimals")
-    public Long decimals;
+    private Long decimals;
     @JsonProperty("type")
-    public String type;
+    private String type;
     @JsonProperty("quantum")
-    public Long quantum;
+    private Long quantum;
     @JsonProperty("asset_type")
-    public String assetType;
+    private String assetType;
 }

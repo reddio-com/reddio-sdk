@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 public class WithdrawalStatusMessage {
     public static final String STAGE_WITHDRAWAREA = "withdrawarea";
     @JsonProperty("stage")
-    public String stage;
+    private String stage;
     @JsonProperty("ethaddress")
-    public String ethAddress;
+    private String ethAddress;
 }

@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor(staticName = "of")
 public class GetBalancesResponse {
     @JsonProperty("list")
-    public List<BalanceRecord> list;
+    private List<BalanceRecord> list;
 
     @JsonProperty("total")
     private Long total;

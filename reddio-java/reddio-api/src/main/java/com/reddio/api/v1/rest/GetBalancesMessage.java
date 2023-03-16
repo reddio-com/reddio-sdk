@@ -10,11 +10,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(staticName = "of")
 public class GetBalancesMessage {
     @JsonProperty("stark_key")
-    public String starkKey;
+    private String starkKey;
     @JsonProperty("contract_address")
-    public String contractAddress;
+    private String contractAddress;
     @JsonProperty("limit")
-    public Long limit;
+    private Long limit;
     @JsonProperty("page")
-    public Long page;
+    private Long page;
 }

@@ -16,48 +16,44 @@ public class OrderMessage {
     public static final String STOP_LIMIT_TIME_IN_FORCE_IOC = "IOC";
     public static final String STOP_LIMIT_TIME_IN_FORCE_FOK = "FOK";
 
-
     @JsonProperty("amount")
-    public String amount;
+    private String amount;
     @JsonProperty("amount_buy")
-    public String amountBuy;
+    private String amountBuy;
     @JsonProperty("amount_sell")
-    public String amountSell;
+    private String amountSell;
     @JsonProperty("token_buy")
-    public String tokenBuy;
+    private String tokenBuy;
     @JsonProperty("token_sell")
-    public String tokenSell;
+    private String tokenSell;
     @JsonProperty("base_token")
-    public String baseToken;
+    private String baseToken;
     @JsonProperty("quote_token")
-    public String quoteToken;
+    private String quoteToken;
     @JsonProperty("vault_id_buy")
-    public String vaultIdBuy;
+    private String vaultIdBuy;
     @JsonProperty("vault_id_sell")
-    public String vaultIdSell;
+    private String vaultIdSell;
     @JsonProperty("expiration_timestamp")
-    public Long expirationTimestamp;
+    private Long expirationTimestamp;
     @JsonProperty("nonce")
-    public Long nonce;
+    private Long nonce;
     @JsonProperty("signature")
-    public Signature signature;
+    private Signature signature;
     @JsonProperty("account_id")
-    public String accountId;
+    private String accountId;
     @JsonProperty("direction")
-    public Long direction;
+    private Long direction;
     @JsonProperty("fee_info")
-    public FeeInfo feeInfo;
+    private FeeInfo feeInfo;
     @JsonProperty("price")
-    public String price;
-
+    private String price;
     @JsonProperty("stark_key")
-    public String starkKey;
-
+    private String starkKey;
     @JsonProperty("stop_limit_time_in_force")
-    public String stopLimitTimeInForce;
-
+    private String stopLimitTimeInForce;
     @JsonProperty("payment")
-    public Payment payment;
+    private Payment payment;
 
     @Data
     @NoArgsConstructor
@@ -65,12 +61,10 @@ public class OrderMessage {
     public static class Payment {
 
         @JsonProperty("pay_info")
-        public com.reddio.api.v1.rest.Payment.PayInfo payInfo;
-
+        private com.reddio.api.v1.rest.Payment.PayInfo payInfo;
         @JsonProperty("nonce")
-        public Long nonce;
-
+        private Long nonce;
         @JsonProperty("signature")
-        public Signature signature;
+        private Signature signature;
     }
 }
