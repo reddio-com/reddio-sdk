@@ -261,6 +261,7 @@ class DefaultReddioClientOrderIntegrationTest {
         Assert.assertEquals("1026", data.getTokenId())
         Assert.assertEquals("0.001", data.getDisplayPrice())
         Assert.assertEquals(OrderState.Filled, data.getOrderState())
+        Assert.assertEquals( Instant.ofEpochMilli(1676126105555), data.orderCreatedAt)
     }
 
     @Test
