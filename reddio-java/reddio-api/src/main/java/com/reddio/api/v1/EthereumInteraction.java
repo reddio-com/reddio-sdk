@@ -13,45 +13,30 @@ import java.util.function.Consumer;
 
 public interface EthereumInteraction extends AutoCloseable {
 
-    CompletableFuture<LogDeposit> depositETH(
-            String starkKey,
-            String amount,
-            GasOption gasOption
-    );
+    CompletableFuture<LogDeposit> depositETH(String starkKey, String amount, GasOption gasOption);
 
-    CompletableFuture<LogDeposit> depositERC20(
-            String tokenAddress,
-            String starkKey,
-            String amount,
-            GasOption gasOption
-    );
+    CompletableFuture<LogDeposit> depositERC20(String tokenAddress, String starkKey, String amount, GasOption gasOption);
 
-    CompletableFuture<LogDepositWithToken> depositERC721(
-            String tokenAddress,
-            String tokenId,
-            String starkKey,
-            GasOption gasOption
-    );
+    CompletableFuture<LogDepositWithToken> depositERC721(String tokenAddress, String tokenId, String starkKey, GasOption gasOption);
 
-    CompletableFuture<TransactionReceipt> withdrawETHOrERC20(
-            String ethAddress,
-            String assetType,
-            GasOption gasOption
-    );
+    /**
+     * @param ethAddress
+     * @param assetType
+     * @param gasOption
+     * @return
+     * @deprecated use {@link #withdrawalETH(String, GasOption)} and {@link #withdrawalERC20(String, String, GasOption)} instead
+     */
+    @Deprecated
+    CompletableFuture<TransactionReceipt> withdrawETHOrERC20(String ethAddress, String assetType, GasOption gasOption);
 
-    CompletableFuture<TransactionReceipt> withdrawalERC721(
-            String ethAddress,
-            String assetType,
-            String tokenId,
-            GasOption gasOption
-    );
+    CompletableFuture<TransactionReceipt> withdrawalETH(String ethAddress, GasOption gasOption);
 
-    CompletableFuture<TransactionReceipt> withdrawalERC721M(
-            String ethAddress,
-            String assetType,
-            String tokenId,
-            GasOption gasOption
-    );
+    CompletableFuture<TransactionReceipt> withdrawalERC20(String ethAddress, String erc20ContractAddress, GasOption gasOption);
+
+    CompletableFuture<TransactionReceipt> withdrawalERC721(String ethAddress, String contractAddress, String tokenId, GasOption gasOption);
+
+    CompletableFuture<TransactionReceipt> withdrawalERC721M(String ethAddress, String contractAddress, String tokenId, GasOption gasOption);
+
 
     Disposable watchDeposit(Consumer<Tuple2<Deposits.LogDepositEventResponse, EthBlock>> consumer);
 

@@ -1,0 +1,34 @@
+name: Java SDK Integration Tests
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - main
+jobs:
+  mvn_integration_test_linux:
+    name: mvn integration-test (linux)
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Java and Maven
+        uses: actions/setup-java@v3
+        with:
+          distribution: "adopt-hotspot"
+          java-version: "8"
+          cache: "maven"
+      - name: Setup Rust toolchain x86_64-unknown-linux-gnu
+        uses: actions-rs/toolchain@v1
+        with:
+          target: x86_64-unknown-linux-gnu
+      - name: Compile Native Library
+        run: |
+          make
+      - name: mvn integration-test
+        env:
+         INTEGRATION_TEST_ETHERSCAN_API_KEY: ${{ secrets.INTEGRATION_TEST_ETHERSCAN_API_KEY }}
+         INTEGRATION_TEST_ETH_JSON_RPC_NODE: ${{ secrets.INTEGRATION_TEST_ETH_JSON_RPC_NODE }}
+         INTEGRATION_TEST_ETH_PRIVATE_KEYS: ${{ secrets.INTEGRATION_TEST_ETH_PRIVATE_KEYS }}
+         INTEGRATION_TEST_PAYMENT_SIGNER_STARK_PRIVATE_KEY: ${{ secrets.INTEGRATION_TEST_PAYMENT_SIGNER_STARK_PRIVATE_KEY }}
+        run: |
+          cd reddio-java && mvn -B integration-test

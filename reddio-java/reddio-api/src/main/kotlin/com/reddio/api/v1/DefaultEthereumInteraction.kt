@@ -26,6 +26,7 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.protocol.http.HttpService
 import org.web3j.tuples.generated.Tuple2
 import org.web3j.tx.gas.ContractGasProvider
+import org.web3j.utils.Convert
 import org.web3j.utils.Numeric
 import java.math.BigInteger
 import java.util.*
@@ -51,7 +52,7 @@ class DefaultEthereumInteraction(
 
     override fun depositETH(
         starkKey: String,
-        quantizedAmount: String,
+        amount: String,
         gasOption: GasOption,
     ): CompletableFuture<LogDeposit> {
         val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
@@ -59,7 +60,7 @@ class DefaultEthereumInteraction(
         )
         return CompletableFuture.supplyAsync {
             runBlocking {
-                asyncDepositETH(starkKey, quantizedAmount, gasProvider)
+                asyncDepositETH(starkKey, amount, gasProvider)
             }
         }
     }
@@ -84,12 +85,12 @@ class DefaultEthereumInteraction(
         web3j: Web3j,
         gasProvider: ContractGasProvider,
     ): ERC20.ApprovalEventResponse {
-
-        val nonQuantizedAmount = quantizedHelper.nonQuantizedAmount(amount, "ERC20", erc20ContractAddress)
         val erc20Contract = ERC20.load(erc20ContractAddress, web3j, credentials, gasProvider)
+        val decimals = erc20Contract.decimals().send()
+        val amountAfterDecimals = amount.toBigDecimal().movePointRight(decimals.toInt())
         val call = erc20Contract.approve(
             this.reddioStarexContractAddress(),
-            nonQuantizedAmount.toBigInteger(),
+            amountAfterDecimals.toBigInteger(),
         )
         call.send()
         return EthNextEventSubscriber.create(erc20Contract::approvalEventFlowable, web3j).subscribeNextEvent()
@@ -133,13 +134,12 @@ class DefaultEthereumInteraction(
         val deposits = Deposits.load(
             this.reddioStarexContractAddress(), web3j, credentials, gasProvider
         )
-
-        val quantizedAmount = quantizedHelper.quantizedAmount(amount, "ETH", "ETH")
+        val amountInWei = Convert.toWei(amount, Convert.Unit.ETHER)
         val call = deposits.depositEth(
             BigInteger(starkKey.toLowerCase().replace("0x", ""), 16),
             BigInteger(assetType.toLowerCase().replace("0x", ""), 16),
             BigInteger(vaultId, 10),
-            quantizedAmount.toBigInteger(),
+            amountInWei.toBigInteger(),
         );
 
         call.send();
@@ -233,27 +233,81 @@ class DefaultEthereumInteraction(
         }
     }
 
-    override fun withdrawalERC721(
-        ethAddress: String, assetType: String, tokenId: String, gasOption: GasOption
+    override fun withdrawalETH(
+        ethAddress: String, gasOption: GasOption
     ): CompletableFuture<TransactionReceipt> {
         val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
             this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
         )
         return CompletableFuture.supplyAsync {
             runBlocking {
+                val assetType =
+                    restClient.getContractInfo(
+                        GetContractInfoMessage.of(
+                            ReddioClient.TOKEN_TYPE_ETH,
+                            "ETH"
+                        )
+                    ).await().data.getAssetType()
+                asyncWithdrawal(ethAddress, assetType, gasProvider)
+            }
+        }
+    }
+
+    override fun withdrawalERC20(
+        ethAddress: String, contractAddress: String, gasOption: GasOption
+    ): CompletableFuture<TransactionReceipt> {
+        val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
+            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+        )
+        return CompletableFuture.supplyAsync {
+            runBlocking {
+                val assetType =
+                    restClient.getContractInfo(
+                        GetContractInfoMessage.of(
+                            ReddioClient.TOKEN_TYPE_ERC20,
+                            contractAddress
+                        )
+                    ).await().data.getAssetType()
+                asyncWithdrawal(ethAddress, assetType, gasProvider)
+            }
+        }
+    }
+
+    override fun withdrawalERC721(
+        ethAddress: String, contractAddress: String, tokenId: String, gasOption: GasOption
+    ): CompletableFuture<TransactionReceipt> {
+        val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
+            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+        )
+        return CompletableFuture.supplyAsync {
+            runBlocking {
+                val assetType =
+                    restClient.getContractInfo(
+                        GetContractInfoMessage.of(
+                            ReddioClient.TOKEN_TYPE_ERC721,
+                            contractAddress
+                        )
+                    ).await().data.getAssetType()
                 asyncWithdrawalERC721(ethAddress, assetType, tokenId, gasProvider)
             }
         }
     }
 
     override fun withdrawalERC721M(
-        ethAddress: String, assetType: String, tokenId: String, gasOption: GasOption
+        ethAddress: String, contractAddress: String, tokenId: String, gasOption: GasOption
     ): CompletableFuture<TransactionReceipt> {
         val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
             this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
         )
         return CompletableFuture.supplyAsync {
             runBlocking {
+                val assetType =
+                    restClient.getContractInfo(
+                        GetContractInfoMessage.of(
+                            ReddioClient.TOKEN_TYPE_ERC721M,
+                            contractAddress
+                        )
+                    ).await().data.getAssetType()
                 asyncWithdrawalERC721M(ethAddress, assetType, tokenId, gasProvider)
             }
         }

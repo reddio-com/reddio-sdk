@@ -1,26 +1,25 @@
 package com.reddio.api.v1.rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.reddio.IntegrationTest;
+import com.reddio.api.v1.DefaultEthereumInteractionTest;
+import com.reddio.api.v1.ReddioClient;
 import com.reddio.exception.ReddioBusinessException;
 import com.reddio.exception.ReddioErrorCode;
-import okhttp3.Protocol;
-import okhttp3.Request;
-import okhttp3.Response;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 
-import static com.reddio.api.v1.DefaultEthereumInteractionTest.REDDIO721_CONTRACT_ADDRESS;
 
 public class DefaultReddioRestClientTest {
 
     @Test
+    @Category(IntegrationTest.class)
     public void testGetRecord() throws ExecutionException, InterruptedException {
         DefaultReddioRestClient client = DefaultReddioRestClient.testnet();
         ResponseWrapper<GetRecordResponse> response = client.getRecord(GetRecordMessage.of("0x6736f7449da3bf44bf0f7bdd6463818e1ef272641d43021e8bca17b32ec2df0", 300523L)).get();
@@ -28,6 +27,7 @@ public class DefaultReddioRestClientTest {
     }
 
     @Test
+    @Category(IntegrationTest.class)
     public void testGetTxn() throws ExecutionException, InterruptedException {
         DefaultReddioRestClient client = DefaultReddioRestClient.testnet();
         ResponseWrapper<GetTxnResponse> response = client.getTxn(GetTxnMessage.of(300523L)).get();
@@ -35,14 +35,16 @@ public class DefaultReddioRestClientTest {
     }
 
     @Test
+    @Category(IntegrationTest.class)
     public void testOrderList() throws ExecutionException, InterruptedException {
         DefaultReddioRestClient client = DefaultReddioRestClient.testnet();
-        CompletableFuture<ResponseWrapper<OrderListResponse>> future = client.orderList(OrderListMessage.of("0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4", REDDIO721_CONTRACT_ADDRESS, null, null, null, null, null));
+        CompletableFuture<ResponseWrapper<OrderListResponse>> future = client.orderList(OrderListMessage.of("0x1c2847406b96310a32c379536374ec034b732633e8675860f20f4141e701ff4", DefaultEthereumInteractionTest.REDDIO721_CONTRACT_ADDRESS, null, null, null, null, null));
         ResponseWrapper<OrderListResponse> result = future.get();
         Assert.assertEquals("OK", result.getStatus());
     }
 
     @Test
+    @Category(IntegrationTest.class)
     public void testStarexContract() throws JsonProcessingException, ExecutionException, InterruptedException {
         DefaultReddioRestClient client = DefaultReddioRestClient.testnet();
         CompletableFuture<ResponseWrapper<StarexContractsResponse>> future = client.starexContracts();
@@ -54,6 +56,7 @@ public class DefaultReddioRestClientTest {
     }
 
     @Test
+    @Category(IntegrationTest.class)
     public void testGetRecordBySignature() throws ExecutionException, InterruptedException {
         DefaultReddioRestClient restClient = DefaultReddioRestClient.testnet();
         ResponseWrapper<GetRecordResponse> wrapper = restClient.getRecordBySignature(Signature.of("0x603893549d9fbb1d710ca68f2e44aa8ae2f7c4353219cb662d94e48971dd15f", "0x7556a28be6f49fa896077b3bd96f909e07a226392e2af93852e4ecd8d56814d")).get();
@@ -90,6 +93,7 @@ public class DefaultReddioRestClientTest {
     }
 
     @Test
+    @Category(IntegrationTest.class)
     public void testGetRecordBySignature2() throws ExecutionException, InterruptedException {
         DefaultReddioRestClient restClient = DefaultReddioRestClient.testnet();
         ResponseWrapper<GetRecordResponse> wrapper = restClient.getRecordBySignature(Signature.of("0x6314640fa3955fec989b9c8e85446d3f10fffad4f2df8b3a1f90d75e9649804", "0x70514b88e78028eacdaad5583bda1ecfd93d4fbe5f65eadaeb42e94201662e9")).get();
@@ -113,6 +117,7 @@ public class DefaultReddioRestClientTest {
     }
 
     @Test
+    @Category(IntegrationTest.class)
     public void testEnsureSuccess() {
         ResponseWrapper<?> wrapper = new ResponseWrapper<>();
         wrapper.setStatus("OK");
@@ -120,6 +125,7 @@ public class DefaultReddioRestClientTest {
     }
 
     @Test
+    @Category(IntegrationTest.class)
     public void testEnsureSuccessWithFailure() {
         ResponseWrapper<?> wrapper = new ResponseWrapper<>();
         wrapper.setStatus("FAIL");
@@ -133,6 +139,7 @@ public class DefaultReddioRestClientTest {
     }
 
     @Test
+    @Category(IntegrationTest.class)
     public void testEnsureSuccessWithUnrecognizedErrorCode() {
         ResponseWrapper<?> wrapper = new ResponseWrapper<>();
         wrapper.setStatus("FAIL");
@@ -149,17 +156,11 @@ public class DefaultReddioRestClientTest {
     }
 
     @Test
-    @Ignore("Waiting backend update")
+    @Category(IntegrationTest.class)
     public void testMintWithInvalidApiKey() {
         final DefaultReddioRestClient restClient = DefaultReddioRestClient.testnet("not a real api key");
         try {
-            restClient.mints(
-                    MintsMessage.of(
-                            "",
-                            "",
-                            "1"
-                    )
-            ).join();
+            restClient.mints(MintsMessage.of("", "", "1")).join();
             Assert.fail();
         } catch (CompletionException e) {
             final Throwable cause = e.getCause();

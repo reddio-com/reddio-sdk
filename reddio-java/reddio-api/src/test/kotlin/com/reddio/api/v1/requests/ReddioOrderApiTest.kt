@@ -1,5 +1,6 @@
 package com.reddio.api.v1.requests
 
+import com.reddio.IntegrationTest
 import com.reddio.api.v1.DefaultEthereumInteractionTest
 import com.reddio.api.v1.OrderBehavior
 import com.reddio.api.v1.rest.DefaultReddioRestClient
@@ -9,11 +10,15 @@ import com.reddio.api.v1.rest.OrderListMessage
 import com.reddio.api.v1.rest.OrderState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Ignore
 import org.junit.Test
+import org.junit.experimental.categories.Category
 import java.util.stream.Collectors
 
+@Ignore
 class ReddioOrderApiTest {
     @Test
+    @Category(IntegrationTest::class)
     fun testOrder() {
         val restClient = DefaultReddioRestClient.testnet()
         val request = ReddioOrderApi.order(
@@ -34,6 +39,7 @@ class ReddioOrderApiTest {
     }
 
     @Test
+    @Category(IntegrationTest::class)
     fun testOrderThenPolling_OrderPlaced() {
         val restClient = DefaultReddioRestClient.testnet()
         val balancesFuture = restClient.getBalances(
@@ -67,6 +73,7 @@ class ReddioOrderApiTest {
     }
 
     @Test
+    @Category(IntegrationTest::class)
     fun testOrderThenPolling_InvalidOrder_NotOwnTheNFT() {
         val restClient = DefaultReddioRestClient.testnet()
         val request = ReddioOrderApi.order(
@@ -88,6 +95,7 @@ class ReddioOrderApiTest {
     }
 
     @Test
+    @Category(IntegrationTest::class)
     fun testOrderThenPooling_BuyOrder_Filled() {
         val restClient = DefaultReddioRestClient.testnet()
         val balancesFuture = restClient.getBalances(

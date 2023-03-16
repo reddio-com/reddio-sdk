@@ -1,4 +1,5 @@
-import com.reddio.api.v1.StarkExSigner;
+package com.reddio.api.v1;
+
 import com.reddio.api.v1.rest.Signature;
 import org.junit.Assert;
 import org.junit.Test;

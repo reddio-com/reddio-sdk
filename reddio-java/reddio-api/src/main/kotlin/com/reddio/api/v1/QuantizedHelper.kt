@@ -3,9 +3,7 @@ package com.reddio.api.v1
 import com.reddio.api.v1.rest.GetContractInfoMessage
 import com.reddio.api.v1.rest.ReddioRestClient
 import kotlinx.coroutines.future.await
-import org.web3j.utils.Convert
 import java.math.BigDecimal
-import kotlin.math.pow
 
 class QuantizedHelper(private val restClient: ReddioRestClient) {
 
@@ -37,7 +35,8 @@ class QuantizedHelper(private val restClient: ReddioRestClient) {
         amount: String, type: String, contractAddress: String
     ): Long {
         val contractInfo = restClient.getContractInfo(GetContractInfoMessage.of(type, contractAddress)).await()
-        val nonQuantizedAmount = amount.toBigDecimal().multiply(BigDecimal(10).pow(contractInfo.data.decimals.toInt())).toLong()
+        val nonQuantizedAmount =
+            amount.toBigDecimal().multiply(BigDecimal(10).pow(contractInfo.data.decimals.toInt())).toLong()
         return nonQuantizedAmount
     }
 }
