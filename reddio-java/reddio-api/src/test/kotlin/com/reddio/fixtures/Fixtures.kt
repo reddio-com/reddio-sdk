@@ -3,14 +3,12 @@ package com.reddio.fixtures
 import com.reddio.api.v1.DefaultEthereumInteraction
 import com.reddio.api.v1.QuantizedHelper
 import com.reddio.api.v1.ReddioClient
-import com.reddio.api.v1.StarkKeys
 import com.reddio.api.v1.rest.DefaultReddioRestClient
 import com.reddio.api.v1.rest.GetBalancesMessage
 import com.reddio.api.v1.rest.WithdrawalStatusMessage
 import com.reddio.api.v1.rest.WithdrawalStatusResponse.WithdrawalStatusRecord
 import com.reddio.gas.GasOption
 import com.reddio.gas.StaticGasLimitSuggestionPriceGasProvider
-import jdk.internal.joptsimple.internal.Strings
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
 import org.web3j.contracts.eip20.generated.ERC20
@@ -240,7 +238,7 @@ class Fixtures {
          */
         fun fetchETHJsonRPCNode(): String {
             val env = System.getenv("INTEGRATION_TEST_ETH_JSON_RPC_NODE")
-            if (Strings.isNullOrEmpty(env)) {
+            if (env.isNullOrEmpty()) {
                 throw FixtureException("environment variable INTEGRATION_TEST_ETH_JSON_RPC_NODE is not set")
             }
             return env
@@ -441,7 +439,7 @@ class Fixtures {
 
         fun fetchReddioAPIKey(): String {
             val env = System.getenv("INTEGRATION_TEST_REDDIO_API_KEY")
-            if (Strings.isNullOrEmpty(env)) {
+            if (env.isNullOrEmpty()) {
                 throw FixtureException("environment variable INTEGRATION_TEST_REDDIO_API_KEY is not set")
             }
             return env
