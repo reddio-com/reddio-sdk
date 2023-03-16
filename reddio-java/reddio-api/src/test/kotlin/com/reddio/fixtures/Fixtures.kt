@@ -10,6 +10,7 @@ import com.reddio.api.v1.rest.WithdrawalStatusMessage
 import com.reddio.api.v1.rest.WithdrawalStatusResponse.WithdrawalStatusRecord
 import com.reddio.gas.GasOption
 import com.reddio.gas.StaticGasLimitSuggestionPriceGasProvider
+import jdk.internal.joptsimple.internal.Strings
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
 import org.web3j.contracts.eip20.generated.ERC20
@@ -238,8 +239,11 @@ class Fixtures {
          * return the ETH json rpc node url restored from the environment variable INTEGRATION_TEST_ETH_JSON_RPC_NODE
          */
         fun fetchETHJsonRPCNode(): String {
-            return System.getenv("INTEGRATION_TEST_ETH_JSON_RPC_NODE")
-                ?: throw FixtureException("environment variable INTEGRATION_TEST_ETH_JSON_RPC_NODE is not set")
+            val env = System.getenv("INTEGRATION_TEST_ETH_JSON_RPC_NODE")
+            if (Strings.isNullOrEmpty(env)) {
+                throw FixtureException("environment variable INTEGRATION_TEST_ETH_JSON_RPC_NODE is not set")
+            }
+            return env
         }
 
         fun displayValueOfETHOrERC20(amount: BigInteger, decimals: Int): String {
@@ -436,8 +440,11 @@ class Fixtures {
 
 
         fun fetchReddioAPIKey(): String {
-            return System.getenv("INTEGRATION_TEST_REDDIO_API_KEY")
-                ?: throw FixtureException("environment variable INTEGRATION_TEST_REDDIO_API_KEY is not set")
+            val env = System.getenv("INTEGRATION_TEST_REDDIO_API_KEY")
+            if (Strings.isNullOrEmpty(env)) {
+                throw FixtureException("environment variable INTEGRATION_TEST_REDDIO_API_KEY is not set")
+            }
+            return env
         }
     }
 }

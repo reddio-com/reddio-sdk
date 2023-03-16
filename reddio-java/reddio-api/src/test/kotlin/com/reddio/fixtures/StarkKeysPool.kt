@@ -3,6 +3,7 @@ package com.reddio.fixtures
 import com.reddio.api.v1.DefaultEthereumInteraction
 import com.reddio.api.v1.StarkKeys
 import com.reddio.crypto.CryptoService
+import jdk.internal.joptsimple.internal.Strings
 import org.web3j.crypto.Credentials
 import java.util.stream.Collectors
 
@@ -19,7 +20,7 @@ class StarkKeysPool {
          */
         fun paymentSignerStarkPrivateKey(): String {
             val paymentSignerStarkPrivateKey = System.getenv("INTEGRATION_TEST_PAYMENT_SIGNER_STARK_PRIVATE_KEY")
-            if (paymentSignerStarkPrivateKey != null) {
+            if (!Strings.isNullOrEmpty(paymentSignerStarkPrivateKey)) {
                 return paymentSignerStarkPrivateKey
             }
             throw FixtureException("The environment variable INTEGRATION_TEST_PAYMENT_SIGNER_STARK_PRIVATE_KEY is not set.")
@@ -41,7 +42,7 @@ class StarkKeysPool {
          */
         fun pool(): List<EthAndStarkKeys> {
             val ethPrivateKeys = System.getenv("INTEGRATION_TEST_ETH_PRIVATE_KEYS")
-            if (ethPrivateKeys != null) {
+            if (!Strings.isNullOrEmpty(ethPrivateKeys)) {
                 return ethPrivateKeys.split(",").parallelStream().map { ethPrivateKeys ->
                     ethPrivateKeys.trim()
                 }.map { ethPrivateKey ->
