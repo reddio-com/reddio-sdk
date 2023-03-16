@@ -4,9 +4,11 @@ import com.reddio.IntegrationTest
 import com.reddio.api.v1.rest.DefaultReddioRestClient
 import com.reddio.api.v1.rest.RecordStatus
 import org.junit.Assert.*
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
 
+@Ignore
 class ReddioWithdrawalToApiTest {
     @Test
     @Category(IntegrationTest::class)

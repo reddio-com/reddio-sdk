@@ -26,15 +26,9 @@ class DefaultEthereumWithdrawalInteractionTest {
             val ethereumInteraction = DefaultEthereumInteraction.build(
                 restClient, DefaultEthereumInteraction.GOERIL_ID, Fixtures.fetchETHJsonRPCNode(), account.ethPrivateKey
             )
-            val contractInfo: ResponseWrapper<GetContractInfoResponse> = restClient.getContractInfo(
-                GetContractInfoMessage.of(
-                    "ETH", "ETH"
-                )
-            ).join()
-            val assetType = contractInfo.data.getAssetType()
 
-            val log = ethereumInteraction.withdrawETHOrERC20(
-                account.ethAddress, assetType, GasOption.Market
+            val log = ethereumInteraction.withdrawalETH(
+                account.ethAddress, GasOption.Market
             ).join()
             logger.info {
                 "ETH deposit: $log"
@@ -52,14 +46,6 @@ class DefaultEthereumWithdrawalInteractionTest {
             val ethereumInteraction = DefaultEthereumInteraction.build(
                 restClient, DefaultEthereumInteraction.GOERIL_ID, Fixtures.fetchETHJsonRPCNode(), account.ethPrivateKey
             )
-            val contractInfo: ResponseWrapper<GetContractInfoResponse> = restClient.getContractInfo(
-                GetContractInfoMessage.of(
-                    ReddioClient.TOKEN_TYPE_ERC20,
-                    record.contractAddress
-                )
-            ).join()
-            val assetType = contractInfo.data.getAssetType()
-
             val log = ethereumInteraction.withdrawalERC20(
                 account.ethAddress, record.contractAddress, GasOption.Market
             ).join()
@@ -79,16 +65,9 @@ class DefaultEthereumWithdrawalInteractionTest {
             val ethereumInteraction = DefaultEthereumInteraction.build(
                 restClient, DefaultEthereumInteraction.GOERIL_ID, Fixtures.fetchETHJsonRPCNode(), account.ethPrivateKey
             )
-            val contractInfo: ResponseWrapper<GetContractInfoResponse> = restClient.getContractInfo(
-                GetContractInfoMessage.of(
-                    ReddioClient.TOKEN_TYPE_ERC721,
-                    record.contractAddress
-                )
-            ).join()
-            val assetType = contractInfo.data.getAssetType()
 
             val log = ethereumInteraction.withdrawalERC721(
-                account.ethAddress, assetType, record.tokenId, GasOption.Market
+                account.ethAddress, record.contractAddress, record.tokenId, GasOption.Market
             ).join()
             logger.info {
                 "ERC721 deposit: $log"
@@ -106,16 +85,9 @@ class DefaultEthereumWithdrawalInteractionTest {
             val ethereumInteraction = DefaultEthereumInteraction.build(
                 restClient, DefaultEthereumInteraction.GOERIL_ID, Fixtures.fetchETHJsonRPCNode(), account.ethPrivateKey
             )
-            val contractInfo: ResponseWrapper<GetContractInfoResponse> = restClient.getContractInfo(
-                GetContractInfoMessage.of(
-                    ReddioClient.TOKEN_TYPE_ERC721M,
-                    record.contractAddress
-                )
-            ).join()
-            val assetType = contractInfo.data.getAssetType()
 
             val log = ethereumInteraction.withdrawalERC721M(
-                account.ethAddress, assetType, record.tokenId, GasOption.Market
+                account.ethAddress, record.contractAddress, record.tokenId, GasOption.Market
             ).join()
             logger.info {
                 "ERC721M deposit: $log"

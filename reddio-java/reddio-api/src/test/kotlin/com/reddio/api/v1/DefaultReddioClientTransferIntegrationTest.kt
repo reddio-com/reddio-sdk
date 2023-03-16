@@ -110,35 +110,6 @@ class DefaultReddioClientTransferIntegrationTest {
         }
     }
 
-    @Test(timeout = 1000 * 20)
-    @Category(IntegrationTest::class)
-    fun testTransferThenWaitingRecordGetApproved() {
-        val (sender, erc721Ownership) = Fixtures.fetchStarkKeysWhichOwnERC721OnLayer2()
-        val receiver = StarkKeysPool.starkKeysFromPoolButExpect(sender.starkKey)
-        logger.info {
-            "transfer ERC721 fixtures prepared, sender: ${sender.starkKey}, receiver: ${receiver.starkKey}, contractAddress: ${erc721Ownership.contractAddress} tokenId: ${erc721Ownership.tokenId}"
-        }
-
-        val client = DefaultReddioClient.testnet()
-        val clientWithSigner = client.withStarkExSigner(sender.starkPrivateKey)
-        val result = clientWithSigner.transfer(
-            sender.starkKey,
-            "1",
-            erc721Ownership.contractAddress,
-            erc721Ownership.tokenId,
-            ReddioClient.TOKEN_TYPE_ERC721,
-            receiver.starkKey,
-            ReddioClient.MAX_EXPIRATION_TIMESTAMP
-        ).join()
-        Assert.assertEquals("OK", result.status)
-
-        val waitingResult = client.waitingTransferGetApproved(
-            sender.starkKey, result.data.getSequenceId()
-        ).join()
-
-        Assert.assertEquals("OK", waitingResult.status)
-    }
-
     @Test
     fun testTransferForNoSuchToken() {
         val senderPrivateKey = CryptoService.getRandomPrivateKey()

@@ -11,6 +11,7 @@ import com.reddio.exception.ReddioErrorCode
 import com.reddio.fixtures.Fixtures
 import mu.KotlinLogging
 import org.junit.Assert
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import java.util.concurrent.CompletionException
@@ -89,6 +90,7 @@ class DefaultReddioClientIntegrationTest {
     @Throws(
         ExecutionException::class, InterruptedException::class, JsonProcessingException::class
     )
+    @Ignore("invalid api key")
     fun testMints() {
         val client = DefaultReddioClient.testnet("<truncated-api-key>")
         val future = client.mints(

@@ -38,50 +38,6 @@ public class DefaultEthereumInteractionTest {
 
     @Test
     @Category(IntegrationTest.class)
-    public void testWithdrawalETH() throws ExecutionException, InterruptedException {
-        DefaultReddioRestClient restClient = DefaultReddioRestClient.testnet();
-        DefaultEthereumInteraction ethereumInteraction = DefaultEthereumInteraction.build(restClient, DefaultEthereumInteraction.GOERIL_ID, "https://eth-goerli.g.alchemy.com/v2/yyabgQ1GlM0xxqDC4ZBbR1lBcBKQmnxT", "0x27832a8be401e504eaa3e66904f929f02f72cd7f697e3f8f0a1c3d4b8654ba9d");
-        ResponseWrapper<GetContractInfoResponse> contractInfo = restClient.getContractInfo(GetContractInfoMessage.of("eth", "eth")).get();
-        String assetType = contractInfo.getData().getAssetType();
-        TransactionReceipt txn = ethereumInteraction.withdrawETHOrERC20("0x76f2Fc7ed90039d986e3eb4DB294f05E160c8F03", assetType, GasOption.Market).get();
-        System.out.println(txn.getTransactionHash());
-    }
-
-    @Test
-    @Category(IntegrationTest.class)
-    public void testWithdrawalERC20() throws ExecutionException, InterruptedException {
-        DefaultReddioRestClient restClient = DefaultReddioRestClient.testnet();
-        DefaultEthereumInteraction ethereumInteraction = DefaultEthereumInteraction.build(restClient, DefaultEthereumInteraction.GOERIL_ID, "https://eth-goerli.g.alchemy.com/v2/yyabgQ1GlM0xxqDC4ZBbR1lBcBKQmnxT", "0x27832a8be401e504eaa3e66904f929f02f72cd7f697e3f8f0a1c3d4b8654ba9d");
-        ResponseWrapper<GetContractInfoResponse> contractInfo = restClient.getContractInfo(GetContractInfoMessage.of("ERC20", RDD20_CONTRACT_ADDRESS)).get();
-        String assetType = contractInfo.getData().getAssetType();
-        TransactionReceipt txn = ethereumInteraction.withdrawETHOrERC20("0x76f2Fc7ed90039d986e3eb4DB294f05E160c8F03", assetType, GasOption.Market).get();
-        System.out.println(txn.getTransactionHash());
-    }
-
-    @Test
-    @Category(IntegrationTest.class)
-    public void testWithdrawalERC721() throws ExecutionException, InterruptedException {
-        DefaultReddioRestClient restClient = DefaultReddioRestClient.testnet();
-        DefaultEthereumInteraction ethereumInteraction = DefaultEthereumInteraction.build(restClient, DefaultEthereumInteraction.GOERIL_ID, "https://eth-goerli.g.alchemy.com/v2/yyabgQ1GlM0xxqDC4ZBbR1lBcBKQmnxT", "0x27832a8be401e504eaa3e66904f929f02f72cd7f697e3f8f0a1c3d4b8654ba9d");
-        ResponseWrapper<GetContractInfoResponse> contractInfo = restClient.getContractInfo(GetContractInfoMessage.of("ERC721", REDDIO721_CONTRACT_ADDRESS)).get();
-        String assetType = contractInfo.getData().getAssetType();
-        TransactionReceipt txn = ethereumInteraction.withdrawalERC721("0x76f2Fc7ed90039d986e3eb4DB294f05E160c8F03", assetType, "1022", GasOption.Market).get();
-        System.out.println(txn.getTransactionHash());
-    }
-
-    @Test
-    @Category(IntegrationTest.class)
-    public void testWithdrawalERC721M() throws ExecutionException, InterruptedException {
-        DefaultReddioRestClient restClient = DefaultReddioRestClient.testnet();
-        DefaultEthereumInteraction ethereumInteraction = DefaultEthereumInteraction.build(restClient, DefaultEthereumInteraction.GOERIL_ID, "https://eth-goerli.g.alchemy.com/v2/yyabgQ1GlM0xxqDC4ZBbR1lBcBKQmnxT", "0x27832a8be401e504eaa3e66904f929f02f72cd7f697e3f8f0a1c3d4b8654ba9d");
-        ResponseWrapper<GetContractInfoResponse> contractInfo = restClient.getContractInfo(GetContractInfoMessage.of("ERC721M", "0xe3d2a2ca17a8dedb740b6c259b4eeeaaf81c9fb6")).get();
-        String assetType = contractInfo.getData().getAssetType();
-        TransactionReceipt txn = ethereumInteraction.withdrawalERC721M("0x76f2Fc7ed90039d986e3eb4DB294f05E160c8F03", assetType, "3", GasOption.Market).get();
-        System.out.println(txn.getTransactionHash());
-    }
-
-    @Test
-    @Category(IntegrationTest.class)
     @Ignore("never end")
     public void testWatchDeposit() throws InterruptedException, IOException {
         ObjectMapper om = new ObjectMapper();
@@ -158,6 +114,7 @@ public class DefaultEthereumInteractionTest {
 
     @Test
     @Category(IntegrationTest.class)
+    @Ignore("Insufficient funds for gas")
     public void testDeployERC721M() throws Exception {
         Web3j web3j = Web3j.build(new HttpService("https://eth-goerli.g.alchemy.com/v2/yyabgQ1GlM0xxqDC4ZBbR1lBcBKQmnxT"));
         Credentials credentials = Credentials.create("552ad9b756acfeb2e32cfd3354b653b1f95177b851a44155d6178d244b80e08b");

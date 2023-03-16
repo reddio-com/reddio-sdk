@@ -5,6 +5,7 @@ import com.reddio.api.v1.rest.DefaultReddioRestClient;
 import com.reddio.api.v1.rest.Order;
 import com.reddio.api.v1.rest.OrderState;
 import com.reddio.api.v1.rest.ReddioRestClient;
+import com.reddio.exception.ReddioException;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -24,7 +25,7 @@ public class OrderPollerTest {
         assertEquals(OrderState.Filled, order.getOrderState());
     }
 
-    @Test(expected = CompletionException.class)
+    @Test(expected = ReddioException.class)
     @Category(IntegrationTest.class)
     public void testPollOrder_NeverGetDesiredState() {
         final ReddioRestClient restClient = DefaultReddioRestClient.testnet();

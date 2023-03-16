@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.reddio.IntegrationTest;
 import com.reddio.api.v1.DefaultEthereumInteractionTest;
+import com.reddio.api.v1.ReddioClient;
 import com.reddio.exception.ReddioBusinessException;
 import com.reddio.exception.ReddioErrorCode;
 import org.junit.Assert;
@@ -159,13 +160,7 @@ public class DefaultReddioRestClientTest {
     public void testMintWithInvalidApiKey() {
         final DefaultReddioRestClient restClient = DefaultReddioRestClient.testnet("not a real api key");
         try {
-            restClient.mints(
-                    MintsMessage.of(
-                            "",
-                            "",
-                            "1"
-                    )
-            ).join();
+            restClient.mints(MintsMessage.of("", "", "1")).join();
             Assert.fail();
         } catch (CompletionException e) {
             final Throwable cause = e.getCause();

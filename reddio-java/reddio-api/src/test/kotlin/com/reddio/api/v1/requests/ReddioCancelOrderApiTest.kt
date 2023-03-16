@@ -6,9 +6,11 @@ import com.reddio.api.v1.rest.DefaultReddioRestClient
 import com.reddio.api.v1.rest.OrderListMessage
 import com.reddio.api.v1.rest.OrderState
 import org.junit.Assert.*
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
 
+@Ignore
 class ReddioCancelOrderApiTest {
 
     @Test

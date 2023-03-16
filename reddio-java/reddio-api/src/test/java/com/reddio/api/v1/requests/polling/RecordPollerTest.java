@@ -5,6 +5,7 @@ import com.reddio.api.v1.rest.DefaultReddioRestClient;
 import com.reddio.api.v1.rest.RecordStatus;
 import com.reddio.api.v1.rest.ReddioRestClient;
 import com.reddio.api.v1.rest.SequenceRecord;
+import com.reddio.exception.ReddioException;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -24,7 +25,7 @@ public class RecordPollerTest {
         assertEquals(RecordStatus.AcceptedByReddio, record.getStatus());
     }
 
-    @Test(expected = CompletionException.class)
+    @Test(expected = ReddioException.class)
     @Category(IntegrationTest.class)
     public void testPollRecord_NeverGetDesiredStatus() {
         final ReddioRestClient restClient = DefaultReddioRestClient.testnet();
