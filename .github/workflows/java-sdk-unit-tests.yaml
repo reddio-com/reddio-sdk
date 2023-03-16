@@ -30,3 +30,5 @@ jobs:
       - name: mvn test
         run: |
           cd reddio-java && mvn -B test
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3

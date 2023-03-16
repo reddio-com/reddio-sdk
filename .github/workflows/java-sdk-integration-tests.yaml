@@ -33,3 +33,5 @@ jobs:
          INTEGRATION_TEST_REDDIO_API_KEY: ${{ secrets.INTEGRATION_TEST_REDDIO_API_KEY }}
         run: |
           cd reddio-java && mvn -B integration-test
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
