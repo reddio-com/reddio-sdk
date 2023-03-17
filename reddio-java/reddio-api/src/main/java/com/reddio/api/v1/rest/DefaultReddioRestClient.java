@@ -233,8 +233,8 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         if (orderListMessage.getPage() != null) {
             builder.addQueryParameter("page", orderListMessage.getPage().toString());
         }
-        if (orderListMessage.orderState != null) {
-            builder.addQueryParameter("order_state", Integer.toString(orderListMessage.orderState.getValue()));
+        if (orderListMessage.getOrderState() != null) {
+            builder.addQueryParameter("order_state", Integer.toString(orderListMessage.getOrderState().getValue()));
         }
 
         final HttpUrl endpoint = builder.build();
@@ -266,7 +266,7 @@ public class DefaultReddioRestClient implements ReddioRestClient {
 
     @Override
     public CompletableFuture<ResponseWrapper<GetContractInfoResponse>> getContractInfo(GetContractInfoMessage getContractInfoMessage) {
-        String endpoint = baseEndpoint + "/v1/contract_info?type=" + getContractInfoMessage.type + "&contract_address=" + getContractInfoMessage.contractAddress;
+        String endpoint = baseEndpoint + "/v1/contract_info?type=" + getContractInfoMessage.getType() + "&contract_address=" + getContractInfoMessage.getContractAddress();
 
         Request request = new Request.Builder().url(endpoint).get().build();
         Call call = this.httpClient.newCall(request);
@@ -277,15 +277,15 @@ public class DefaultReddioRestClient implements ReddioRestClient {
     @Override
     public CompletableFuture<ResponseWrapper<GetBalancesResponse>> getBalances(GetBalancesMessage getBalancesMessage) {
         final HttpUrl.Builder builder = Objects.requireNonNull(HttpUrl.parse(baseEndpoint + "/v1/balances")).newBuilder();
-        builder.addQueryParameter("stark_key", Objects.requireNonNull(getBalancesMessage.starkKey));
+        builder.addQueryParameter("stark_key", Objects.requireNonNull(getBalancesMessage.getStarkKey()));
         if (getBalancesMessage.getContractAddress() != null) {
-            builder.addQueryParameter("contract_address", getBalancesMessage.contractAddress);
+            builder.addQueryParameter("contract_address", getBalancesMessage.getContractAddress());
         }
         if (getBalancesMessage.getLimit() != null) {
-            builder.addQueryParameter("limit", getBalancesMessage.limit.toString());
+            builder.addQueryParameter("limit", getBalancesMessage.getLimit().toString());
         }
         if (getBalancesMessage.getPage() != null) {
-            builder.addQueryParameter("page", getBalancesMessage.page.toString());
+            builder.addQueryParameter("page", getBalancesMessage.getPage().toString());
         }
         final HttpUrl endpoint = builder.build();
         Request request = new Request.Builder().url(endpoint).get().build();

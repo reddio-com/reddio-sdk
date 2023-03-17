@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(staticName = "of")
 public class GetRecordMessage {
     @JsonProperty("stark_key")
-    public String starkKey;
+    private String starkKey;
     @JsonProperty("sequence_id")
-    public Long sequenceId;
+    private Long sequenceId;
 }

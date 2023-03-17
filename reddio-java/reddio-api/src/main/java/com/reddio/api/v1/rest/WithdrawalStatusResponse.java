@@ -15,28 +15,28 @@ public class WithdrawalStatusResponse extends ArrayList<WithdrawalStatusResponse
     @AllArgsConstructor(staticName = "of")
     public static class WithdrawalStatusRecord {
         @JsonProperty("contract_address")
-        public String contractAddress;
+        private String contractAddress;
 
         @JsonProperty("asset_id")
-        public String assetId;
+        private String assetId;
 
         @JsonProperty("token_id")
-        public String tokenId;
+        private String tokenId;
 
         @JsonProperty("type")
-        public String type;
+        private String type;
 
         @JsonProperty("asset_type")
-        public String assetType;
+        private String assetType;
 
         @JsonProperty("display_value")
-        public String displayValue;
+        private String displayValue;
 
         @JsonProperty("symbol")
-        public String symbol;
+        private String symbol;
 
         @JsonProperty("amount")
-        public Long amount;
+        private Long amount;
 
     }
 }

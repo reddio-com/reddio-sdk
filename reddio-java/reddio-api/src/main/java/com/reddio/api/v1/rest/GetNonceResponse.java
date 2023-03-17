@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(staticName = "of")
 public class GetNonceResponse {
     @JsonProperty("nonce")
-    public Long nonce;
+    private Long nonce;
 }

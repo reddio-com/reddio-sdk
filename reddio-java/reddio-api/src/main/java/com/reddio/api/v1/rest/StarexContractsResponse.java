@@ -5,12 +5,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.awt.*;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "of")
 public class StarexContractsResponse {
     @JsonProperty("mainnet")
-    public String Mainnet;
+    private String Mainnet;
     @JsonProperty("testnet")
-    public String Testnet;
+    private String Testnet;
 }

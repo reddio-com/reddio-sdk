@@ -10,15 +10,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(staticName = "of")
 public class Payment {
     @JsonProperty("pay_info")
-    public PayInfo payInfo;
+    private PayInfo payInfo;
     @JsonProperty("state")
-    public String state;
+    private String state;
 
     @Data
     @NoArgsConstructor
     @AllArgsConstructor(staticName = "of")
     public static class PayInfo {
         @JsonProperty("order_id")
-        public String orderId;
+        private String orderId;
     }
 }

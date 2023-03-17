@@ -10,7 +10,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(staticName = "of")
 public class CancelOrderMessage {
     @JsonProperty("stark_key")
-    public String starkKey;
+    private String starkKey;
+
     @JsonProperty("signature")
-    public Signature signature;
+    private Signature signature;
 }

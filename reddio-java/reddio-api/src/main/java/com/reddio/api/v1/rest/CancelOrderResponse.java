@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(staticName = "of")
 public class CancelOrderResponse {
     @JsonProperty("sequence_id")
-    public Long sequenceId;
+    private Long sequenceId;
 }

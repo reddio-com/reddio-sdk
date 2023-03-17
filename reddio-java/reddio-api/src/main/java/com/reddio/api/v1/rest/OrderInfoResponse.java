@@ -12,19 +12,19 @@ import java.util.List;
 @AllArgsConstructor(staticName = "of")
 public class OrderInfoResponse {
     @JsonProperty("fee_rate")
-    public String feeRate;
+    private String feeRate;
     @JsonProperty("base_token")
-    public String baseToken;
+    private String baseToken;
     @JsonProperty("fee_token")
-    public String feeToken;
+    private String feeToken;
     @JsonProperty("lower_limit")
-    public Long lowerLimit;
+    private Long lowerLimit;
     @JsonProperty("nonce")
-    public Long nonce;
+    private Long nonce;
     @JsonProperty("contracts")
-    public List<Contract> contracts;
+    private List<Contract> contracts;
     @JsonProperty("vault_ids")
-    public List<String> vaultIds;
+    private List<String> vaultIds;
     @JsonProperty("asset_ids")
-    public List<String> assetIds;
+    private List<String> assetIds;
 }

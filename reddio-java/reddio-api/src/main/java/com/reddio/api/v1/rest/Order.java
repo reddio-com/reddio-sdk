@@ -12,43 +12,43 @@ import java.time.Instant;
 @AllArgsConstructor(staticName = "of")
 public class Order {
     @JsonProperty("order_id")
-    public Long orderId;
+    private Long orderId;
 
     @JsonProperty("stark_key")
-    public String starkKey;
+    private String starkKey;
 
     @JsonProperty("price")
-    public String price;
+    private String price;
 
     @JsonProperty("direction")
-    public Long direction;
+    private Long direction;
 
     @JsonProperty("amount")
-    public String amount;
+    private String amount;
 
     @JsonProperty("un_filled")
-    public String unFilled;
+    private String unFilled;
 
     @JsonProperty("symbol")
-    public Symbol symbol;
+    private Symbol symbol;
 
     @JsonProperty("fee_rate")
-    public String feeRate;
+    private String feeRate;
 
     @JsonProperty("token_type")
-    public String tokenType;
+    private String tokenType;
 
     @JsonProperty("token_id")
-    public String tokenId;
+    private String tokenId;
 
     @JsonProperty("display_price")
-    public String displayPrice;
+    private String displayPrice;
 
     @JsonProperty("order_state")
-    public OrderState orderState;
+    private OrderState orderState;
 
     @JsonProperty("resp")
-    public String resp;
+    private String resp;
 
     @JsonProperty("order_created_at")
     private Instant orderCreatedAt;

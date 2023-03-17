@@ -8,12 +8,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "of")
 public class LogDepositWithToken {
-    public String depositorEthKey;
-    public String starkKey;
-    public String vaultId;
-    public String assetType;
-    public String tokenId;
-    public String assetId;
-    public String nonQuantizedAmount;
-    public String quantizedAmount;
+    private String depositorEthKey;
+    private String starkKey;
+    private String vaultId;
+    private String assetType;
+    private String tokenId;
+    private String assetId;
+    private String nonQuantizedAmount;
+    private String quantizedAmount;
 }

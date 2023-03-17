@@ -16,52 +16,52 @@ public class SequenceRecord {
     public static final int SEQUENCE_STATUS_PROVED_ERROR = 4;
 
     @JsonProperty("amount")
-    public String amount;
+    private String amount;
 
     @JsonProperty("asset_id")
-    public String assetId;
+    private String assetId;
 
     @JsonProperty("asset_name")
-    public String assetName;
+    private String assetName;
 
     @JsonProperty("asset_type")
-    public String assetType;
+    private String assetType;
 
     @JsonProperty("contract_address")
-    public String contractAddress;
+    private String contractAddress;
 
     @JsonProperty("display_value")
-    public String displayValue;
+    private String displayValue;
 
     @JsonProperty("from")
-    public String from;
+    private String from;
 
     @JsonProperty("order")
     private Order order;
 
     @JsonProperty("record_type")
-    public RecordType recordType;
+    private RecordType recordType;
 
     @JsonProperty("sequence_id")
-    public Long sequenceId;
+    private Long sequenceId;
 
     @JsonProperty("stark_key")
-    public String starkKey;
+    private String starkKey;
 
     @JsonProperty("status")
-    public RecordStatus status;
+    private RecordStatus status;
 
     @JsonProperty("resp")
-    public String resp;
+    private String resp;
 
     @JsonProperty("time")
-    public Long time;
+    private Long time;
 
     @JsonProperty("to")
-    public String to;
+    private String to;
 
     @JsonProperty("token_id")
-    public String tokenId;
+    private String tokenId;
 
     @Data
     @NoArgsConstructor

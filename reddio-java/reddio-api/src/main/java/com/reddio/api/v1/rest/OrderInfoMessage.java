@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(staticName = "of")
 public class OrderInfoMessage {
     @JsonProperty("stark_key")
-    public String starkKey;
+    private String starkKey;
     @JsonProperty("contract1")
-    public String contract1;
+    private String contract1;
     @JsonProperty("contract2")
-    public String contract2;
+    private String contract2;
 }

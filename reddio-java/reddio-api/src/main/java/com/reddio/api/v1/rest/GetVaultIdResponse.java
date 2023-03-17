@@ -12,5 +12,5 @@ import java.util.List;
 @AllArgsConstructor(staticName = "of")
 public class GetVaultIdResponse {
     @JsonProperty("vault_ids")
-    public List<String> vaultIds;
+    private List<String> vaultIds;
 }

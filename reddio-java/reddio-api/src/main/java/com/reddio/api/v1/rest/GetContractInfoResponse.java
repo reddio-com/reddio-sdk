@@ -10,29 +10,29 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(staticName = "of")
 public class GetContractInfoResponse {
     @JsonProperty("quantum")
-    public Long quantum;
+    private Long quantum;
     @JsonProperty("count")
-    public Long count;
+    private Long count;
     @JsonProperty("type")
-    public String type;
+    private String type;
     @JsonProperty("decimals")
-    public String decimals;
+    private String decimals;
     @JsonProperty("symbol")
-    public String symbol;
+    private String symbol;
     @JsonProperty("total_supply")
-    public String totalSupply;
+    private String totalSupply;
     @JsonProperty("asset_type")
-    public String assetType;
+    private String assetType;
     @JsonProperty("asset_info")
-    public String assetInfo;
+    private String assetInfo;
     @JsonProperty("id")
-    public Long id;
+    private Long id;
     @JsonProperty("belongs_to")
-    public String belongsTo;
+    private String belongsTo;
     @JsonProperty("contract_uuid")
-    public String contractUuid;
+    private String contractUuid;
     @JsonProperty("chain_status")
-    public String chainStatus;
+    private String chainStatus;
     @JsonProperty("contract_address")
-    public String contractAddress;
+    private String contractAddress;
 }

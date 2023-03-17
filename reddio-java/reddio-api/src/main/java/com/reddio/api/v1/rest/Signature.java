@@ -11,13 +11,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(staticName = "of")
 public class Signature {
     @JsonProperty("r")
-    public String r;
+    private String r;
     @JsonProperty("s")
-    public String s;
+    private String s;
 
     @JsonProperty("stark_key")
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    public String starkKey;
+    private String starkKey;
 
     public static Signature of(String r, String s) {
         return of(r, s, "");

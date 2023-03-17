@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(staticName = "of")
 public class GetContractInfoMessage {
     @JsonProperty("type")
-    public String type;
+    private String type;
     @JsonProperty("contract_address")
-    public String contractAddress;
+    private String contractAddress;
 }

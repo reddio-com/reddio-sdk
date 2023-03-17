@@ -16,13 +16,13 @@ public class MintsMessage {
      * Contract address of token (ERC20 or ERC721)
      */
     @JsonProperty("contract_address")
-    public String contractAddress;
+    private String contractAddress;
 
     /**
      * A unique key that identifies the user in the off-chain state
      */
     @JsonProperty("stark_key")
-    public String starkKey;
+    private String starkKey;
 
     /**
      * Amount of tokens mint on layer 2.
@@ -31,7 +31,7 @@ public class MintsMessage {
      */
     @JsonProperty("amount")
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    public String amount;
+    private String amount;
 
     /**
      * Specified token ids to mint.
@@ -40,7 +40,7 @@ public class MintsMessage {
      */
     @JsonProperty("token_ids")
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    public String tokenIds;
+    private String tokenIds;
 
     public static final String tokenIdsAsString(List<Long> tokenIds) {
         return String.join(",", tokenIds.stream().map(Object::toString).toArray(String[]::new));

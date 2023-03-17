@@ -11,11 +11,11 @@ import lombok.RequiredArgsConstructor;
 @AllArgsConstructor(staticName = "of")
 public class GetAssetIdMessage {
     @JsonProperty("contract_address")
-    public String contractAddress;
+    private String contractAddress;
     @JsonProperty("type")
-    public String type;
+    private String type;
     @JsonProperty("token_id")
-    public String tokenId;
+    private String tokenId;
     @JsonProperty("quantum")
-    public Long quantum;
+    private Long quantum;
 }

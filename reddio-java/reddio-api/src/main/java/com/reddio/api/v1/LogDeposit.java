@@ -10,11 +10,11 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "of")
 public class LogDeposit {
-    public String depositorEthKey;
-    public String starkKey;
-    public String vaultId;
-    public String assetType;
-    public String nonQuantizedAmount;
-    public String quantizedAmount;
+    private String depositorEthKey;
+    private String starkKey;
+    private String vaultId;
+    private String assetType;
+    private String nonQuantizedAmount;
+    private String quantizedAmount;
 //    public Map<String, Object> raw;
 }

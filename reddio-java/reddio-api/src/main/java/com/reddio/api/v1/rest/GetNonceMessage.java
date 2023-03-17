@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(staticName = "of")
 public class GetNonceMessage {
     @JsonProperty("stark_key")
-    public String starkKey;
+    private String starkKey;
 }

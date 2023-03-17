@@ -10,9 +10,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(staticName = "of")
 public class FeeInfo {
     @JsonProperty("fee_limit")
-    public Long feeLimit;
+    private Long feeLimit;
+
     @JsonProperty("token_id")
-    public String tokenId;
+    private String tokenId;
+
     @JsonProperty("source_vault_id")
-    public Long sourceVaultId;
+    private Long sourceVaultId;
 }

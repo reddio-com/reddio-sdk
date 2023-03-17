@@ -12,5 +12,5 @@ import java.util.List;
 @AllArgsConstructor(staticName = "of")
 public class MintResponse {
     @JsonProperty("sequence_ids")
-    public List<Long> sequenceIds;
+    private List<Long> sequenceIds;
 }

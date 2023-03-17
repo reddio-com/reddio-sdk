@@ -10,22 +10,22 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(staticName = "of")
 public class TransferMessage {
     @JsonProperty("asset_id")
-    public String assetId;
+    private String assetId;
     @JsonProperty("stark_key")
-    public String starkKey;
+    private String starkKey;
     @JsonProperty("amount")
-    public String amount;
+    private String amount;
     @JsonProperty("nonce")
-    public Long nonce;
+    private Long nonce;
     @JsonProperty("vault_id")
-    public String vaultId;
+    private String vaultId;
     @JsonProperty("receiver")
-    public String receiver;
+    private String receiver;
     @JsonProperty("receiver_vault_id")
-    public String receiverVaultId;
+    private String receiverVaultId;
     @JsonProperty("expiration_timestamp")
-    public Long expirationTimestamp;
+    private Long expirationTimestamp;
     @JsonProperty("signature")
-    public Signature signature;
+    private Signature signature;
 
 }
