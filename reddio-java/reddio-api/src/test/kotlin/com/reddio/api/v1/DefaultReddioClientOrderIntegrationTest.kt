@@ -206,6 +206,8 @@ class DefaultReddioClientOrderIntegrationTest {
         }
         Assert.assertEquals("OK", sellOrder.status)
 
+        logger.info { "cancel sell order: ${sellOrder.data}" }
+
         val cancelResult = with(client.withStarkExSigner(seller.starkPrivateKey)) {
             cancelOrder(seller.starkKey, sellOrder.data.sequenceId).join()
         }
