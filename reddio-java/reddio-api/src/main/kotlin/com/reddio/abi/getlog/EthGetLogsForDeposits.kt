@@ -3,7 +3,9 @@ package com.reddio.abi.getlog
 import com.reddio.abi.Deposits
 import com.reddio.exception.ReddioException
 import io.reactivex.Flowable
+import org.web3j.abi.EventEncoder
 import org.web3j.protocol.Web3j
+import org.web3j.protocol.core.DefaultBlockParameter
 import org.web3j.protocol.core.methods.request.EthFilter
 import org.web3j.protocol.core.methods.response.Log
 import java.math.BigInteger
@@ -17,6 +19,17 @@ import java.math.BigInteger
  */
 class EthGetLogsForDeposits {
     companion object {
+
+        fun getLogsForLogDepositEvent(
+            web3j: Web3j,
+            startBlock: DefaultBlockParameter,
+            endBlock: DefaultBlockParameter,
+            contractAddress: String
+        ): List<Deposits.LogDepositEventResponse> {
+            val ethFilter = EthFilter(startBlock, endBlock, contractAddress)
+            ethFilter.addSingleTopic(EventEncoder.encode(Deposits.LOGDEPOSIT_EVENT))
+            return getLogsForLogDepositEvent(web3j, ethFilter)
+        }
 
         fun getLogsForLogDepositEvent(
             web3j: Web3j, ethFilter: EthFilter
@@ -35,6 +48,17 @@ class EthGetLogsForDeposits {
                     this.quantizedAmount = eventValues.nonIndexedValues[5].value as BigInteger
                 }
             }
+        }
+
+        fun getLogsForLogNftDepositEvent(
+            web3j: Web3j,
+            startBlock: DefaultBlockParameter,
+            endBlock: DefaultBlockParameter,
+            contractAddress: String
+        ): List<Deposits.LogNftDepositEventResponse> {
+            val ethFilter = EthFilter(startBlock, endBlock, contractAddress)
+            ethFilter.addSingleTopic(EventEncoder.encode(Deposits.LOGNFTDEPOSIT_EVENT))
+            return getLogsForLogNftDepositEvent(web3j, ethFilter)
         }
 
         fun getLogsForLogNftDepositEvent(

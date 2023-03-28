@@ -244,13 +244,11 @@ class DefaultEthereumInteraction(
         )
         return CompletableFuture.supplyAsync {
             runBlocking {
-                val assetType =
-                    restClient.getContractInfo(
-                        GetContractInfoMessage.of(
-                            ReddioClient.TOKEN_TYPE_ETH,
-                            "ETH"
-                        )
-                    ).await().data.getAssetType()
+                val assetType = restClient.getContractInfo(
+                    GetContractInfoMessage.of(
+                        ReddioClient.TOKEN_TYPE_ETH, "ETH"
+                    )
+                ).await().data.getAssetType()
                 asyncWithdrawal(ethAddress, assetType, gasProvider)
             }
         }
@@ -264,13 +262,11 @@ class DefaultEthereumInteraction(
         )
         return CompletableFuture.supplyAsync {
             runBlocking {
-                val assetType =
-                    restClient.getContractInfo(
-                        GetContractInfoMessage.of(
-                            ReddioClient.TOKEN_TYPE_ERC20,
-                            contractAddress
-                        )
-                    ).await().data.getAssetType()
+                val assetType = restClient.getContractInfo(
+                    GetContractInfoMessage.of(
+                        ReddioClient.TOKEN_TYPE_ERC20, contractAddress
+                    )
+                ).await().data.getAssetType()
                 asyncWithdrawal(ethAddress, assetType, gasProvider)
             }
         }
@@ -284,13 +280,11 @@ class DefaultEthereumInteraction(
         )
         return CompletableFuture.supplyAsync {
             runBlocking {
-                val assetType =
-                    restClient.getContractInfo(
-                        GetContractInfoMessage.of(
-                            ReddioClient.TOKEN_TYPE_ERC721,
-                            contractAddress
-                        )
-                    ).await().data.getAssetType()
+                val assetType = restClient.getContractInfo(
+                    GetContractInfoMessage.of(
+                        ReddioClient.TOKEN_TYPE_ERC721, contractAddress
+                    )
+                ).await().data.getAssetType()
                 asyncWithdrawalERC721(ethAddress, assetType, tokenId, gasProvider)
             }
         }
@@ -304,13 +298,11 @@ class DefaultEthereumInteraction(
         )
         return CompletableFuture.supplyAsync {
             runBlocking {
-                val assetType =
-                    restClient.getContractInfo(
-                        GetContractInfoMessage.of(
-                            ReddioClient.TOKEN_TYPE_ERC721M,
-                            contractAddress
-                        )
-                    ).await().data.getAssetType()
+                val assetType = restClient.getContractInfo(
+                    GetContractInfoMessage.of(
+                        ReddioClient.TOKEN_TYPE_ERC721M, contractAddress
+                    )
+                ).await().data.getAssetType()
                 asyncWithdrawalERC721M(ethAddress, assetType, tokenId, gasProvider)
             }
         }
@@ -399,10 +391,10 @@ class DefaultEthereumInteraction(
             val reddioStarexContractAddress = reddioStarexContractAddress()
             val blockConfirmationRequiredEvents = BlockConfirmationRequiredEvents(
                 { startBlock, endBlock ->
-                    val ethFilter = EthFilter(startBlock, endBlock, reddioStarexContractAddress)
-                    ethFilter.addSingleTopic(EventEncoder.encode(Deposits.LOGDEPOSIT_EVENT))
                     EthGetLogsForDeposits.asFlowable(
-                        EthGetLogsForDeposits.getLogsForLogDepositEvent(web3j, ethFilter)
+                        EthGetLogsForDeposits.getLogsForLogDepositEvent(
+                            web3j, startBlock, endBlock, reddioStarexContractAddress
+                        )
                     )
                 }, requiredBlockConfirmation, web3j
             )
@@ -451,10 +443,10 @@ class DefaultEthereumInteraction(
             val reddioStarexContractAddress = reddioStarexContractAddress()
             val blockConfirmationRequiredEvents = BlockConfirmationRequiredEvents(
                 { startBlock, endBlock ->
-                    val ethFilter = EthFilter(startBlock, endBlock, reddioStarexContractAddress)
-                    ethFilter.addSingleTopic(EventEncoder.encode(Deposits.LOGNFTDEPOSIT_EVENT))
                     EthGetLogsForDeposits.asFlowable(
-                        EthGetLogsForDeposits.getLogsForLogNftDepositEvent(web3j, ethFilter)
+                        EthGetLogsForDeposits.getLogsForLogNftDepositEvent(
+                            web3j, startBlock, endBlock, reddioStarexContractAddress
+                        )
                     )
                 }, requiredBlockConfirmation, web3j
             )
