@@ -11,11 +11,14 @@ import mu.KotlinLogging
 import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.categories.Category
+import org.junit.experimental.runners.Enclosed
+import org.junit.runner.RunWith
 import java.util.concurrent.locks.ReentrantLock
 
 
 private val logger = KotlinLogging.logger {}
 
+@RunWith(Enclosed::class)
 @Category(IntegrationTest::class)
 class DefaultEthereumInteractionWatchDepositEventIntegrationTest {
 
@@ -73,10 +76,7 @@ class DefaultEthereumInteractionWatchDepositEventIntegrationTest {
                 toDeposit.ethPrivateKey
             )
             val logNftDeposit = ethereumInteraction.depositERC721(
-                erC721Ownership.contractAddress,
-                erC721Ownership.tokenId,
-                toDeposit.starkKey,
-                GasOption.Market
+                erC721Ownership.contractAddress, erC721Ownership.tokenId, toDeposit.starkKey, GasOption.Market
             ).join()
             logger.info { logNftDeposit }
         }
