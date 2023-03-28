@@ -4,14 +4,12 @@ import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameter
-import org.web3j.protocol.core.Response
 import org.web3j.protocol.core.methods.response.BaseEventResponse
 import org.web3j.protocol.core.methods.response.EthBlock
 import org.web3j.protocol.core.methods.response.EthBlockNumber
 import org.web3j.tuples.generated.Tuple2
 import java.math.BigInteger
 import java.util.concurrent.Executors
-import java.util.concurrent.Flow
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 
