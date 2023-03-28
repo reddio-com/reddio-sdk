@@ -12,7 +12,7 @@ import org.junit.experimental.categories.Category
 private val logger = KotlinLogging.logger {}
 
 @Category(IntegrationTest::class)
-class DefaultEthereumDepositInteractionTest {
+class DefaultEthereumInteractionDepositIntegrationTest {
 
     @Test
     fun testDepositETH() {

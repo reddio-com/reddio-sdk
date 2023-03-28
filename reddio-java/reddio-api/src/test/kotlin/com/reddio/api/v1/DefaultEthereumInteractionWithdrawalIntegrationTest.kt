@@ -2,9 +2,6 @@ package com.reddio.api.v1
 
 import com.reddio.IntegrationTest
 import com.reddio.api.v1.rest.DefaultReddioRestClient
-import com.reddio.api.v1.rest.GetContractInfoMessage
-import com.reddio.api.v1.rest.GetContractInfoResponse
-import com.reddio.api.v1.rest.ResponseWrapper
 import com.reddio.fixtures.FixtureException
 import com.reddio.fixtures.Fixtures
 import com.reddio.gas.GasOption
@@ -17,7 +14,7 @@ import org.junit.experimental.categories.Category
 private val logger = KotlinLogging.logger {}
 
 @Category(IntegrationTest::class)
-class DefaultEthereumWithdrawalInteractionTest {
+class DefaultEthereumInteractionWithdrawalIntegrationTest {
     @Test
     fun testWithdrawETH() {
         try {

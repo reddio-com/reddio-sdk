@@ -4,7 +4,6 @@ import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameter
-import org.web3j.protocol.core.Response
 import org.web3j.protocol.core.methods.response.BaseEventResponse
 import org.web3j.protocol.core.methods.response.EthBlock
 import org.web3j.protocol.core.methods.response.EthBlockNumber
@@ -26,31 +25,35 @@ class BlockConfirmationRequiredEvents<T>(
             if (prevBlockNumber.toLong() > end.toLong()) {
                 Flowable.empty<T>()
             }
-            val result = Flowable.create(
+            val result: Flowable<T> = Flowable.create(
                 { subscriber ->
-                    val disposable = flowableProvider(
-                        DefaultBlockParameter.valueOf(prevBlockNumber), DefaultBlockParameter.valueOf(end)
-                    ).subscribe({
-                        subscriber.onNext(it)
-                    }, {
-                        subscriber.onError(it)
-                    })
+                    try {
+                        val disposable = flowableProvider(
+                            DefaultBlockParameter.valueOf(prevBlockNumber), DefaultBlockParameter.valueOf(end)
+                        ).subscribe({
+                            subscriber.onNext(it)
+                        }, {
+                            subscriber.onError(it)
+                        })
 
-                    // the origin web3j would never actively complete the log flowable , so we need to complete it manually
-                    // ref: https://github.com/web3j/web3j/discussions/1845
-                    var cancelSchedule: ScheduledFuture<*>? = null
-                    cancelSchedule = scheduledExecutorService.scheduleAtFixedRate({
-                        val currentBlockNumber = web3j.ethBlockNumber().send().blockNumber
-                        if (currentBlockNumber.toLong() - ethBlockNumber.blockNumber.toLong() > requiredBlockConfirmation) {
-                            disposable.dispose()
-                            subscriber.onComplete()
-                            cancelSchedule?.cancel(false)
-                        }
-                        // TODO: do not hardcode blocktime
-                    }, 0, BLOCK_TIME, TimeUnit.SECONDS)
-
+                        // the origin web3j would never actively complete the log flowable , so we need to complete it manually
+                        // ref: https://github.com/web3j/web3j/discussions/1845
+                        var cancelSchedule: ScheduledFuture<*>? = null
+                        cancelSchedule = scheduledExecutorService.scheduleAtFixedRate({
+                            val currentBlockNumber = web3j.ethBlockNumber().send().blockNumber
+                            if (currentBlockNumber.toLong() - ethBlockNumber.blockNumber.toLong() > requiredBlockConfirmation) {
+                                disposable.dispose()
+                                subscriber.onComplete()
+                                cancelSchedule?.cancel(false)
+                            }
+                            // TODO: do not hardcode blocktime
+                        }, 0, BLOCK_TIME, TimeUnit.SECONDS)
+                    } catch (e: Throwable) {
+                        subscriber.onError(e)
+                    }
                 }, BackpressureStrategy.BUFFER
             )
+
             prevBlockNumber = end
             result
         }
@@ -59,8 +62,8 @@ class BlockConfirmationRequiredEvents<T>(
     suspend fun eventFlowableWithEthBlock(startBlockNumber: BigInteger): Flowable<Tuple2<T, EthBlock>> {
         return this.eventFlowable(startBlockNumber).flatMap { response ->
             val blockNumber = response.log.blockNumber!!
-            web3j.ethGetBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), false)
-                .flowable().map { Tuple2(response, it) }
+            web3j.ethGetBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), false).flowable()
+                .map { Tuple2(response, it) }
         }
     }
 
