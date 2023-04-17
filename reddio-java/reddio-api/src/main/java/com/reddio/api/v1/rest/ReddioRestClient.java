@@ -13,6 +13,15 @@ public interface ReddioRestClient extends AutoCloseable {
      */
     CompletableFuture<ResponseWrapper<TransferResponse>> transfer(TransferMessage transferMessage);
 
+
+    /**
+     * Batch transfer items.
+     *
+     * @param batchTransferMessage
+     * @return
+     */
+    CompletableFuture<ResponseWrapper<BatchTransferResponse>> batchTransfer(BatchTransferMessage batchTransferMessage);
+
     /**
      * Retrieve the unique nonce by stark_key
      * <p>
