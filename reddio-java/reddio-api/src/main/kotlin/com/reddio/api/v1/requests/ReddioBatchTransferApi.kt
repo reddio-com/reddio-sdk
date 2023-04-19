@@ -9,6 +9,7 @@ import com.reddio.sign.BatchTransferSign
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.CompletableFuture
+import kotlin.math.sin
 
 class ReddioBatchTransferApi private constructor(
     private val localRestClient: ReddioRestClient, private val request: BatchTransferMessage
@@ -276,10 +277,11 @@ class ReddioBatchTransferApi private constructor(
             baseTokenTransferSeqId: Long?,
         ): ReddioBatchTransferApi {
             val signer = StarkExSigner(senderStarkPrivateKey)
+            val starkPublicKey = signer.getStarkKey()
             val batchTransferMessage = runBlocking {
                 val nonce = localRestClient.getNonce(
                     GetNonceMessage.of(
-                        signer.getStarkKey()
+                        starkPublicKey
                     )
                 ).await().data.nonce
                 val transfers = transfers.map {
@@ -306,6 +308,7 @@ class ReddioBatchTransferApi private constructor(
                 }
                 val result = BatchTransferMessage.of(
                     transfers,
+                    starkPublicKey,
                     nonce,
                     null,
                     baseTokenTransferSeqId,

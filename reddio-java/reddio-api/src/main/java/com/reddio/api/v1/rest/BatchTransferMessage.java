@@ -14,6 +14,8 @@ public class BatchTransferMessage {
 
     @JsonProperty("transfers")
     private List<BatchTransferItem> transfers;
+    @JsonProperty("stark_key")
+    private String starkKey;
     @JsonProperty("nonce")
     private Long nonce;
     @JsonProperty("signature")
