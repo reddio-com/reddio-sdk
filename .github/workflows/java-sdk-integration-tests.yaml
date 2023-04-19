@@ -24,7 +24,7 @@ jobs:
       - name: Compile Native Library
         run: |
           make
-      - name: mvn verify
+      - name: mvn integration-test post-integration-test
         env:
          INTEGRATION_TEST_ETHERSCAN_API_KEY: ${{ secrets.INTEGRATION_TEST_ETHERSCAN_API_KEY }}
          INTEGRATION_TEST_ETH_JSON_RPC_NODE: ${{ secrets.INTEGRATION_TEST_ETH_JSON_RPC_NODE }}
@@ -32,6 +32,6 @@ jobs:
          INTEGRATION_TEST_PAYMENT_SIGNER_STARK_PRIVATE_KEY: ${{ secrets.INTEGRATION_TEST_PAYMENT_SIGNER_STARK_PRIVATE_KEY }}
          INTEGRATION_TEST_REDDIO_API_KEY: ${{ secrets.INTEGRATION_TEST_REDDIO_API_KEY }}
         run: |
-          cd reddio-java && mvn -B clean verify
+          cd reddio-java && mvn -B clean integration-test post-integration-test
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
