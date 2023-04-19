@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "of")
 public class TransferResponse {
-
     @JsonProperty("sequence_id")
     private Long sequenceId;
 }

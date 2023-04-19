@@ -9,7 +9,6 @@ import com.reddio.sign.BatchTransferSign
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.CompletableFuture
-import kotlin.math.sin
 
 class ReddioBatchTransferApi private constructor(
     private val localRestClient: ReddioRestClient, private val request: BatchTransferMessage
@@ -70,109 +69,69 @@ class ReddioBatchTransferApi private constructor(
     companion object {
 
         data class TransferItem(
-            var assetId: String,
-            val starkKey: String,
             val amount: String,
-            val nonce: Long,
-            val vaultId: String,
+            val contractAddress: String,
+            val tokenId: String,
+            val tokenType: String,
             val receiver: String,
-            val receiverVaultId: String,
             val expirationTimestamp: Long,
-            val signature: Signature,
         ) {
-            companion object {
-                /**
-                 * Build a transfer item of batch transfer.
-                 *
-                 * @param restClient the reddio rest client
-                 * @param starkPrivateKey the stark private key for signing the request
-                 * @param amount the amount of asset to transfer, use 1 for ERC721
-                 * @param contractAddress the contract address of the asset to transfer
-                 * @param tokenId the token id of the asset to transfer, use empty string for ETH and ERC20
-                 * @param tokenType the token type of the asset to transfer, use literal "ERC20" for ERC20 and "ERC721" for ERC721
-                 * @param receiver the receiver's stark key
-                 * @param expirationTimestamp the expiration timestamp of the request in seconds, max value is 4194303L
-                 */
-                @JvmStatic
-                fun transfer(
-                    restClient: ReddioRestClient,
-                    starkPrivateKey: String,
-                    amount: String,
-                    contractAddress: String,
-                    tokenId: String,
-                    tokenType: String,
-                    receiver: String,
-                    expirationTimestamp: Long,
-                ): TransferItem {
-                    val quantizedHelper = QuantizedHelper(restClient)
-                    val starkExSigner = StarkExSigner(starkPrivateKey)
-                    val starkKey = starkExSigner.getStarkKey()
-
-                    return runBlocking {
-                        val quantizedAmount =
-                            quantizedHelper.quantizedAmount(amount, tokenType, contractAddress).toString()
-                        val assetId = AssetVaultHelper.getAssetId(restClient, contractAddress, tokenId, tokenType)
-                        val vaultsIds = AssetVaultHelper.getVaultsIds(restClient, assetId, starkKey, receiver)
-                        val nonce = restClient.getNonce(GetNonceMessage.of(starkKey)).await().getData().getNonce()
-
-                        val signature = starkExSigner.signTransferMessage(
-                            quantizedAmount,
-                            nonce,
-                            vaultsIds.senderVaultId,
-                            assetId,
-                            vaultsIds.receiverVaultId,
-                            receiver,
-                            expirationTimestamp
-                        )
-                        TransferItem(
-                            assetId,
-                            starkKey,
-                            quantizedAmount,
-                            nonce,
-                            vaultsIds.senderVaultId,
-                            receiver,
-                            vaultsIds.receiverVaultId,
-                            expirationTimestamp,
-                            signature
-                        )
-                    }
-
+            fun asSignedBatchTransferItem(restClient: ReddioRestClient, starkPrivateKey: String): BatchTransferItem {
+                val quantizedHelper = QuantizedHelper(restClient)
+                val starkExSigner = StarkExSigner(starkPrivateKey)
+                val starkKey = starkExSigner.getStarkKey()
+                return runBlocking {
+                    val quantizedAmount = quantizedHelper.quantizedAmount(amount, tokenType, contractAddress).toString()
+                    val assetId = AssetVaultHelper.getAssetId(restClient, contractAddress, tokenId, tokenType)
+                    val vaultsIds = AssetVaultHelper.getVaultsIds(restClient, assetId, starkKey, receiver)
+                    val nonce = restClient.getNonce(GetNonceMessage.of(starkKey)).await().getData().getNonce()
+                    val signature = starkExSigner.signTransferMessage(
+                        quantizedAmount,
+                        nonce,
+                        vaultsIds.senderVaultId,
+                        assetId,
+                        vaultsIds.receiverVaultId,
+                        receiver,
+                        expirationTimestamp
+                    )
+                    BatchTransferItem.of(
+                        assetId,
+                        starkKey,
+                        amount,
+                        nonce,
+                        vaultsIds.senderVaultId,
+                        receiver,
+                        vaultsIds.receiverVaultId,
+                        expirationTimestamp,
+                        signature
+                    )
                 }
+
+            }
+
+            companion object {
 
                 /**
                  * Build a transfer item in batch transfer for transfer ETH.
                  *
-                 * @param restClient the reddio rest client
-                 * @param starkPrivateKey the stark private key for signing the request
                  * @param amount the amount of ETH to transfer
                  * @param receiver the receiver's stark key
                  * @param expirationTimestamp the expiration timestamp of the request in seconds, max value is 4194303L
                  */
                 @JvmStatic
                 fun transferETH(
-                    restClient: ReddioRestClient,
-                    starkPrivateKey: String,
                     amount: String,
                     receiver: String,
                     expirationTimestamp: Long,
                 ): TransferItem {
-                    return transfer(
-                        restClient,
-                        starkPrivateKey,
-                        amount,
-                        "ETH",
-                        "",
-                        ReddioClient.TOKEN_TYPE_ETH,
-                        receiver,
-                        expirationTimestamp
+                    return TransferItem(
+                        amount, "ETH", "", ReddioClient.TOKEN_TYPE_ETH, receiver, expirationTimestamp
                     )
                 }
 
                 /**
                  * Build a batch transfer item in batch transfer for transfer ERC20.
                  *
-                 * @param restClient the reddio rest client
-                 * @param starkPrivateKey the stark private key for signing the request
                  * @param amount the amount of ERC20 to transfer
                  * @param contractAddress the contract address of the ERC20 to transfer
                  * @param receiver the receiver's stark key
@@ -180,30 +139,19 @@ class ReddioBatchTransferApi private constructor(
                  */
                 @JvmStatic
                 fun transferERC20(
-                    restClient: ReddioRestClient,
-                    starkPrivateKey: String,
                     amount: String,
                     contractAddress: String,
                     receiver: String,
                     expirationTimestamp: Long,
                 ): TransferItem {
-                    return transfer(
-                        restClient,
-                        starkPrivateKey,
-                        amount,
-                        contractAddress,
-                        "",
-                        ReddioClient.TOKEN_TYPE_ERC20,
-                        receiver,
-                        expirationTimestamp
+                    return TransferItem(
+                        amount, contractAddress, "", ReddioClient.TOKEN_TYPE_ERC20, receiver, expirationTimestamp
                     )
                 }
 
                 /**
                  * Build a transfer item in batch transfer for transfer ERC721/ERC721M.
                  *
-                 * @param restClient the reddio rest client
-                 * @param starkPrivateKey the stark private key for signing the request
                  * @param contractAddress the contract address of the ERC721/ERC721M to transfer
                  * @param tokenId the token id of the ERC721/ERC721M to transfer
                  * @param tokenType the token type of the ERC721/ERC721M to transfer, use [ReddioClient.TOKEN_TYPE_ERC721] for ERC721 and [ReddioClient.TOKEN_TYPE_ERC721M] for ERC721M
@@ -212,23 +160,14 @@ class ReddioBatchTransferApi private constructor(
                  */
                 @JvmStatic
                 fun transferERC721(
-                    restClient: ReddioRestClient,
-                    starkPrivateKey: String,
                     contractAddress: String,
                     tokenId: String,
                     tokenType: String,
                     receiver: String,
                     expirationTimestamp: Long
                 ): TransferItem {
-                    return transfer(
-                        restClient,
-                        starkPrivateKey,
-                        "1",
-                        contractAddress,
-                        tokenId,
-                        tokenType,
-                        receiver,
-                        expirationTimestamp
+                    return TransferItem(
+                        "1", contractAddress, tokenId, tokenType, receiver, expirationTimestamp
                     )
                 }
             }
@@ -284,30 +223,10 @@ class ReddioBatchTransferApi private constructor(
                         starkPublicKey
                     )
                 ).await().data.nonce
-                val transfers = transfers.map {
-                    val signature = signer.signTransferMessage(
-                        it.amount,
-                        it.nonce,
-                        it.vaultId,
-                        it.assetId,
-                        it.receiverVaultId,
-                        it.receiver,
-                        it.expirationTimestamp
-                    )
-                    BatchTransferItem.of(
-                        it.assetId,
-                        it.starkKey,
-                        it.amount,
-                        it.nonce,
-                        it.vaultId,
-                        it.receiver,
-                        it.receiverVaultId,
-                        it.expirationTimestamp,
-                        signature
-                    )
-                }
                 val result = BatchTransferMessage.of(
-                    transfers,
+                    transfers.map {
+                        it.asSignedBatchTransferItem(localRestClient, senderStarkPrivateKey)
+                    },
                     starkPublicKey,
                     nonce,
                     null,
