@@ -1,11 +1,11 @@
 package com.reddio.api.v1.requests
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.reddio.api.v1.QuantizedHelper
 import com.reddio.api.v1.ReddioClient
 import com.reddio.api.v1.StarkExSigner
 import com.reddio.api.v1.requests.polling.RecordPoller
 import com.reddio.api.v1.rest.*
+import com.reddio.sign.BatchTransferSign
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.CompletableFuture
@@ -275,13 +275,23 @@ class ReddioBatchTransferApi private constructor(
             transfers: List<TransferItem>,
             baseTokenTransferSeqId: Long?,
         ): ReddioBatchTransferApi {
+            val signer = StarkExSigner(senderStarkPrivateKey)
             val batchTransferMessage = runBlocking {
                 val nonce = localRestClient.getNonce(
                     GetNonceMessage.of(
-                        StarkExSigner(senderStarkPrivateKey).getStarkKey()
+                        signer.getStarkKey()
                     )
                 ).await().data.nonce
-                val result = transfers.map {
+                val transfers = transfers.map {
+                    val signature = signer.signTransferMessage(
+                        it.amount,
+                        it.nonce,
+                        it.vaultId,
+                        it.assetId,
+                        it.receiverVaultId,
+                        it.receiver,
+                        it.expirationTimestamp
+                    )
                     BatchTransferItem.of(
                         it.assetId,
                         it.starkKey,
@@ -291,15 +301,17 @@ class ReddioBatchTransferApi private constructor(
                         it.receiver,
                         it.receiverVaultId,
                         it.expirationTimestamp,
-                        it.signature
-                    ) as BatchTransferItem
+                        signature
+                    )
                 }
-                BatchTransferMessage.of(
-                    result,
+                val result = BatchTransferMessage.of(
+                    transfers,
                     nonce,
                     null,
                     baseTokenTransferSeqId,
                 )
+                result.signature = BatchTransferSign.sign(senderStarkPrivateKey, result)
+                result
             }
             return build(localRestClient, batchTransferMessage)
         }
