@@ -6,7 +6,7 @@ on:
       - main
 jobs:
   mvn_integration_test_linux:
-    name: mvn verify (linux)
+    name: integration test (linux)
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
@@ -24,6 +24,13 @@ jobs:
       - name: Compile Native Library
         run: |
           make
+      - name: Cache Maven
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.m2
+            ~/repository
+          key: ${{ github.job }}-${{ hashFiles('**/pom.xml') }}
       - name: mvn integration-test post-integration-test
         env:
          INTEGRATION_TEST_ETHERSCAN_API_KEY: ${{ secrets.INTEGRATION_TEST_ETHERSCAN_API_KEY }}

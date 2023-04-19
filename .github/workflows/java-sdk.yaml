@@ -31,6 +31,13 @@ jobs:
         with:
           distribution: "adopt"
           java-version: "8"
+      - name: Cache Maven
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.m2
+            ~/repository
+          key: ${{ github.job }}-${{ hashFiles('**/pom.xml') }}
       - name: Build Java SDK Jars
         working-directory: reddio-java
         run: |

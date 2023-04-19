@@ -38,6 +38,13 @@ jobs:
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
+      - name: Cache Maven
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.m2
+            ~/repository
+          key: ${{ github.job }}-${{ hashFiles('**/pom.xml') }}
       - name: Publish package
         working-directory: reddio-java
         run: |

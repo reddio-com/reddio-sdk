@@ -27,6 +27,13 @@ jobs:
       - name: Compile Native Library
         run: |
           make
+      - name: Cache Maven
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.m2
+            ~/repository
+          key: ${{ github.job }}-${{ hashFiles('**/pom.xml') }}
       - name: mvn test
         run: |
           cd reddio-java && mvn -B clean test
