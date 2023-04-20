@@ -52,4 +52,7 @@ public class Order {
 
     @JsonProperty("order_created_at")
     private Instant orderCreatedAt;
+
+    @JsonProperty("timestamp")
+    private Instant timestamp;
 }
