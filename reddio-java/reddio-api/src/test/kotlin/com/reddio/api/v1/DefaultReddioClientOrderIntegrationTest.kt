@@ -264,7 +264,7 @@ class DefaultReddioClientOrderIntegrationTest {
         Assert.assertEquals("1026", data.getTokenId())
         Assert.assertEquals("0.001", data.getDisplayPrice())
         Assert.assertEquals(OrderState.Filled, data.getOrderState())
-        Assert.assertEquals(Instant.ofEpochMilli(1676126105555), data.timestamp)
+        Assert.assertEquals(Instant.ofEpochMilli(1676126105000), data.timestamp)
         // uncomment this line after the new field is added to the response
         // Assert.assertEquals( Instant.ofEpochMilli(1676126105555), data.orderCreatedAt)
     }
