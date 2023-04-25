@@ -25,7 +25,7 @@ class ReddioBatchTransferApiTest {
         ).join().data.list.filter { it.balanceAvailable > 0 }
 
         val itemsToTransfer = balances.map {
-            ReddioBatchTransferApi.Companion.TransferItem.transferERC721(
+            ReddioBatchTransferApi.TransferItem.transferERC721(
                 it.contractAddress,
                 it.tokenId,
                 it.type,

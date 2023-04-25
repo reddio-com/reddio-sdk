@@ -66,112 +66,112 @@ class ReddioBatchTransferApi private constructor(
     }
 
 
-    companion object {
-
-        data class TransferItem(
-            val amount: String,
-            val contractAddress: String,
-            val tokenId: String,
-            val tokenType: String,
-            val receiver: String,
-            val expirationTimestamp: Long,
-        ) {
-            fun asSignedBatchTransferItem(restClient: ReddioRestClient, starkPrivateKey: String): BatchTransferItem {
-                val quantizedHelper = QuantizedHelper(restClient)
-                val starkExSigner = StarkExSigner(starkPrivateKey)
-                val starkKey = starkExSigner.getStarkKey()
-                return runBlocking {
-                    val quantizedAmount = quantizedHelper.quantizedAmount(amount, tokenType, contractAddress).toString()
-                    val assetId = AssetVaultHelper.getAssetId(restClient, contractAddress, tokenId, tokenType)
-                    val vaultsIds = AssetVaultHelper.getVaultsIds(restClient, assetId, starkKey, receiver)
-                    val nonce = restClient.getNonce(GetNonceMessage.of(starkKey)).await().getData().getNonce()
-                    val signature = starkExSigner.signTransferMessage(
-                        quantizedAmount,
-                        nonce,
-                        vaultsIds.senderVaultId,
-                        assetId,
-                        vaultsIds.receiverVaultId,
-                        receiver,
-                        expirationTimestamp
-                    )
-                    BatchTransferItem.of(
-                        assetId,
-                        starkKey,
-                        amount,
-                        nonce,
-                        vaultsIds.senderVaultId,
-                        receiver,
-                        vaultsIds.receiverVaultId,
-                        expirationTimestamp,
-                        signature
-                    )
-                }
-
+    data class TransferItem(
+        val amount: String,
+        val contractAddress: String,
+        val tokenId: String,
+        val tokenType: String,
+        val receiver: String,
+        val expirationTimestamp: Long,
+    ) {
+        fun asSignedBatchTransferItem(restClient: ReddioRestClient, starkPrivateKey: String): BatchTransferItem {
+            val quantizedHelper = QuantizedHelper(restClient)
+            val starkExSigner = StarkExSigner(starkPrivateKey)
+            val starkKey = starkExSigner.getStarkKey()
+            return runBlocking {
+                val quantizedAmount = quantizedHelper.quantizedAmount(amount, tokenType, contractAddress).toString()
+                val assetId = AssetVaultHelper.getAssetId(restClient, contractAddress, tokenId, tokenType)
+                val vaultsIds = AssetVaultHelper.getVaultsIds(restClient, assetId, starkKey, receiver)
+                val nonce = restClient.getNonce(GetNonceMessage.of(starkKey)).await().getData().getNonce()
+                val signature = starkExSigner.signTransferMessage(
+                    quantizedAmount,
+                    nonce,
+                    vaultsIds.senderVaultId,
+                    assetId,
+                    vaultsIds.receiverVaultId,
+                    receiver,
+                    expirationTimestamp
+                )
+                BatchTransferItem.of(
+                    assetId,
+                    starkKey,
+                    amount,
+                    nonce,
+                    vaultsIds.senderVaultId,
+                    receiver,
+                    vaultsIds.receiverVaultId,
+                    expirationTimestamp,
+                    signature
+                )
             }
 
-            companion object {
+        }
 
-                /**
-                 * Build a transfer item in batch transfer for transfer ETH.
-                 *
-                 * @param amount the amount of ETH to transfer
-                 * @param receiver the receiver's stark key
-                 * @param expirationTimestamp the expiration timestamp of the request in seconds, max value is 4194303L
-                 */
-                @JvmStatic
-                fun transferETH(
-                    amount: String,
-                    receiver: String,
-                    expirationTimestamp: Long,
-                ): TransferItem {
-                    return TransferItem(
-                        amount, "ETH", "", ReddioClient.TOKEN_TYPE_ETH, receiver, expirationTimestamp
-                    )
-                }
+        companion object {
 
-                /**
-                 * Build a batch transfer item in batch transfer for transfer ERC20.
-                 *
-                 * @param amount the amount of ERC20 to transfer
-                 * @param contractAddress the contract address of the ERC20 to transfer
-                 * @param receiver the receiver's stark key
-                 * @param expirationTimestamp the expiration timestamp of the request in seconds, max value is 4194303L
-                 */
-                @JvmStatic
-                fun transferERC20(
-                    amount: String,
-                    contractAddress: String,
-                    receiver: String,
-                    expirationTimestamp: Long,
-                ): TransferItem {
-                    return TransferItem(
-                        amount, contractAddress, "", ReddioClient.TOKEN_TYPE_ERC20, receiver, expirationTimestamp
-                    )
-                }
+            /**
+             * Build a transfer item in batch transfer for transfer ETH.
+             *
+             * @param amount the amount of ETH to transfer
+             * @param receiver the receiver's stark key
+             * @param expirationTimestamp the expiration timestamp of the request in seconds, max value is 4194303L
+             */
+            @JvmStatic
+            fun transferETH(
+                amount: String,
+                receiver: String,
+                expirationTimestamp: Long,
+            ): TransferItem {
+                return TransferItem(
+                    amount, "ETH", "", ReddioClient.TOKEN_TYPE_ETH, receiver, expirationTimestamp
+                )
+            }
 
-                /**
-                 * Build a transfer item in batch transfer for transfer ERC721/ERC721M.
-                 *
-                 * @param contractAddress the contract address of the ERC721/ERC721M to transfer
-                 * @param tokenId the token id of the ERC721/ERC721M to transfer
-                 * @param tokenType the token type of the ERC721/ERC721M to transfer, use [ReddioClient.TOKEN_TYPE_ERC721] for ERC721 and [ReddioClient.TOKEN_TYPE_ERC721M] for ERC721M
-                 * @param receiver the receiver's stark key
-                 * @param expirationTimestamp the expiration timestamp of the request in seconds, max value is 4194303L
-                 */
-                @JvmStatic
-                fun transferERC721(
-                    contractAddress: String,
-                    tokenId: String,
-                    tokenType: String,
-                    receiver: String,
-                    expirationTimestamp: Long
-                ): TransferItem {
-                    return TransferItem(
-                        "1", contractAddress, tokenId, tokenType, receiver, expirationTimestamp
-                    )
-                }
+            /**
+             * Build a batch transfer item in batch transfer for transfer ERC20.
+             *
+             * @param amount the amount of ERC20 to transfer
+             * @param contractAddress the contract address of the ERC20 to transfer
+             * @param receiver the receiver's stark key
+             * @param expirationTimestamp the expiration timestamp of the request in seconds, max value is 4194303L
+             */
+            @JvmStatic
+            fun transferERC20(
+                amount: String,
+                contractAddress: String,
+                receiver: String,
+                expirationTimestamp: Long,
+            ): TransferItem {
+                return TransferItem(
+                    amount, contractAddress, "", ReddioClient.TOKEN_TYPE_ERC20, receiver, expirationTimestamp
+                )
+            }
+
+            /**
+             * Build a transfer item in batch transfer for transfer ERC721/ERC721M.
+             *
+             * @param contractAddress the contract address of the ERC721/ERC721M to transfer
+             * @param tokenId the token id of the ERC721/ERC721M to transfer
+             * @param tokenType the token type of the ERC721/ERC721M to transfer, use [ReddioClient.TOKEN_TYPE_ERC721] for ERC721 and [ReddioClient.TOKEN_TYPE_ERC721M] for ERC721M
+             * @param receiver the receiver's stark key
+             * @param expirationTimestamp the expiration timestamp of the request in seconds, max value is 4194303L
+             */
+            @JvmStatic
+            fun transferERC721(
+                contractAddress: String,
+                tokenId: String,
+                tokenType: String,
+                receiver: String,
+                expirationTimestamp: Long
+            ): TransferItem {
+                return TransferItem(
+                    "1", contractAddress, tokenId, tokenType, receiver, expirationTimestamp
+                )
             }
         }
+    }
+
+    companion object {
 
         private val defaultDesiredRecordStatus = arrayOf(
             RecordStatus.SubmittedToReddio,
