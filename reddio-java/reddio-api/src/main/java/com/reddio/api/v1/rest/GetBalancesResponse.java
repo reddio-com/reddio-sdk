@@ -55,8 +55,17 @@ public class GetBalancesResponse {
         @JsonProperty("quantum")
         private String quantum;
 
+        @JsonProperty("display_frozen")
+        private String displayFrozen;
+
         @JsonProperty("display_value")
         private String displayValue;
+
+        @JsonProperty("available")
+        private String available;
+
+        @JsonProperty("frozen")
+        private String frozen;
 
         @JsonProperty("token_id")
         private String tokenId;
