@@ -43,6 +43,9 @@ public class GetBalancesResponse {
         @JsonProperty("balance_frozen")
         private Long balanceFrozen;
 
+        @JsonProperty("withdraw_frozen")
+        private Long withdrawFrozen;
+
         @JsonProperty("type")
         private String type;
 
@@ -58,6 +61,9 @@ public class GetBalancesResponse {
         @JsonProperty("display_frozen")
         private String displayFrozen;
 
+        @JsonProperty("display_withdraw")
+        private String displayWithdraw;
+
         @JsonProperty("display_value")
         private String displayValue;
 
@@ -66,6 +72,9 @@ public class GetBalancesResponse {
 
         @JsonProperty("frozen")
         private String frozen;
+
+        @JsonProperty("withdraw")
+        private String withdraw;
 
         @JsonProperty("token_id")
         private String tokenId;
