@@ -6,6 +6,12 @@ It's **NOT** recommend to use `ReddioCrypto.xcframework` directly, please use <h
 
 ## Build
 
-The building process requires Xcode to package the artifact, so macOS is required. It would build the `ReddioCrypto.xcframework` for both iOS and MacOS, both arm64 and x86.
+Just execute:
+
+```bash
+make
+```
+
+The building process requires Xcode to package the artifact, so macOS is required. It would build the `ReddioCrypto.xcframework` for both iOS and MacOS.
 
 The artifact would be located at `output/ReddioCrypto.xcframework`.
