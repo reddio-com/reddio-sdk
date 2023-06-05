@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>reddio-java</artifactId>
@@ -69,7 +69,25 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>copy-resources-darwin</id>
+                        <id>copy-resources-darwin-aarch64</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${basedir}/target/classes/darwin-aarch64</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>../../output/lib/darwin-aarch64</directory>
+                                    <includes>
+                                        <include>libreddio.dylib</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-resources-darwin-x86_64</id>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>copy-resources</goal>
@@ -78,7 +96,7 @@
                             <outputDirectory>${basedir}/target/classes/darwin-x86-64</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>../../output/lib</directory>
+                                    <directory>../../output/lib/darwin-x86-64</directory>
                                     <includes>
                                         <include>libreddio.dylib</include>
                                     </includes>
