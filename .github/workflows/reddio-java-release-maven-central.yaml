@@ -27,7 +27,9 @@ jobs:
           path: artifacts
       - name: Copy Native Library to Java Project
         run: |
-          mkdir -p output/lib 
+          mkdir -p output/lib
+          mkdir -p output/lib/darwin-aarch64
+          mkdir -p output/lib/darwin-x86-64
           cp artifacts/libreddio-x86_64-pc-windows-msvc/reddio.dll output/lib/reddio.dll
           cp artifacts/libreddio-x86_64-unknown-linux-gnu/libreddio.so output/lib/libreddio.so
           cp artifacts/libreddio-aarch64-apple-darwin/libreddio.dylib output/lib/darwin-aarch64/libreddio.dylib
