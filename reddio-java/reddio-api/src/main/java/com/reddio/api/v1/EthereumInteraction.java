@@ -1,6 +1,7 @@
 package com.reddio.api.v1;
 
 import com.reddio.abi.Deposits;
+import com.reddio.abi.ReddioDeployHelperAsset;
 import com.reddio.gas.GasOption;
 import io.reactivex.disposables.Disposable;
 import org.web3j.protocol.core.methods.response.EthBlock;
@@ -51,5 +52,9 @@ public interface EthereumInteraction extends AutoCloseable {
     Disposable watchNftDeposit(Consumer<Tuple2<Deposits.LogNftDepositEventResponse, EthBlock>> consumer, BigInteger startBlockNumber, Long requiredBlockConfirmation);
 
     BigInteger getStarkPrivateKey();
+
+    CompletableFuture<TransactionReceipt> deployERC20AndRegister(String name, String symbol, BigInteger amount, GasOption gasOption);
+
+    CompletableFuture<TransactionReceipt> deployERC20AndRegister(String name, String symbol, String baseURI, ReddioDeployHelperAsset asset, GasOption gasOption);
 
 }

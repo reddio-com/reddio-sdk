@@ -3,6 +3,8 @@ package com.reddio.api.v1
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.reddio.abi.Deposits
+import com.reddio.abi.ReddioDeployHelper
+import com.reddio.abi.ReddioDeployHelperAsset
 import com.reddio.abi.Withdrawals
 import com.reddio.abi.getlog.EthGetLogsForDeposits
 import com.reddio.api.v1.rest.GetAssetIdMessage
@@ -17,13 +19,11 @@ import com.reddio.gas.StaticGasLimitSuggestionPriceGasProvider
 import io.reactivex.disposables.Disposable
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
-import org.web3j.abi.EventEncoder
 import org.web3j.contracts.eip20.generated.ERC20
 import org.web3j.contracts.eip721.generated.ERC721
 import org.web3j.crypto.*
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.Web3jService
-import org.web3j.protocol.core.methods.request.EthFilter
 import org.web3j.protocol.core.methods.response.EthBlock
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.protocol.http.HttpService
@@ -482,6 +482,40 @@ class DefaultEthereumInteraction(
         )
     }
 
+    override fun deployERC20AndRegister(
+        name: String, symbol: String, amount: BigInteger, gasOption: GasOption
+    ): CompletableFuture<TransactionReceipt> {
+        val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
+            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+        )
+        return CompletableFuture.supplyAsync {
+            runBlocking {
+                val helper = ReddioDeployHelper.load(REDDIO_DEPLOY_HELPER_ADDRESS, web3j, credentials, gasProvider)
+                helper.deployERC20AndRegister(
+                    name, symbol, amount
+                ).sendAsync().await()
+            }
+        }
+    }
+
+    override fun deployERC20AndRegister(
+        name: String,
+        symbol: String,
+        baseURI: String,
+        asset: ReddioDeployHelperAsset,
+        gasOption: GasOption,
+    ): CompletableFuture<TransactionReceipt> {
+        val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
+            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+        )
+        return CompletableFuture.supplyAsync {
+            runBlocking {
+                val helper = ReddioDeployHelper.load(REDDIO_DEPLOY_HELPER_ADDRESS, web3j, credentials, gasProvider)
+                helper.deployERC721AndRegister(name, symbol, baseURI, asset.value.toBigInteger()).sendAsync().await()
+            }
+        }
+    }
+
     @Synchronized
     override fun close() {
         this.closed.set(true)
@@ -515,6 +549,9 @@ class DefaultEthereumInteraction(
     }
 
     companion object {
+
+        const val REDDIO_DEPLOY_HELPER_ADDRESS = "0x2B202b379Df18923bcceA686402e97CB36DA1D08"
+
         private const val SIGN_MESSAGE = "Generate layer 2 key"
         private val objectMapper = ObjectMapper()
 
