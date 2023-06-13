@@ -483,6 +483,7 @@ class DefaultEthereumInteraction(
     }
 
     override fun deployERC20AndRegister(
+        reddioDeployHelperAddress: String,
         name: String, symbol: String, amount: BigInteger, gasOption: GasOption
     ): CompletableFuture<TransactionReceipt> {
         val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
@@ -490,7 +491,7 @@ class DefaultEthereumInteraction(
         )
         return CompletableFuture.supplyAsync {
             runBlocking {
-                val helper = ReddioDeployHelper.load(REDDIO_DEPLOY_HELPER_ADDRESS, web3j, credentials, gasProvider)
+                val helper = ReddioDeployHelper.load(reddioDeployHelperAddress, web3j, credentials, gasProvider)
                 helper.deployERC20AndRegister(
                     name, symbol, amount
                 ).sendAsync().await()
@@ -499,6 +500,7 @@ class DefaultEthereumInteraction(
     }
 
     override fun deployERC20AndRegister(
+        reddioDeployHelperAddress: String,
         name: String,
         symbol: String,
         baseURI: String,
@@ -510,7 +512,7 @@ class DefaultEthereumInteraction(
         )
         return CompletableFuture.supplyAsync {
             runBlocking {
-                val helper = ReddioDeployHelper.load(REDDIO_DEPLOY_HELPER_ADDRESS, web3j, credentials, gasProvider)
+                val helper = ReddioDeployHelper.load(reddioDeployHelperAddress, web3j, credentials, gasProvider)
                 helper.deployERC721AndRegister(name, symbol, baseURI, asset.value.toBigInteger()).sendAsync().await()
             }
         }
@@ -550,7 +552,7 @@ class DefaultEthereumInteraction(
 
     companion object {
 
-        const val REDDIO_DEPLOY_HELPER_ADDRESS = "0x2B202b379Df18923bcceA686402e97CB36DA1D08"
+        const val REDDIO_DEPLOY_HELPER_ADDRESS_GOERLI = "0x2B202b379Df18923bcceA686402e97CB36DA1D08"
 
         private const val SIGN_MESSAGE = "Generate layer 2 key"
         private val objectMapper = ObjectMapper()

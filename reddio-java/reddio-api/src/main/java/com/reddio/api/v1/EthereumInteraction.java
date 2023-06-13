@@ -53,8 +53,8 @@ public interface EthereumInteraction extends AutoCloseable {
 
     BigInteger getStarkPrivateKey();
 
-    CompletableFuture<TransactionReceipt> deployERC20AndRegister(String name, String symbol, BigInteger amount, GasOption gasOption);
+    CompletableFuture<TransactionReceipt> deployERC20AndRegister(String reddioDeployHelperAddress, String name, String symbol, BigInteger amount, GasOption gasOption);
 
-    CompletableFuture<TransactionReceipt> deployERC20AndRegister(String name, String symbol, String baseURI, ReddioDeployHelperAsset asset, GasOption gasOption);
+    CompletableFuture<TransactionReceipt> deployERC20AndRegister(String reddioDeployHelperAddress, String name, String symbol, String baseURI, ReddioDeployHelperAsset asset, GasOption gasOption);
 
 }
