@@ -42,11 +42,15 @@ public class MintsMessage {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String tokenIds;
 
+    @JsonProperty("token_url")
+    private String tokenUrl;
+
     public static final String tokenIdsAsString(List<Long> tokenIds) {
         return String.join(",", tokenIds.stream().map(Object::toString).toArray(String[]::new));
     }
 
     public static MintsMessage of(String contractAddress, String starkKey, String amount) {
-        return new MintsMessage(contractAddress, starkKey, amount, "");
+        return new MintsMessage(contractAddress, starkKey, amount, "", "");
     }
+
 }
