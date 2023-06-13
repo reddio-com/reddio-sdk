@@ -1,7 +1,7 @@
 package com.reddio.api.v1
 
-import com.reddio.exception.ReddioException
 import com.reddio.api.v1.rest.*
+import com.reddio.exception.ReddioException
 import com.reddio.sign.PaymentSign
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.future.await
@@ -39,10 +39,7 @@ class DefaultReddioClient(
     }
 
     override fun listRecords(
-        starkKey: String?,
-        limit: Long?,
-        page: Long?,
-        contractAddress: String?
+        starkKey: String?, limit: Long?, page: Long?, contractAddress: String?
     ): CompletableFuture<ResponseWrapper<ListRecordsResponse>> {
         return this.restClient.listRecords(ListRecordsMessage.of(starkKey, limit, page, contractAddress))
     }
@@ -108,7 +105,11 @@ class DefaultReddioClient(
     override fun mints(
         contractAddress: String, starkKey: String, tokenIds: List<Long>
     ): CompletableFuture<ResponseWrapper<MintResponse>> {
-        return restClient.mints(MintsMessage.of(contractAddress, starkKey, "", MintsMessage.tokenIdsAsString(tokenIds)))
+        return restClient.mints(
+            MintsMessage.of(
+                contractAddress, starkKey, "", MintsMessage.tokenIdsAsString(tokenIds), ""
+            )
+        )
     }
 
     override fun withdrawalStatus(
@@ -251,11 +252,7 @@ class DefaultReddioClient(
         }
 
         override fun withdrawalERC721(
-            contractAddress: String,
-            tokenId: String,
-            tokenType: String,
-            receiver: String,
-            expirationTimeStamp: Long
+            contractAddress: String, tokenId: String, tokenType: String, receiver: String, expirationTimeStamp: Long
         ): CompletableFuture<ResponseWrapper<WithdrawalToResponse>> {
             if (ReddioClient.TOKEN_TYPE_ERC721M != tokenType && ReddioClient.TOKEN_TYPE_ERC721 != tokenType) {
                 throw ReddioException("tokenType must be ERC721 or ERC721M for ERC721/ERC721M withdrawal")
@@ -285,15 +282,7 @@ class DefaultReddioClient(
             return CompletableFuture.supplyAsync {
                 runBlocking {
                     val orderMessage = orderMessage(
-                        starkKey,
-                        "ETH",
-                        "ETH",
-                        tokenType,
-                        tokenAddress,
-                        tokenId,
-                        price,
-                        amount,
-                        orderType
+                        starkKey, "ETH", "ETH", tokenType, tokenAddress, tokenId, price, amount, orderType
                     )
                     restClient.order(orderMessage).await()
                 }
@@ -522,15 +511,7 @@ class DefaultReddioClient(
             return CompletableFuture.supplyAsync {
                 runBlocking {
                     val orderMessage = orderMessage(
-                        starkKey,
-                        "ETH",
-                        "ETH",
-                        contractType,
-                        contractAddress,
-                        tokenId,
-                        price,
-                        amount,
-                        OrderBehavior.BUY
+                        starkKey, "ETH", "ETH", contractType, contractAddress, tokenId, price, amount, OrderBehavior.BUY
                     )
 
                     // setup stop limit order as IOC
@@ -625,11 +606,7 @@ class DefaultReddioClient(
         }
 
         override fun transferERC721(
-            contractAddress: String,
-            tokenId: String,
-            tokenType: String,
-            receiver: String,
-            expirationTimeStamp: Long
+            contractAddress: String, tokenId: String, tokenType: String, receiver: String, expirationTimeStamp: Long
         ): CompletableFuture<ResponseWrapper<TransferResponse>> {
             if (ReddioClient.TOKEN_TYPE_ERC721M != tokenType && ReddioClient.TOKEN_TYPE_ERC721 != tokenType) {
                 throw ReddioException("tokenType must be ERC721 or ERC721M for ERC721/ERC721M transfer")
@@ -637,13 +614,7 @@ class DefaultReddioClient(
 
             val starkKey = this.starkExSigner.getStarkKey();
             return this.transfer(
-                starkKey,
-                "1",
-                contractAddress,
-                tokenId,
-                tokenType,
-                receiver,
-                expirationTimeStamp
+                starkKey, "1", contractAddress, tokenId, tokenType, receiver, expirationTimeStamp
             )
         }
 
