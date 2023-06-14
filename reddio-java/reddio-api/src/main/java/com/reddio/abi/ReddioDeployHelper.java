@@ -157,13 +157,35 @@ public class ReddioDeployHelper extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public RemoteFunctionCall<TransactionReceipt> deployERC721AndRegister(String name_, String symbol_, String baseURI_, BigInteger asset) {
+    public RemoteFunctionCall<TransactionReceipt> deployERC721AndRegister(String name_, String symbol_, String baseURI_) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_DEPLOYERC721ANDREGISTER, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Utf8String(name_), 
                 new org.web3j.abi.datatypes.Utf8String(symbol_), 
                 new org.web3j.abi.datatypes.Utf8String(baseURI_), 
-                new org.web3j.abi.datatypes.generated.Uint8(asset)), 
+                new org.web3j.abi.datatypes.generated.Uint8(BigInteger.ONE)),
+                Collections.<TypeReference<?>>emptyList());
+        return executeRemoteCallTransaction(function);
+    }
+
+    public RemoteFunctionCall<TransactionReceipt> deployERC721MAndRegister(String name_, String symbol_, String baseURI_) {
+        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
+                FUNC_DEPLOYERC721ANDREGISTER,
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.Utf8String(name_),
+                        new org.web3j.abi.datatypes.Utf8String(symbol_),
+                        new org.web3j.abi.datatypes.Utf8String(baseURI_),
+                        new org.web3j.abi.datatypes.generated.Uint8(BigInteger.TWO)),
+                Collections.<TypeReference<?>>emptyList());
+        return executeRemoteCallTransaction(function);
+    }
+
+    public RemoteFunctionCall<TransactionReceipt> deployERC721MCAndRegister(String name_, String symbol_) {
+        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
+                FUNC_DEPLOYERC721ANDREGISTER,
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.Utf8String(name_),
+                        new org.web3j.abi.datatypes.Utf8String(symbol_),
+                        new org.web3j.abi.datatypes.Utf8String(""),
+                        new org.web3j.abi.datatypes.generated.Uint8(BigInteger.valueOf(3))),
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
