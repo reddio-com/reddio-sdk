@@ -22,6 +22,8 @@ public interface ReddioRestClient extends AutoCloseable {
      */
     CompletableFuture<ResponseWrapper<BatchTransferResponse>> batchTransfer(BatchTransferMessage batchTransferMessage);
 
+    CompletableFuture<ResponseWrapper<MultiTransferResponse>> multiTransfer(MultiTransferMessage multiTransferMessage);
+
     /**
      * Retrieve the unique nonce by stark_key
      * <p>
