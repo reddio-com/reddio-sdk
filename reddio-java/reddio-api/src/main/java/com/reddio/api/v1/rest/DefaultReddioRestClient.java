@@ -115,6 +115,24 @@ public class DefaultReddioRestClient implements ReddioRestClient {
     }
 
     @Override
+    public CompletableFuture<ResponseWrapper<MultiTransferResponse>> multiTransfer(MultiTransferMessage multiTransferMessage) {
+        String endpoint = baseEndpoint + "/v1/multitransfer";
+
+        final String jsonString;
+        try {
+            jsonString = objectMapper.writeValueAsString(multiTransferMessage);
+        } catch (JsonProcessingException e) {
+            throw new ReddioException(e);
+        }
+
+        Request request = new Request.Builder().url(endpoint).post(RequestBody.create(jsonString, JSON)).build();
+        Call call = this.httpClient.newCall(request);
+
+        return asFuture(call, new TypeReference<ResponseWrapper<MultiTransferResponse>>() {
+        }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint));
+    }
+
+    @Override
     public CompletableFuture<ResponseWrapper<GetNonceResponse>> getNonce(GetNonceMessage getNonceMessage) {
         String endpoint = baseEndpoint + "/v1/nonce?stark_key=" + getNonceMessage.getStarkKey();
         Request request = new Request.Builder().url(endpoint).get().build();
