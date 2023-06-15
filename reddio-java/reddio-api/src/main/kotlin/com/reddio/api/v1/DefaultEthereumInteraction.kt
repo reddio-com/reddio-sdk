@@ -483,8 +483,7 @@ class DefaultEthereumInteraction(
     }
 
     override fun deployERC20AndRegister(
-        reddioDeployHelperAddress: String,
-        name: String, symbol: String, amount: BigInteger, gasOption: GasOption
+        reddioDeployHelperAddress: String, name: String, symbol: String, amount: BigInteger, gasOption: GasOption
     ): CompletableFuture<TransactionReceipt> {
         val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
             this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
@@ -499,13 +498,8 @@ class DefaultEthereumInteraction(
         }
     }
 
-    override fun deployERC20AndRegister(
-        reddioDeployHelperAddress: String,
-        name: String,
-        symbol: String,
-        baseURI: String,
-        asset: ReddioDeployHelperAsset,
-        gasOption: GasOption,
+    override fun deployERC721AndRegister(
+        reddioDeployHelperAddress: String, name: String, symbol: String, baseURI: String, gasOption: GasOption
     ): CompletableFuture<TransactionReceipt> {
         val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
             this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
@@ -513,7 +507,41 @@ class DefaultEthereumInteraction(
         return CompletableFuture.supplyAsync {
             runBlocking {
                 val helper = ReddioDeployHelper.load(reddioDeployHelperAddress, web3j, credentials, gasProvider)
-                helper.deployERC721AndRegister(name, symbol, baseURI, asset.value.toBigInteger()).sendAsync().await()
+                helper.deployERC721AndRegister(
+                    name, symbol, baseURI, ReddioDeployHelperAsset.ERC721.value.toBigInteger()
+                ).sendAsync().await()
+            }
+        }
+    }
+
+    override fun deployERC721MAndRegister(
+        reddioDeployHelperAddress: String, name: String, symbol: String, baseURI: String, gasOption: GasOption
+    ): CompletableFuture<TransactionReceipt> {
+        val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
+            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+        )
+        return CompletableFuture.supplyAsync {
+            runBlocking {
+                val helper = ReddioDeployHelper.load(reddioDeployHelperAddress, web3j, credentials, gasProvider)
+                helper.deployERC721AndRegister(
+                    name, symbol, baseURI, ReddioDeployHelperAsset.ERC721Mintable.value.toBigInteger()
+                ).sendAsync().await()
+            }
+        }
+    }
+
+    override fun deployERC721MCAndRegister(
+        reddioDeployHelperAddress: String, name: String, symbol: String, gasOption: GasOption
+    ): CompletableFuture<TransactionReceipt> {
+        val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
+            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+        )
+        return CompletableFuture.supplyAsync {
+            runBlocking {
+                val helper = ReddioDeployHelper.load(reddioDeployHelperAddress, web3j, credentials, gasProvider)
+                helper.deployERC721AndRegister(
+                    name, symbol, "", ReddioDeployHelperAsset.ERC721MintableCustomURI.value.toBigInteger()
+                ).sendAsync().await()
             }
         }
     }
