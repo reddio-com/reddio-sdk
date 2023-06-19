@@ -58,8 +58,19 @@ class DefaultEthereumInteraction(
         amount: String,
         gasOption: GasOption,
     ): CompletableFuture<LogDeposit> {
+        return this.depositETH(
+            starkKey, amount, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+        )
+    }
+
+    override fun depositETH(
+        starkKey: String,
+        amount: String,
+        gasOption: GasOption,
+        gasLimit: BigInteger,
+    ): CompletableFuture<LogDeposit> {
         val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
-            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+            this.chainId, gasOption, gasLimit
         )
         return CompletableFuture.supplyAsync {
             runBlocking {
@@ -68,11 +79,20 @@ class DefaultEthereumInteraction(
         }
     }
 
+
     override fun depositERC20(
         tokenAddress: String, starkKey: String, amount: String, gasOption: GasOption
     ): CompletableFuture<LogDeposit> {
+        return this.depositERC20(
+            tokenAddress, starkKey, amount, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+        )
+    }
+
+    override fun depositERC20(
+        tokenAddress: String, starkKey: String, amount: String, gasOption: GasOption, gasLimit: BigInteger
+    ): CompletableFuture<LogDeposit> {
         val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
-            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+            this.chainId, gasOption, gasLimit
         )
         return CompletableFuture.supplyAsync {
             runBlocking {
@@ -117,8 +137,16 @@ class DefaultEthereumInteraction(
     override fun depositERC721(
         tokenAddress: String, tokenId: String, starkKey: String, gasOption: GasOption
     ): CompletableFuture<LogDepositWithToken> {
+        return this.depositERC721(
+            tokenAddress, tokenId, starkKey, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+        )
+    }
+
+    override fun depositERC721(
+        tokenAddress: String, tokenId: String, starkKey: String, gasOption: GasOption, gasLimit: BigInteger
+    ): CompletableFuture<LogDepositWithToken> {
         val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
-            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+            this.chainId, gasOption, gasLimit
         )
         return CompletableFuture.supplyAsync {
             runBlocking {
@@ -226,8 +254,16 @@ class DefaultEthereumInteraction(
     override fun withdrawETHOrERC20(
         ethAddress: String, assetType: String, gasOption: GasOption
     ): CompletableFuture<TransactionReceipt> {
+        return this.withdrawETHOrERC20(
+            ethAddress, assetType, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+        )
+    }
+
+    override fun withdrawETHOrERC20(
+        ethAddress: String, assetType: String, gasOption: GasOption, gasLimit: BigInteger
+    ): CompletableFuture<TransactionReceipt> {
         val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
-            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+            this.chainId, gasOption, gasLimit
         )
         return CompletableFuture.supplyAsync {
             runBlocking {
@@ -236,11 +272,20 @@ class DefaultEthereumInteraction(
         }
     }
 
+
     override fun withdrawalETH(
         ethAddress: String, gasOption: GasOption
     ): CompletableFuture<TransactionReceipt> {
+        return this.withdrawalETH(
+            ethAddress, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+        )
+    }
+
+    override fun withdrawalETH(
+        ethAddress: String, gasOption: GasOption, gasLimit: BigInteger
+    ): CompletableFuture<TransactionReceipt> {
         val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
-            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+            this.chainId, gasOption, gasLimit
         )
         return CompletableFuture.supplyAsync {
             runBlocking {
@@ -257,8 +302,16 @@ class DefaultEthereumInteraction(
     override fun withdrawalERC20(
         ethAddress: String, contractAddress: String, gasOption: GasOption
     ): CompletableFuture<TransactionReceipt> {
+        return this.withdrawalERC20(
+            ethAddress, contractAddress, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+        )
+    }
+
+    override fun withdrawalERC20(
+        ethAddress: String, contractAddress: String, gasOption: GasOption, gasLimit: BigInteger
+    ): CompletableFuture<TransactionReceipt> {
         val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
-            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+            this.chainId, gasOption, gasLimit
         )
         return CompletableFuture.supplyAsync {
             runBlocking {
@@ -275,8 +328,16 @@ class DefaultEthereumInteraction(
     override fun withdrawalERC721(
         ethAddress: String, contractAddress: String, tokenId: String, gasOption: GasOption
     ): CompletableFuture<TransactionReceipt> {
+        return this.withdrawalERC721(
+            ethAddress, contractAddress, tokenId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+        )
+    }
+
+    override fun withdrawalERC721(
+        ethAddress: String, contractAddress: String, tokenId: String, gasOption: GasOption, gasLimit: BigInteger
+    ): CompletableFuture<TransactionReceipt> {
         val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
-            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+            this.chainId, gasOption, gasLimit
         )
         return CompletableFuture.supplyAsync {
             runBlocking {
@@ -293,8 +354,16 @@ class DefaultEthereumInteraction(
     override fun withdrawalERC721M(
         ethAddress: String, contractAddress: String, tokenId: String, gasOption: GasOption
     ): CompletableFuture<TransactionReceipt> {
+        return this.withdrawalERC721M(
+            ethAddress, contractAddress, tokenId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+        )
+    }
+
+    override fun withdrawalERC721M(
+        ethAddress: String, contractAddress: String, tokenId: String, gasOption: GasOption, gasLimit: BigInteger
+    ): CompletableFuture<TransactionReceipt> {
         val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
-            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+            this.chainId, gasOption, gasLimit
         )
         return CompletableFuture.supplyAsync {
             runBlocking {
@@ -485,8 +554,26 @@ class DefaultEthereumInteraction(
     override fun deployERC20AndRegister(
         reddioDeployHelperAddress: String, name: String, symbol: String, amount: BigInteger, gasOption: GasOption
     ): CompletableFuture<TransactionReceipt> {
+        return this.deployERC20AndRegister(
+            reddioDeployHelperAddress,
+            name,
+            symbol,
+            amount,
+            gasOption,
+            StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+        )
+    }
+
+    override fun deployERC20AndRegister(
+        reddioDeployHelperAddress: String,
+        name: String,
+        symbol: String,
+        amount: BigInteger,
+        gasOption: GasOption,
+        gasLimit: BigInteger
+    ): CompletableFuture<TransactionReceipt> {
         val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
-            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+            this.chainId, gasOption, gasLimit
         )
         return CompletableFuture.supplyAsync {
             runBlocking {
@@ -498,11 +585,30 @@ class DefaultEthereumInteraction(
         }
     }
 
+
     override fun deployERC721AndRegister(
         reddioDeployHelperAddress: String, name: String, symbol: String, baseURI: String, gasOption: GasOption
     ): CompletableFuture<TransactionReceipt> {
+        return this.deployERC721AndRegister(
+            reddioDeployHelperAddress,
+            name,
+            symbol,
+            baseURI,
+            gasOption,
+            StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+        )
+    }
+
+    override fun deployERC721AndRegister(
+        reddioDeployHelperAddress: String,
+        name: String,
+        symbol: String,
+        baseURI: String,
+        gasOption: GasOption,
+        gasLimit: BigInteger
+    ): CompletableFuture<TransactionReceipt> {
         val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
-            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+            this.chainId, gasOption, gasLimit
         )
         return CompletableFuture.supplyAsync {
             runBlocking {
@@ -517,8 +623,26 @@ class DefaultEthereumInteraction(
     override fun deployERC721MAndRegister(
         reddioDeployHelperAddress: String, name: String, symbol: String, baseURI: String, gasOption: GasOption
     ): CompletableFuture<TransactionReceipt> {
+        return this.deployERC721MAndRegister(
+            reddioDeployHelperAddress,
+            name,
+            symbol,
+            baseURI,
+            gasOption,
+            StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+        )
+    }
+
+    override fun deployERC721MAndRegister(
+        reddioDeployHelperAddress: String,
+        name: String,
+        symbol: String,
+        baseURI: String,
+        gasOption: GasOption,
+        gasLimit: BigInteger
+    ): CompletableFuture<TransactionReceipt> {
         val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
-            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+            this.chainId, gasOption, gasLimit
         )
         return CompletableFuture.supplyAsync {
             runBlocking {
@@ -530,11 +654,24 @@ class DefaultEthereumInteraction(
         }
     }
 
+
     override fun deployERC721MCAndRegister(
         reddioDeployHelperAddress: String, name: String, symbol: String, gasOption: GasOption
     ): CompletableFuture<TransactionReceipt> {
+        return this.deployERC721MCAndRegister(
+            reddioDeployHelperAddress,
+            name,
+            symbol,
+            gasOption,
+            StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+        )
+    }
+
+    override fun deployERC721MCAndRegister(
+        reddioDeployHelperAddress: String, name: String, symbol: String, gasOption: GasOption, gasLimit: BigInteger
+    ): CompletableFuture<TransactionReceipt> {
         val gasProvider = StaticGasLimitSuggestionPriceGasProvider(
-            this.chainId, gasOption, StaticGasLimitSuggestionPriceGasProvider.DEFAULT_GAS_LIMIT
+            this.chainId, gasOption, gasLimit
         )
         return CompletableFuture.supplyAsync {
             runBlocking {

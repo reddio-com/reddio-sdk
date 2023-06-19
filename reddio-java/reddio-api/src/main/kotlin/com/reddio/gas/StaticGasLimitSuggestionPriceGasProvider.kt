@@ -46,6 +46,6 @@ class StaticGasLimitSuggestionPriceGasProvider(
     }
 
     companion object {
-        val DEFAULT_GAS_LIMIT = 500_000L.toBigInteger();
+        val DEFAULT_GAS_LIMIT = 1000_000L.toBigInteger();
     }
 }

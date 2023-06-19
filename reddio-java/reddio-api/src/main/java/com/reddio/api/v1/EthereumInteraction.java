@@ -15,9 +15,16 @@ public interface EthereumInteraction extends AutoCloseable {
 
     CompletableFuture<LogDeposit> depositETH(String starkKey, String amount, GasOption gasOption);
 
+    CompletableFuture<LogDeposit> depositETH(String starkKey, String amount, GasOption gasOption, BigInteger gasLimit);
+
     CompletableFuture<LogDeposit> depositERC20(String tokenAddress, String starkKey, String amount, GasOption gasOption);
 
+    CompletableFuture<LogDeposit> depositERC20(String tokenAddress, String starkKey, String amount, GasOption gasOption, BigInteger gasLimit);
+
     CompletableFuture<LogDepositWithToken> depositERC721(String tokenAddress, String tokenId, String starkKey, GasOption gasOption);
+
+    CompletableFuture<LogDepositWithToken> depositERC721(String tokenAddress, String tokenId, String starkKey, GasOption gasOption, BigInteger gasLimit);
+
 
     /**
      * @param ethAddress
@@ -29,13 +36,23 @@ public interface EthereumInteraction extends AutoCloseable {
     @Deprecated
     CompletableFuture<TransactionReceipt> withdrawETHOrERC20(String ethAddress, String assetType, GasOption gasOption);
 
+    CompletableFuture<TransactionReceipt> withdrawETHOrERC20(String ethAddress, String assetType, GasOption gasOption, BigInteger gasLimit);
+
     CompletableFuture<TransactionReceipt> withdrawalETH(String ethAddress, GasOption gasOption);
+
+    CompletableFuture<TransactionReceipt> withdrawalETH(String ethAddress, GasOption gasOption, BigInteger gasLimit);
 
     CompletableFuture<TransactionReceipt> withdrawalERC20(String ethAddress, String erc20ContractAddress, GasOption gasOption);
 
+    CompletableFuture<TransactionReceipt> withdrawalERC20(String ethAddress, String erc20ContractAddress, GasOption gasOption, BigInteger gasLimit);
+
     CompletableFuture<TransactionReceipt> withdrawalERC721(String ethAddress, String contractAddress, String tokenId, GasOption gasOption);
 
+    CompletableFuture<TransactionReceipt> withdrawalERC721(String ethAddress, String contractAddress, String tokenId, GasOption gasOption, BigInteger gasLimit);
+
     CompletableFuture<TransactionReceipt> withdrawalERC721M(String ethAddress, String contractAddress, String tokenId, GasOption gasOption);
+
+    CompletableFuture<TransactionReceipt> withdrawalERC721M(String ethAddress, String contractAddress, String tokenId, GasOption gasOption, BigInteger gasLimit);
 
 
     Disposable watchDeposit(Consumer<Tuple2<Deposits.LogDepositEventResponse, EthBlock>> consumer);
@@ -54,9 +71,17 @@ public interface EthereumInteraction extends AutoCloseable {
 
     CompletableFuture<TransactionReceipt> deployERC20AndRegister(String reddioDeployHelperAddress, String name, String symbol, BigInteger amount, GasOption gasOption);
 
+    CompletableFuture<TransactionReceipt> deployERC20AndRegister(String reddioDeployHelperAddress, String name, String symbol, BigInteger amount, GasOption gasOption, BigInteger gasLimit);
+
     CompletableFuture<TransactionReceipt> deployERC721AndRegister(String reddioDeployHelperAddress, String name, String symbol, String baseURI, GasOption gasOption);
+
+    CompletableFuture<TransactionReceipt> deployERC721AndRegister(String reddioDeployHelperAddress, String name, String symbol, String baseURI, GasOption gasOption, BigInteger gasLimit);
 
     CompletableFuture<TransactionReceipt> deployERC721MAndRegister(String reddioDeployHelperAddress, String name, String symbol, String baseURI, GasOption gasOption);
 
+    CompletableFuture<TransactionReceipt> deployERC721MAndRegister(String reddioDeployHelperAddress, String name, String symbol, String baseURI, GasOption gasOption, BigInteger gasLimit);
+
     CompletableFuture<TransactionReceipt> deployERC721MCAndRegister(String reddioDeployHelperAddress, String name, String symbol, GasOption gasOption);
+
+    CompletableFuture<TransactionReceipt> deployERC721MCAndRegister(String reddioDeployHelperAddress, String name, String symbol, GasOption gasOption, BigInteger gasLimit);
 }
