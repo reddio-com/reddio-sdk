@@ -717,7 +717,7 @@ class DefaultEthereumInteraction(
 
     companion object {
 
-        const val REDDIO_DEPLOY_HELPER_ADDRESS_GOERLI = "0x2B202b379Df18923bcceA686402e97CB36DA1D08"
+        const val REDDIO_DEPLOY_HELPER_ADDRESS_GOERLI = "0xE6f26945d915A9C6d5ebaF26a0dcD99caE74347d"
 
         private const val SIGN_MESSAGE = "Generate layer 2 key"
         private val objectMapper = ObjectMapper()
