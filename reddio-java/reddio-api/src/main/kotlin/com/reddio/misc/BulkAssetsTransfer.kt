@@ -1,11 +1,11 @@
 package com.reddio.misc
 
-import com.reddio.exception.ReddioException
 import com.reddio.api.v1.StarkExSigner
 import com.reddio.api.v1.requests.ReddioCancelOrderApi
 import com.reddio.api.v1.requests.ReddioTransferToApi
 import com.reddio.api.v1.rest.*
 import com.reddio.api.v1.rest.GetBalancesResponse.BalanceRecord
+import com.reddio.exception.ReddioException
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
 import java.util.stream.Collectors

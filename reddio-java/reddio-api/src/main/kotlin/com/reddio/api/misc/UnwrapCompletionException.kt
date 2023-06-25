@@ -1,4 +1,4 @@
-package com.reddio.api.v1.requests
+package com.reddio.api.misc
 
 import java.util.concurrent.CompletionException
 
