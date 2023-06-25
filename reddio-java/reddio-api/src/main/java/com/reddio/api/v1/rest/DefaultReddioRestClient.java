@@ -4,15 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.reddio.exception.ReddioBusinessException;
-import com.reddio.exception.ReddioErrorCode;
+import com.reddio.api.misc.EnsureSuccess;
+import com.reddio.api.misc.ReddioApiKeyInterceptor;
+import com.reddio.api.misc.ReddioUAInterceptor;
+import com.reddio.api.misc.ToCompletableFutureCallback;
 import com.reddio.exception.ReddioException;
 import okhttp3.*;
-import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.util.Objects;
-import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -41,20 +40,6 @@ public class DefaultReddioRestClient implements ReddioRestClient {
 
     public DefaultReddioRestClient(String baseUrl) {
         this(baseUrl, "");
-    }
-
-    private static <T> CompletableFuture<T> asFuture(Call call, TypeReference<T> typeReference) {
-        CompletableFuture<T> future = new CompletableFuture<>();
-        // notice: the HTTP request would execute in the background after call.enqueue(), not after the future.get().
-        call.enqueue(new ToCompletableFutureCallback<>(future, typeReference));
-        return future;
-    }
-
-    public static <T> ResponseWrapper<T> ensureSuccess(ResponseWrapper<T> responseWrapper, String... messages) {
-        if ("OK".equals(responseWrapper.getStatus())) {
-            return responseWrapper;
-        }
-        throw new ReddioBusinessException(responseWrapper.getStatus(), responseWrapper.getError(), ReddioErrorCode.fromCode(responseWrapper.getErrorCode()), responseWrapper);
     }
 
     public static DefaultReddioRestClient mainnet() {
@@ -92,8 +77,8 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         Request request = new Request.Builder().url(endpoint).post(RequestBody.create(jsonString, JSON)).build();
         Call call = this.httpClient.newCall(request);
 
-        return asFuture(call, new TypeReference<ResponseWrapper<TransferResponse>>() {
-        }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint));
+        return ToCompletableFutureCallback.asFuture(call, new TypeReference<ResponseWrapper<TransferResponse>>() {
+        }, objectMapper).thenApply(it -> EnsureSuccess.ensureSuccess(it, "endpoint", endpoint));
     }
 
     @Override
@@ -110,8 +95,8 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         Request request = new Request.Builder().url(endpoint).post(RequestBody.create(jsonString, JSON)).build();
         Call call = this.httpClient.newCall(request);
 
-        return asFuture(call, new TypeReference<ResponseWrapper<BatchTransferResponse>>() {
-        }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint));
+        return ToCompletableFutureCallback.asFuture(call, new TypeReference<ResponseWrapper<BatchTransferResponse>>() {
+        }, objectMapper).thenApply(it -> EnsureSuccess.ensureSuccess(it, "endpoint", endpoint));
     }
 
     @Override
@@ -128,8 +113,8 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         Request request = new Request.Builder().url(endpoint).post(RequestBody.create(jsonString, JSON)).build();
         Call call = this.httpClient.newCall(request);
 
-        return asFuture(call, new TypeReference<ResponseWrapper<MultiTransferResponse>>() {
-        }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint));
+        return ToCompletableFutureCallback.asFuture(call, new TypeReference<ResponseWrapper<MultiTransferResponse>>() {
+        }, objectMapper).thenApply(it -> EnsureSuccess.ensureSuccess(it, "endpoint", endpoint));
     }
 
     @Override
@@ -137,8 +122,8 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         String endpoint = baseEndpoint + "/v1/nonce?stark_key=" + getNonceMessage.getStarkKey();
         Request request = new Request.Builder().url(endpoint).get().build();
         Call call = this.httpClient.newCall(request);
-        return asFuture(call, new TypeReference<ResponseWrapper<GetNonceResponse>>() {
-        }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint));
+        return ToCompletableFutureCallback.asFuture(call, new TypeReference<ResponseWrapper<GetNonceResponse>>() {
+        }, objectMapper).thenApply(it -> EnsureSuccess.ensureSuccess(it, "endpoint", endpoint));
     }
 
     @Override
@@ -146,8 +131,8 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         String endpoint = baseEndpoint + "/v1/assetid?type=" + getAssetIdMessage.getType() + "&contract_address=" + getAssetIdMessage.getContractAddress() + "&token_id=" + getAssetIdMessage.getTokenId() + "&quantum=" + getAssetIdMessage.getQuantum();
         Request request = new Request.Builder().url(endpoint).get().build();
         Call call = this.httpClient.newCall(request);
-        return asFuture(call, new TypeReference<ResponseWrapper<GetAssetIdResponse>>() {
-        }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint));
+        return ToCompletableFutureCallback.asFuture(call, new TypeReference<ResponseWrapper<GetAssetIdResponse>>() {
+        }, objectMapper).thenApply(it -> EnsureSuccess.ensureSuccess(it, "endpoint", endpoint));
     }
 
     @Override
@@ -155,8 +140,8 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         String endpoint = baseEndpoint + "/v1/vaults?asset_id=" + getVaultIdMessage.getAssetId() + "&stark_keys=" + String.join(",", getVaultIdMessage.getStarkKeys());
         Request request = new Request.Builder().url(endpoint).get().build();
         Call call = this.httpClient.newCall(request);
-        return asFuture(call, new TypeReference<ResponseWrapper<GetVaultIdResponse>>() {
-        }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint));
+        return ToCompletableFutureCallback.asFuture(call, new TypeReference<ResponseWrapper<GetVaultIdResponse>>() {
+        }, objectMapper).thenApply(it -> EnsureSuccess.ensureSuccess(it, "endpoint", endpoint));
     }
 
     @Override
@@ -173,8 +158,8 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         final HttpUrl endpoint = builder.build();
         Request request = new Request.Builder().url(endpoint).get().build();
         Call call = this.httpClient.newCall(request);
-        return asFuture(call, new TypeReference<ResponseWrapper<GetRecordResponse>>() {
-        }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint.toString()));
+        return ToCompletableFutureCallback.asFuture(call, new TypeReference<ResponseWrapper<GetRecordResponse>>() {
+        }, objectMapper).thenApply(it -> EnsureSuccess.ensureSuccess(it, "endpoint", endpoint.toString()));
     }
 
     @Override
@@ -182,8 +167,8 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         String endpoint = baseEndpoint + "/v1/record/by/signature?r=" + Objects.requireNonNull(signature.getR()) + "&s=" + Objects.requireNonNull(signature.getS());
         Request request = new Request.Builder().url(endpoint).get().build();
         Call call = this.httpClient.newCall(request);
-        return asFuture(call, new TypeReference<ResponseWrapper<GetRecordResponse>>() {
-        }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint));
+        return ToCompletableFutureCallback.asFuture(call, new TypeReference<ResponseWrapper<GetRecordResponse>>() {
+        }, objectMapper).thenApply(it -> EnsureSuccess.ensureSuccess(it, "endpoint", endpoint));
     }
 
     @Override
@@ -208,8 +193,8 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         final HttpUrl endpoint = builder.build();
         Request request = new Request.Builder().url(endpoint).get().build();
         Call call = this.httpClient.newCall(request);
-        return asFuture(call, new TypeReference<ResponseWrapper<ListRecordsResponse>>() {
-        }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint.toString()));
+        return ToCompletableFutureCallback.asFuture(call, new TypeReference<ResponseWrapper<ListRecordsResponse>>() {
+        }, objectMapper).thenApply(it -> EnsureSuccess.ensureSuccess(it, "endpoint", endpoint.toString()));
     }
 
     @Override
@@ -218,8 +203,8 @@ public class DefaultReddioRestClient implements ReddioRestClient {
 
         Request request = new Request.Builder().url(endpoint).get().build();
         Call call = this.httpClient.newCall(request);
-        return asFuture(call, new TypeReference<ResponseWrapper<GetTxnResponse>>() {
-        }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint));
+        return ToCompletableFutureCallback.asFuture(call, new TypeReference<ResponseWrapper<GetTxnResponse>>() {
+        }, objectMapper).thenApply(it -> EnsureSuccess.ensureSuccess(it, "endpoint", endpoint));
     }
 
     @Override
@@ -236,8 +221,8 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         Request request = new Request.Builder().url(endpoint).post(RequestBody.create(jsonString, JSON)).build();
         Call call = this.httpClient.newCall(request);
 
-        return asFuture(call, new TypeReference<ResponseWrapper<WithdrawalToResponse>>() {
-        }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint));
+        return ToCompletableFutureCallback.asFuture(call, new TypeReference<ResponseWrapper<WithdrawalToResponse>>() {
+        }, objectMapper).thenApply(it -> EnsureSuccess.ensureSuccess(it, "endpoint", endpoint));
     }
 
     @Override
@@ -245,8 +230,8 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         String endpoint = baseEndpoint + "/v1/withdrawal/status?" + "stage=" + withdrawalStatusMessage.getStage() + "&ethaddress=" + withdrawalStatusMessage.getEthAddress();
         Request request = new Request.Builder().url(endpoint).get().build();
         Call call = this.httpClient.newCall(request);
-        return asFuture(call, new TypeReference<ResponseWrapper<WithdrawalStatusResponse>>() {
-        }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint));
+        return ToCompletableFutureCallback.asFuture(call, new TypeReference<ResponseWrapper<WithdrawalStatusResponse>>() {
+        }, objectMapper).thenApply(it -> EnsureSuccess.ensureSuccess(it, "endpoint", endpoint));
     }
 
     @Override
@@ -263,8 +248,8 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         Request request = new Request.Builder().url(endpoint).post(RequestBody.create(jsonString, JSON)).build();
         Call call = this.httpClient.newCall(request);
 
-        return asFuture(call, new TypeReference<ResponseWrapper<OrderResponse>>() {
-        }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint));
+        return ToCompletableFutureCallback.asFuture(call, new TypeReference<ResponseWrapper<OrderResponse>>() {
+        }, objectMapper).thenApply(it -> EnsureSuccess.ensureSuccess(it, "endpoint", endpoint));
     }
 
     @Override
@@ -273,8 +258,8 @@ public class DefaultReddioRestClient implements ReddioRestClient {
 
         Request request = new Request.Builder().url(endpoint).get().build();
         Call call = this.httpClient.newCall(request);
-        return asFuture(call, new TypeReference<ResponseWrapper<OrderInfoResponse>>() {
-        }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint));
+        return ToCompletableFutureCallback.asFuture(call, new TypeReference<ResponseWrapper<OrderInfoResponse>>() {
+        }, objectMapper).thenApply(it -> EnsureSuccess.ensureSuccess(it, "endpoint", endpoint));
     }
 
     @Override
@@ -283,8 +268,8 @@ public class DefaultReddioRestClient implements ReddioRestClient {
 
         Request request = new Request.Builder().url(endpoint).get().build();
         Call call = this.httpClient.newCall(request);
-        return asFuture(call, new TypeReference<ResponseWrapper<Order>>() {
-        }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint));
+        return ToCompletableFutureCallback.asFuture(call, new TypeReference<ResponseWrapper<Order>>() {
+        }, objectMapper).thenApply(it -> EnsureSuccess.ensureSuccess(it, "endpoint", endpoint));
     }
 
     @Override
@@ -318,8 +303,8 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         Call call = this.httpClient.newCall(request);
         return
 
-                asFuture(call, new TypeReference<ResponseWrapper<OrderListResponse>>() {
-                }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint.toString()));
+                ToCompletableFutureCallback.asFuture(call, new TypeReference<ResponseWrapper<OrderListResponse>>() {
+                }, objectMapper).thenApply(it -> EnsureSuccess.ensureSuccess(it, "endpoint", endpoint.toString()));
     }
 
     @Override
@@ -335,8 +320,8 @@ public class DefaultReddioRestClient implements ReddioRestClient {
 
         Request request = new Request.Builder().url(endpoint).post(RequestBody.create(jsonString, JSON)).build();
         Call call = this.httpClient.newCall(request);
-        return asFuture(call, new TypeReference<ResponseWrapper<CancelOrderResponse>>() {
-        }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint.toString()));
+        return ToCompletableFutureCallback.asFuture(call, new TypeReference<ResponseWrapper<CancelOrderResponse>>() {
+        }, objectMapper).thenApply(it -> EnsureSuccess.ensureSuccess(it, "endpoint", endpoint.toString()));
     }
 
     @Override
@@ -345,8 +330,8 @@ public class DefaultReddioRestClient implements ReddioRestClient {
 
         Request request = new Request.Builder().url(endpoint).get().build();
         Call call = this.httpClient.newCall(request);
-        return asFuture(call, new TypeReference<ResponseWrapper<GetContractInfoResponse>>() {
-        }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint));
+        return ToCompletableFutureCallback.asFuture(call, new TypeReference<ResponseWrapper<GetContractInfoResponse>>() {
+        }, objectMapper).thenApply(it -> EnsureSuccess.ensureSuccess(it, "endpoint", endpoint));
     }
 
     @Override
@@ -365,8 +350,8 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         final HttpUrl endpoint = builder.build();
         Request request = new Request.Builder().url(endpoint).get().build();
         Call call = this.httpClient.newCall(request);
-        return asFuture(call, new TypeReference<ResponseWrapper<GetBalancesResponse>>() {
-        }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint.toString()));
+        return ToCompletableFutureCallback.asFuture(call, new TypeReference<ResponseWrapper<GetBalancesResponse>>() {
+        }, objectMapper).thenApply(it -> EnsureSuccess.ensureSuccess(it, "endpoint", endpoint.toString()));
     }
 
     @Override
@@ -374,8 +359,8 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         String endpoint = baseEndpoint + "/v1/starkex/contracts";
         Request request = new Request.Builder().url(endpoint).get().build();
         Call call = this.httpClient.newCall(request);
-        return asFuture(call, new TypeReference<ResponseWrapper<StarexContractsResponse>>() {
-        }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint));
+        return ToCompletableFutureCallback.asFuture(call, new TypeReference<ResponseWrapper<StarexContractsResponse>>() {
+        }, objectMapper).thenApply(it -> EnsureSuccess.ensureSuccess(it, "endpoint", endpoint));
     }
 
     @Override
@@ -392,110 +377,13 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         final HttpUrl endpoint = builder.build();
         Request request = new Request.Builder().url(endpoint).post(RequestBody.create(jsonString, JSON)).build();
         Call call = this.httpClient.newCall(request);
-        return asFuture(call, new TypeReference<ResponseWrapper<MintResponse>>() {
-        }).thenApply(it -> ensureSuccess(it, "endpoint", endpoint.toString()));
+        return ToCompletableFutureCallback.asFuture(call, new TypeReference<ResponseWrapper<MintResponse>>() {
+        }, objectMapper).thenApply(it -> EnsureSuccess.ensureSuccess(it, "endpoint", endpoint.toString()));
     }
 
     public void requireApiKey() {
         if (null == this.apiKey || this.apiKey.isEmpty()) {
             throw new ReddioException("API key is required");
-        }
-    }
-
-    static class ToCompletableFutureCallback<T> implements Callback {
-        private final CompletableFuture<T> future;
-        private final TypeReference<T> typeReference;
-
-        public ToCompletableFutureCallback(CompletableFuture<T> future, TypeReference<T> typeReference) {
-            this.future = future;
-            this.typeReference = typeReference;
-        }
-
-        public static ResponseWrapper<Object> tryExtractParseResponse(String responseJsonString) {
-            try {
-                return objectMapper.readValue(responseJsonString, new TypeReference<ResponseWrapper<Object>>() {
-                });
-            } catch (Throwable e) {
-                // TODO: debug log
-                return null;
-            }
-
-        }
-
-        @Override
-        public void onFailure(Call call, IOException e) {
-            this.future.completeExceptionally(e);
-        }
-
-        @Override
-        public void onResponse(Call call, Response response) {
-            try {
-                String responseBodyAsString = response.body() != null ? response.body().string() : "";
-                if (!response.isSuccessful()) {
-                    final ResponseWrapper<?> model = tryExtractParseResponse(responseBodyAsString);
-                    if (model != null) {
-                        this.future.completeExceptionally(new ReddioBusinessException(model.getStatus(), model.getError(), ReddioErrorCode.fromCode(model.getErrorCode()), model));
-                    } else {
-                        this.future.completeExceptionally(new ReddioException(String.format("reddio service responded with status code %d, response body: %s", response.code(), responseBodyAsString)));
-                    }
-                    return;
-                }
-                this.future.complete(objectMapper.readValue(responseBodyAsString, typeReference));
-            } catch (Throwable e) {
-                this.future.completeExceptionally(e);
-            }
-        }
-    }
-
-    public static final class ReddioUAInterceptor implements Interceptor {
-
-        private String version;
-
-        public ReddioUAInterceptor(String version) {
-            this.version = version;
-        }
-
-        private static String geMavenProjectVersion() {
-            Properties properties = new Properties();
-            try {
-                properties.load(Objects.requireNonNull(ReddioUAInterceptor.class.getResourceAsStream("/version.properties")));
-            } catch (IOException e) {
-                throw new RuntimeException("get maven project version from resource /version.properties", e);
-            }
-            return properties.getProperty("version");
-        }
-
-        public static ReddioUAInterceptor create() {
-            return new ReddioUAInterceptor(geMavenProjectVersion());
-        }
-
-        @Override
-        public Response intercept(Chain chain) throws IOException {
-            Request originalRequest = chain.request();
-            Request requestWithUserAgent = originalRequest.newBuilder().header("User-Agent", String.format("reddio-client-java/%s", this.version)).build();
-            return chain.proceed(requestWithUserAgent);
-        }
-
-    }
-
-    public static final class ReddioApiKeyInterceptor implements Interceptor {
-
-        private String apiKey;
-
-        public ReddioApiKeyInterceptor(String apiKey) {
-            this.apiKey = apiKey;
-        }
-
-        public final static ReddioApiKeyInterceptor create(String apiKey) {
-            return new ReddioApiKeyInterceptor(apiKey);
-        }
-
-        @NotNull
-        @Override
-        public Response intercept(@NotNull Chain chain) throws IOException {
-            Request originalRequest = chain.request();
-            Request requestWithUserAgent = originalRequest.newBuilder().header("x-api-key", this.apiKey).build();
-            return chain.proceed(requestWithUserAgent);
         }
     }
 

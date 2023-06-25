@@ -1,8 +1,11 @@
 package com.reddio.api.v1.requests.polling;
 
+import com.reddio.api.misc.UnwrapCompletionExceptionKt;
+import com.reddio.api.v1.rest.Order;
+import com.reddio.api.v1.rest.OrderState;
+import com.reddio.api.v1.rest.ReddioRestClient;
+import com.reddio.api.v1.rest.ResponseWrapper;
 import com.reddio.exception.ReddioException;
-import com.reddio.api.v1.requests.UnwrapCompletionExceptionKt;
-import com.reddio.api.v1.rest.*;
 import lombok.SneakyThrows;
 
 import java.time.Duration;
@@ -21,10 +24,9 @@ import java.util.function.Function;
  */
 public class OrderPoller {
 
-    private static final ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(1);
     public final static Duration DEFAULT_WAIT = Duration.ofMillis(100);
     public final static int DEFAULT_MAX_ATTEMPTS = 3;
-
+    private static final ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(1);
     private final ReddioRestClient restClient;
     private final Long sequenceId;
 

@@ -3,8 +3,8 @@ package com.reddio.api.v1.rest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.reddio.IntegrationTest;
+import com.reddio.api.misc.EnsureSuccess;
 import com.reddio.api.v1.DefaultEthereumInteractionTest;
-import com.reddio.api.v1.ReddioClient;
 import com.reddio.exception.ReddioBusinessException;
 import com.reddio.exception.ReddioErrorCode;
 import org.junit.Assert;
@@ -121,7 +121,7 @@ public class DefaultReddioRestClientTest {
     public void testEnsureSuccess() {
         ResponseWrapper<?> wrapper = new ResponseWrapper<>();
         wrapper.setStatus("OK");
-        DefaultReddioRestClient.ensureSuccess(wrapper);
+        EnsureSuccess.ensureSuccess(wrapper);
     }
 
     @Test
@@ -131,7 +131,7 @@ public class DefaultReddioRestClientTest {
         wrapper.setStatus("FAIL");
         wrapper.setErrorCode(ReddioErrorCode.NoMintableToken.getCode());
         try {
-            DefaultReddioRestClient.ensureSuccess(wrapper);
+            EnsureSuccess.ensureSuccess(wrapper);
             Assert.fail();
         } catch (ReddioBusinessException e) {
             Assert.assertEquals(ReddioErrorCode.NoMintableToken, e.getErrorCode());
@@ -145,7 +145,7 @@ public class DefaultReddioRestClientTest {
         wrapper.setStatus("FAIL");
         wrapper.setErrorCode(9999);
         try {
-            DefaultReddioRestClient.ensureSuccess(wrapper);
+            EnsureSuccess.ensureSuccess(wrapper);
             Assert.fail();
         } catch (ReddioBusinessException e) {
             Assert.assertNull(e.getErrorCode());

@@ -1,5 +1,7 @@
 package com.reddio.api.v1.requests
 
+import com.reddio.api.misc.SignedReddioApiRequest
+import com.reddio.api.misc.unwrapCompletionException
 import com.reddio.api.v1.requests.polling.RecordPoller
 import com.reddio.api.v1.rest.*
 import java.util.concurrent.CompletableFuture
