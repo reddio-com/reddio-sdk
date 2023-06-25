@@ -334,6 +334,10 @@ public class DefaultReddioRestClient implements ReddioRestClient {
         }, objectMapper).thenApply(it -> EnsureSuccess.ensureSuccess(it, "endpoint", endpoint));
     }
 
+    /**
+     * @deprecated use {@link com.reddio.api.v3.rest.ReddioRestClient#getBalances(com.reddio.api.v3.rest.GetBalancesMessage)} as instead.
+     */
+    @Deprecated
     @Override
     public CompletableFuture<ResponseWrapper<GetBalancesResponse>> getBalances(GetBalancesMessage getBalancesMessage) {
         final HttpUrl.Builder builder = Objects.requireNonNull(HttpUrl.parse(baseEndpoint + "/v1/balances")).newBuilder();

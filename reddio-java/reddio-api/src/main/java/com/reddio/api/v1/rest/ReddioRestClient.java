@@ -101,6 +101,10 @@ public interface ReddioRestClient extends AutoCloseable {
 
     CompletableFuture<ResponseWrapper<GetContractInfoResponse>> getContractInfo(GetContractInfoMessage getContractInfoMessage);
 
+    /**
+     * @deprecated use {@link com.reddio.api.v3.rest.ReddioRestClient#getBalances(com.reddio.api.v3.rest.GetBalancesMessage)} as instead.
+     */
+    @Deprecated
     CompletableFuture<ResponseWrapper<GetBalancesResponse>> getBalances(GetBalancesMessage getBalancesMessage);
 
     /**

@@ -5,12 +5,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @deprecated use {@link com.reddio.api.v3.rest.ReddioRestClient#getBalances(com.reddio.api.v3.rest.GetBalancesMessage)} as instead.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor(staticName = "of")
+@Deprecated
 public class GetBalancesResponse {
     @JsonProperty("list")
     private List<BalanceRecord> list;
