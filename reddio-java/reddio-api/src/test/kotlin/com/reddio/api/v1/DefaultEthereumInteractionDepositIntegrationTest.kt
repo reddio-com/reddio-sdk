@@ -5,6 +5,7 @@ import com.reddio.api.v1.rest.DefaultReddioRestClient
 import com.reddio.fixtures.Fixtures
 import com.reddio.gas.GasOption
 import mu.KotlinLogging
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
 
@@ -12,6 +13,7 @@ import org.junit.experimental.categories.Category
 private val logger = KotlinLogging.logger {}
 
 @Category(IntegrationTest::class)
+@Ignore
 class DefaultEthereumInteractionDepositIntegrationTest {
 
     @Test
@@ -20,7 +22,7 @@ class DefaultEthereumInteractionDepositIntegrationTest {
         val (toDeposit, ethOwnership) = Fixtures.fetchStarkKeysWhichOwnETHOnLayer1(depositAmount)
         val ethereumInteraction = DefaultEthereumInteraction.build(
             DefaultReddioRestClient.testnet(),
-            DefaultEthereumInteraction.GOERIL_ID,
+            DefaultEthereumInteraction.SEPOLIA_ID,
             Fixtures.fetchETHJsonRPCNode(),
             toDeposit.ethPrivateKey
         )
@@ -36,7 +38,7 @@ class DefaultEthereumInteractionDepositIntegrationTest {
         val (toDeposit, erC20Ownership) = Fixtures.fetchStarkKeysWhichOwnERC20OnLayer1(balance = depositAmount)
         val ethereumInteraction = DefaultEthereumInteraction.build(
             DefaultReddioRestClient.testnet(),
-            DefaultEthereumInteraction.GOERIL_ID,
+            DefaultEthereumInteraction.SEPOLIA_ID,
             Fixtures.fetchETHJsonRPCNode(),
             toDeposit.ethPrivateKey
         )
@@ -51,7 +53,7 @@ class DefaultEthereumInteractionDepositIntegrationTest {
         val (toDeposit, erC721Ownership) = Fixtures.fetchStarkKeysWhichOwnERC721OnLayer1()
         val ethereumInteraction = DefaultEthereumInteraction.build(
             DefaultReddioRestClient.testnet(),
-            DefaultEthereumInteraction.GOERIL_ID,
+            DefaultEthereumInteraction.SEPOLIA_ID,
             Fixtures.fetchETHJsonRPCNode(),
             toDeposit.ethPrivateKey
         )

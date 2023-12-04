@@ -46,7 +46,7 @@ class EtherscanNFTFetcher {
             ethAddress: String, contractAddress: String = Fixtures.ReddioTestERC721ContractAddress
         ): List<Fixtures.Companion.ERC721Ownership> {
             val url =
-                "https://api-goerli.etherscan.io/api?module=account&action=tokennfttx&contractaddress=$contractAddress&address=$ethAddress&startblock=0&endblock=9999999999&sort=asc&apikey=${fetchEtherscanAPIKey()}"
+                "https://api-sepolia.etherscan.io/api?module=account&action=tokennfttx&contractaddress=$contractAddress&address=$ethAddress&startblock=0&endblock=9999999999&sort=asc&apikey=${fetchEtherscanAPIKey()}"
 
             val req = Request.Builder().get().url(url).build()
             val response: EtherscanTokenTransferEvents = httpClient.newCall(req).execute().let { response ->

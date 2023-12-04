@@ -21,7 +21,9 @@ import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
 import org.web3j.contracts.eip20.generated.ERC20
 import org.web3j.contracts.eip721.generated.ERC721
-import org.web3j.crypto.*
+import org.web3j.crypto.Credentials
+import org.web3j.crypto.Sign
+import org.web3j.crypto.StructuredDataEncoder
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.Web3jService
 import org.web3j.protocol.core.methods.response.EthBlock
@@ -717,7 +719,9 @@ class DefaultEthereumInteraction(
 
     companion object {
 
+        @Deprecated("Use REDDIO_DEPLOY_HELPER_ADDRESS_SEPOLIA")
         const val REDDIO_DEPLOY_HELPER_ADDRESS_GOERLI = "0xE6f26945d915A9C6d5ebaF26a0dcD99caE74347d"
+        const val REDDIO_DEPLOY_HELPER_ADDRESS_SEPOLIA = "0xE6f26945d915A9C6d5ebaF26a0dcD99caE74347d"
 
         private const val SIGN_MESSAGE = "Generate layer 2 key"
         private val objectMapper = ObjectMapper()
@@ -780,7 +784,10 @@ class DefaultEthereumInteraction(
 
 
         const val MAINNET_ID = 1L;
+
+        @Deprecated("Use SEPOLIA_ID")
         const val GOERIL_ID = 5L;
+        const val SEPOLIA_ID = 11155111L;
 
         @JvmStatic
         fun build(

@@ -278,7 +278,7 @@ class Fixtures {
                     web3j,
                     Credentials.create(it.ethPrivateKey),
                     StaticGasLimitSuggestionPriceGasProvider(
-                        DefaultEthereumInteraction.GOERIL_ID, GasOption.Market, BigInteger.valueOf(100000L)
+                        DefaultEthereumInteraction.SEPOLIA_ID, GasOption.Market, BigInteger.valueOf(100000L)
                     )
                 )
                 val erc20Balance = contract.balanceOf(it.ethAddress).send()

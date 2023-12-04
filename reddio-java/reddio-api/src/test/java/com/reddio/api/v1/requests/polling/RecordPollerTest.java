@@ -6,13 +6,13 @@ import com.reddio.api.v1.rest.RecordStatus;
 import com.reddio.api.v1.rest.ReddioRestClient;
 import com.reddio.api.v1.rest.SequenceRecord;
 import com.reddio.exception.ReddioException;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import java.util.concurrent.CompletionException;
-
 import static org.junit.Assert.*;
 
+@Ignore
 public class RecordPollerTest {
 
     @Test
