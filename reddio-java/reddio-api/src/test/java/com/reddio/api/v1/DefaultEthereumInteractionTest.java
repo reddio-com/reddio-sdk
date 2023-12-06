@@ -88,19 +88,19 @@ public class DefaultEthereumInteractionTest {
         DefaultEthereumInteraction ethereumInteraction = DefaultEthereumInteraction.build(restClient, DefaultEthereumInteraction.SEPOLIA_ID, "https://eth-sepolia.g.alchemy.com/v2/yyabgQ1GlM0xxqDC4ZBbR1lBcBKQmnxT",
                 "552ad9b756acfeb2e32cfd3354b653b1f95177b851a44155d6178d244b80e08b");
         BigInteger result = ethereumInteraction.getStarkPrivateKey();
-        Assert.assertEquals("5f6fbfbcd995e20f94a768193c42060f7e626e6ae8042cacc15e82031087a55", result.toString(16));
+        Assert.assertEquals("56035b2159b8240c17267a541713b18f697d54eb6da0eed8dfcb33144a05100", result.toString(16));
     }
 
     @Test
     public void testEthSignAndGetStarkKeyStaticMethod() {
         BigInteger result = DefaultEthereumInteraction.getStarkPrivateKey("552ad9b756acfeb2e32cfd3354b653b1f95177b851a44155d6178d244b80e08b", DefaultEthereumInteraction.SEPOLIA_ID);
-        Assert.assertEquals("5f6fbfbcd995e20f94a768193c42060f7e626e6ae8042cacc15e82031087a55", result.toString(16));
+        Assert.assertEquals("56035b2159b8240c17267a541713b18f697d54eb6da0eed8dfcb33144a05100", result.toString(16));
     }
 
     @Test
     public void testGetStarkKeys() {
         StarkKeys starkKeys = DefaultEthereumInteraction.getStarkKeys("552ad9b756acfeb2e32cfd3354b653b1f95177b851a44155d6178d244b80e08b", DefaultEthereumInteraction.SEPOLIA_ID);
-        Assert.assertEquals("0x13a69a1b7a5f033ee2358ebb8c28fd5a6b86d42e30a61845d655d3c7be4ad0e", starkKeys.getStarkKey());
+        Assert.assertEquals("0x79bec1efb30903621fc11d81b9b1a4af25d0eb1555332ec72487d2ed3692174", starkKeys.getStarkKey());
         Assert.assertEquals("0x5f6fbfbcd995e20f94a768193c42060f7e626e6ae8042cacc15e82031087a55", starkKeys.getStarkPrivateKey());
     }
 
