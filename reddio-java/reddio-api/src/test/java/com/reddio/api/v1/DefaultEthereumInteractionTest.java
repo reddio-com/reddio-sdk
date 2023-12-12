@@ -101,7 +101,7 @@ public class DefaultEthereumInteractionTest {
     public void testGetStarkKeys() {
         StarkKeys starkKeys = DefaultEthereumInteraction.getStarkKeys("552ad9b756acfeb2e32cfd3354b653b1f95177b851a44155d6178d244b80e08b", DefaultEthereumInteraction.SEPOLIA_ID);
         Assert.assertEquals("0x79bec1efb30903621fc11d81b9b1a4af25d0eb1555332ec72487d2ed3692174", starkKeys.getStarkKey());
-        Assert.assertEquals("0x5f6fbfbcd995e20f94a768193c42060f7e626e6ae8042cacc15e82031087a55", starkKeys.getStarkPrivateKey());
+        Assert.assertEquals("0x56035b2159b8240c17267a541713b18f697d54eb6da0eed8dfcb33144a05100", starkKeys.getStarkPrivateKey());
     }
 
     @Test
