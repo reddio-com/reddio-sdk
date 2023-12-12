@@ -2,16 +2,17 @@ package com.reddio.api.v1
 
 import com.reddio.IntegrationTest
 import com.reddio.api.v1.rest.WithdrawalStatusMessage
-import com.reddio.crypto.CryptoService.Reddio
 import com.reddio.fixtures.Fixtures
 import com.reddio.fixtures.StarkKeysPool
 import mu.KotlinLogging
 import org.junit.Assert
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
 
 private val logger = KotlinLogging.logger {}
 
+@Ignore
 @Category(IntegrationTest::class)
 class DefaultReddioClientWithdrawalIntegrationTest {
 

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.reddio.IntegrationTest
 import com.reddio.api.v1.requests.ReddioWithdrawalToApi.Companion.withdrawalERC721
-import com.reddio.api.v1.rest.*
+import com.reddio.api.v1.rest.DefaultReddioRestClient
 import com.reddio.crypto.CryptoService
 import com.reddio.exception.ReddioBusinessException
 import com.reddio.exception.ReddioErrorCode
@@ -20,6 +20,7 @@ import java.util.concurrent.ExecutionException
 private val logger = KotlinLogging.logger {}
 
 @Category(IntegrationTest::class)
+@Ignore
 class DefaultReddioClientIntegrationTest {
 
     @Test

@@ -51,7 +51,7 @@ class StarkKeysPool {
                     val ethAddress = pair.first
                     val ethPrivateKey = pair.second
                     val starkKeyPair =
-                        DefaultEthereumInteraction.getStarkKeys(ethPrivateKey, DefaultEthereumInteraction.GOERIL_ID)
+                        DefaultEthereumInteraction.getStarkKeys(ethPrivateKey, DefaultEthereumInteraction.SEPOLIA_ID)
                     EthAndStarkKeys(ethAddress, ethPrivateKey, starkKeyPair.starkKey, starkKeyPair.starkPrivateKey)
                 }.collect(Collectors.toList())
             }

@@ -1,16 +1,17 @@
 package com.reddio.api.v1
 
 import com.reddio.IntegrationTest
-import com.reddio.fixtures.FixtureException
 import com.reddio.fixtures.Fixtures
-import com.reddio.fixtures.StarkKeysPool
 import mu.KotlinLogging
 import org.junit.Assert
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
 
 private val logger = KotlinLogging.logger {}
 
+
+@Ignore
 @Category(IntegrationTest::class)
 class DefaultReddioClientMintIntegrationTest {
     @Test

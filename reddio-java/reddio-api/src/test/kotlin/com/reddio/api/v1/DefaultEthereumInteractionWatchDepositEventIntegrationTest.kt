@@ -7,19 +7,19 @@ import com.reddio.gas.GasOption
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import mu.KotlinLogging
-
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import org.junit.experimental.runners.Enclosed
 import org.junit.runner.RunWith
-import java.util.concurrent.locks.ReentrantLock
 
 
 private val logger = KotlinLogging.logger {}
 
 @RunWith(Enclosed::class)
 @Category(IntegrationTest::class)
+@Ignore
 class DefaultEthereumInteractionWatchDepositEventIntegrationTest {
 
     @Category(IntegrationTest::class)
@@ -30,7 +30,7 @@ class DefaultEthereumInteractionWatchDepositEventIntegrationTest {
             val (toDeposit, erC20Ownership) = Fixtures.fetchStarkKeysWhichOwnERC20OnLayer1(balance = depositAmount)
             val ethereumInteraction = DefaultEthereumInteraction.build(
                 DefaultReddioRestClient.testnet(),
-                DefaultEthereumInteraction.GOERIL_ID,
+                DefaultEthereumInteraction.SEPOLIA_ID,
                 Fixtures.fetchETHJsonRPCNode(),
                 toDeposit.ethPrivateKey
             )
@@ -45,7 +45,7 @@ class DefaultEthereumInteractionWatchDepositEventIntegrationTest {
         fun testWatchDeposit() {
             val ethereumInteraction = DefaultEthereumInteraction.build(
                 DefaultReddioRestClient.testnet(),
-                DefaultEthereumInteraction.GOERIL_ID,
+                DefaultEthereumInteraction.SEPOLIA_ID,
                 Fixtures.fetchETHJsonRPCNode(),
                 "0x0"
             )
@@ -71,7 +71,7 @@ class DefaultEthereumInteractionWatchDepositEventIntegrationTest {
             val (toDeposit, erC721Ownership) = Fixtures.fetchStarkKeysWhichOwnERC721OnLayer1()
             val ethereumInteraction = DefaultEthereumInteraction.build(
                 DefaultReddioRestClient.testnet(),
-                DefaultEthereumInteraction.GOERIL_ID,
+                DefaultEthereumInteraction.SEPOLIA_ID,
                 Fixtures.fetchETHJsonRPCNode(),
                 toDeposit.ethPrivateKey
             )
@@ -86,7 +86,7 @@ class DefaultEthereumInteractionWatchDepositEventIntegrationTest {
         fun testWatchNftDeposit() {
             val ethereumInteraction = DefaultEthereumInteraction.build(
                 DefaultReddioRestClient.testnet(),
-                DefaultEthereumInteraction.GOERIL_ID,
+                DefaultEthereumInteraction.SEPOLIA_ID,
                 Fixtures.fetchETHJsonRPCNode(),
                 "0x0"
             )

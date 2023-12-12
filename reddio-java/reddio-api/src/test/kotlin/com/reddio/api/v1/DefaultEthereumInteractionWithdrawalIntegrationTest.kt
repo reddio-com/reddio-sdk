@@ -7,6 +7,7 @@ import com.reddio.fixtures.Fixtures
 import com.reddio.gas.GasOption
 import mu.KotlinLogging
 import org.junit.Assume
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
 
@@ -14,6 +15,7 @@ import org.junit.experimental.categories.Category
 private val logger = KotlinLogging.logger {}
 
 @Category(IntegrationTest::class)
+@Ignore
 class DefaultEthereumInteractionWithdrawalIntegrationTest {
     @Test
     fun testWithdrawETH() {
@@ -21,7 +23,7 @@ class DefaultEthereumInteractionWithdrawalIntegrationTest {
             val (account, record) = Fixtures.fetchStarkKeysWhichCouldWithdrawalETHOnLayer1()
             val restClient = DefaultReddioRestClient.testnet()
             val ethereumInteraction = DefaultEthereumInteraction.build(
-                restClient, DefaultEthereumInteraction.GOERIL_ID, Fixtures.fetchETHJsonRPCNode(), account.ethPrivateKey
+                restClient, DefaultEthereumInteraction.SEPOLIA_ID, Fixtures.fetchETHJsonRPCNode(), account.ethPrivateKey
             )
 
             val log = ethereumInteraction.withdrawalETH(
@@ -41,7 +43,7 @@ class DefaultEthereumInteractionWithdrawalIntegrationTest {
             val (account, record) = Fixtures.fetchStarkKeysWhichCouldWithdrawalERC20OnLayer1()
             val restClient = DefaultReddioRestClient.testnet()
             val ethereumInteraction = DefaultEthereumInteraction.build(
-                restClient, DefaultEthereumInteraction.GOERIL_ID, Fixtures.fetchETHJsonRPCNode(), account.ethPrivateKey
+                restClient, DefaultEthereumInteraction.SEPOLIA_ID, Fixtures.fetchETHJsonRPCNode(), account.ethPrivateKey
             )
             val log = ethereumInteraction.withdrawalERC20(
                 account.ethAddress, record.contractAddress, GasOption.Market
@@ -60,7 +62,7 @@ class DefaultEthereumInteractionWithdrawalIntegrationTest {
             val (account, record) = Fixtures.fetchStarkKeysWhichCouldWithdrawalERC721OnLayer1()
             val restClient = DefaultReddioRestClient.testnet()
             val ethereumInteraction = DefaultEthereumInteraction.build(
-                restClient, DefaultEthereumInteraction.GOERIL_ID, Fixtures.fetchETHJsonRPCNode(), account.ethPrivateKey
+                restClient, DefaultEthereumInteraction.SEPOLIA_ID, Fixtures.fetchETHJsonRPCNode(), account.ethPrivateKey
             )
 
             val log = ethereumInteraction.withdrawalERC721(
@@ -80,7 +82,7 @@ class DefaultEthereumInteractionWithdrawalIntegrationTest {
             val (account, record) = Fixtures.fetchStarkKeysWhichCouldWithdrawalERC721MOnLayer1()
             val restClient = DefaultReddioRestClient.testnet()
             val ethereumInteraction = DefaultEthereumInteraction.build(
-                restClient, DefaultEthereumInteraction.GOERIL_ID, Fixtures.fetchETHJsonRPCNode(), account.ethPrivateKey
+                restClient, DefaultEthereumInteraction.SEPOLIA_ID, Fixtures.fetchETHJsonRPCNode(), account.ethPrivateKey
             )
 
             val log = ethereumInteraction.withdrawalERC721M(

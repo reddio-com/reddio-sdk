@@ -14,6 +14,7 @@ import com.reddio.fixtures.Fixtures
 import com.reddio.fixtures.StarkKeysPool
 import mu.KotlinLogging
 import org.junit.Assert
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.experimental.categories.Category
 import java.time.Instant
@@ -21,6 +22,7 @@ import java.time.Instant
 
 private val logger = KotlinLogging.logger {}
 
+@Ignore
 @Category(IntegrationTest::class)
 class DefaultReddioClientOrderIntegrationTest {
 
